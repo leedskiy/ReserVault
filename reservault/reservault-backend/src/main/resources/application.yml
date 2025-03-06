@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: ReserVault
+  app:
+    jwtSecret: ${JWT_SECRET}
+    jwtExpirationMs: 3600000
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: ${MONGO_DB_NAME}
+  config:
+    import: "optional:file:.env[.properties]"
