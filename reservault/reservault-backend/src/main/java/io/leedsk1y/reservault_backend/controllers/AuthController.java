@@ -1,0 +1,64 @@
+package io.leedsk1y.reservault_backend.controllers;
+
+import java.util.Map;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.leedsk1y.reservault_backend.dto.LoginRequestDTO;
+import io.leedsk1y.reservault_backend.dto.RegisterRequestDTO;
+import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
+import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
+import io.leedsk1y.reservault_backend.services.AuthService;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+    private final AuthService authService;
+    private final JwtUtils jwtUtils;
+
+    public AuthController(AuthService authService, JwtUtils jwtUtils) {
+        this.authService = authService;
+        this.jwtUtils = jwtUtils;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequestDTO request) {
+        try {
+            return ResponseEntity.ok(authService.registerUser(request));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage(), "status", false));
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO request) {
+        try {
+            return ResponseEntity.ok(authService.authenticateUser(request.getEmail(), request.getPassword()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Bad credentials", "status", false));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String token = jwtUtils.getJwtFromHeader(request);
+        authService.logout(token);
+        return ResponseEntity.ok(Map.of("message", "User logged out successfully", "status", true));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDetailedResponseDTO> getAuthenticatedUser() {
+        return ResponseEntity.ok(authService.getAuthenticatedUser());
+    }
+}
