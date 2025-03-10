@@ -11,11 +11,11 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Arrays;
 
 @Configuration
-public class RoleSeeder {
+public class RoleSeederConfig {
 
     private final RoleRepository roleRepository;
 
-    public RoleSeeder(RoleRepository roleRepository) {
+    public RoleSeederConfig(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 

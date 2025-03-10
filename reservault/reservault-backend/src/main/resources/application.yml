@@ -4,6 +4,8 @@ spring:
   app:
     jwtSecret: ${JWT_SECRET}
     jwtExpirationMs: 3600000
+  frontend:
+    url: "http://localhost:5173"
   data:
     mongodb:
       uri: ${MONGO_URI}
