@@ -4,6 +4,6 @@
 
 /* Global Styles */
 body {
-  @apply bg-[#ffffff];
-  font-family: 'Inter', sans-serif;
+  @apply bg-[#edebdd];
+  font-family: 'Roboto';
 }
