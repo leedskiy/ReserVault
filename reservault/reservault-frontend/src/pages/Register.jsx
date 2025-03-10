@@ -1,13 +1,15 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/axios";
 import { useState } from "react";
+import api from "../api/axios";
+import PopupModal from "../components/PopupModal";
 
 const Register = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, handleSubmit, watch, formState: { errors } } = useForm();
     const navigate = useNavigate();
     const [serverError, setServerError] = useState(null);
+    const [showPopup, setShowPopup] = useState(false);
 
     const mutation = useMutation({
         mutationFn: async (formData) => {
@@ -15,7 +17,7 @@ const Register = () => {
             return response.data;
         },
         onSuccess: () => {
-            navigate("/login");
+            setShowPopup(true);
         },
         onError: (error) => {
             setServerError(error.response?.data?.message || "Registration failed");
@@ -25,6 +27,11 @@ const Register = () => {
     const onSubmit = (data) => {
         setServerError(null);
         mutation.mutate(data);
+    };
+
+    const handleClosePopup = () => {
+        setShowPopup(false);
+        navigate("/");
     };
 
     return (
@@ -63,10 +70,28 @@ const Register = () => {
                         <label className="block text-gray-600">Password</label>
                         <input
                             type="password"
-                            {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })}
+                            {...register("password", {
+                                required: "Password is required",
+                                minLength: { value: 6, message: "Password must be at least 6 characters" }
+                            })}
                             className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                         />
                         {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-gray-600">Confirm Password</label>
+                        <input
+                            type="password"
+                            {...register("confirmPassword", {
+                                required: "Please confirm your password",
+                                validate: (value) => value === watch("password") || "Passwords do not match"
+                            })}
+                            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                        />
+                        {errors.confirmPassword && (
+                            <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
+                        )}
                     </div>
 
                     <button
@@ -80,11 +105,18 @@ const Register = () => {
 
                 <p className="mt-4 text-gray-500 text-center">
                     Already have an account?{" "}
-                    <Link to="/login" className="text-blue-600 hover:underline">
+                    <Link to="/login" className="text-[#32492D] font-semibold hover:underline">
                         Sign in
                     </Link>
                 </p>
             </div>
+
+            {showPopup && (
+                <PopupModal
+                    message="A confirmation email has been sent to your inbox. Please check your email and verify your account before logging in."
+                    onClose={handleClosePopup}
+                />
+            )}
         </div>
     );
 };
