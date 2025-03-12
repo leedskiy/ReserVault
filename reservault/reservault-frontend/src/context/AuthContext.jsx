@@ -8,10 +8,12 @@ export const AuthProvider = ({ children }) => {
     const queryClient = useQueryClient();
 
     const fetchUserProfile = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return null; // No token means no user, immediately return null
-        const { data } = await api.get('/auth/me');
-        return data;
+        try {
+            const { data } = await api.get('/auth/me');
+            return data;
+        } catch {
+            return null;
+        }
     };
 
     const { data: user, isLoading: loading } = useQuery({
@@ -26,9 +28,7 @@ export const AuthProvider = ({ children }) => {
 
     const loginMutation = useMutation({
         mutationFn: async (credentials) => {
-            const { data } = await api.post('/auth/login', credentials);
-            localStorage.setItem('token', data.token);
-            return data;
+            await api.post('/auth/login', credentials);
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['auth', 'user'] }),
         onError: (error) => {
@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }) => {
     const logoutMutation = useMutation({
         mutationFn: async () => {
             await api.post('/auth/logout');
-            localStorage.removeItem('token');
         },
         onSuccess: () => {
             queryClient.clear();
@@ -47,7 +46,6 @@ export const AuthProvider = ({ children }) => {
     });
 
     const login = (credentials) => loginMutation.mutateAsync(credentials);
-
     const logout = async (navigate) => {
         await logoutMutation.mutateAsync();
         navigate('/');

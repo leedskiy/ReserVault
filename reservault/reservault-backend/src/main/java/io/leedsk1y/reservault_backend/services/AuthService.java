@@ -1,6 +1,5 @@
 package io.leedsk1y.reservault_backend.services;
 
-import io.leedsk1y.reservault_backend.dto.LoginResponseDTO;
 import io.leedsk1y.reservault_backend.dto.RegisterRequestDTO;
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.Role;
@@ -68,37 +67,18 @@ public class AuthService {
         return new UserDetailedResponseDTO(userRepository.save(user));
     }
 
-    public LoginResponseDTO authenticateUser(String email, String password) {
+    public String authenticateUser(String email, String password) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email.toLowerCase(), password));
+                    new UsernamePasswordAuthenticationToken(email.toLowerCase(), password));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User user = userRepository.findByEmail(email.toLowerCase())
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-            String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
-
-            return new LoginResponseDTO(
-                jwtToken,
-                user.getId(),
-                user.getEmail(),
-                user.getProfileImage(),
-                user.isVerified(),
-                user.getAuthProvider(),
-                user.getAuthorities()
-            );
+            return jwtUtils.generateTokenFromUsername(userDetails.getUsername());
         } catch (AuthenticationException e) {
             throw new RuntimeException("Invalid email or password");
         }
-    }
-
-    public void logout(String token) {
-        if (token != null) {
-            jwtUtils.blacklistToken(token);
-        }
-        SecurityContextHolder.clearContext();
     }
 
     public UserDetailedResponseDTO getAuthenticatedUser() {
