@@ -75,11 +75,10 @@ public class SecurityConfig {
         http.addFilterBefore(authenticationJwtTokenFilter(),
             UsernamePasswordAuthenticationFilter.class); // add custom filter for JWT
 
-//        http.oauth2Login(oauth2 -> oauth2
-//            .loginPage("/oauth2/login/google")
-//            .defaultSuccessUrl("/oauth2/login/success", true)
-//            .failureUrl("/oauth2/login/failure"));
-
+        http.oauth2Login(oauth2 -> oauth2
+            .loginPage("/oauth2/login/google")
+            .defaultSuccessUrl("/oauth2/login/success", true)
+            .failureUrl("/oauth2/login/failure"));
 
         http.cors(Customizer.withDefaults()); // cors
 

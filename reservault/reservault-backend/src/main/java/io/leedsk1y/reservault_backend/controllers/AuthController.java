@@ -3,15 +3,12 @@ package io.leedsk1y.reservault_backend.controllers;
 import java.util.Map;
 
 import io.leedsk1y.reservault_backend.utils.CookieUtils;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import io.leedsk1y.reservault_backend.dto.LoginRequestDTO;
 import io.leedsk1y.reservault_backend.dto.RegisterRequestDTO;
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
-import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
 import io.leedsk1y.reservault_backend.services.AuthService;
 
 @RestController

@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
+import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
     const { login } = useAuth();
@@ -39,6 +40,10 @@ const Login = () => {
             setError("email", { message: " " });
             setError("password", { message: " " });
         }
+    };
+
+    const handleGoogleSignIn = () => {
+        window.location.href = import.meta.env.VITE_API_BASE_URL + "/oauth2/login/google";
     };
 
     return (
@@ -79,6 +84,16 @@ const Login = () => {
                         {isSubmitting ? "Logging in..." : "Login"}
                     </button>
                 </form>
+
+                <div className="flex items-center justify-center mt-4">
+                    <button
+                        onClick={handleGoogleSignIn}
+                        className="w-full flex items-center justify-center px-4 py-2 border rounded-lg bg-white shadow-md hover:bg-gray-200 transition-all duration-300"
+                    >
+                        <FcGoogle className="text-2xl mr-2" />
+                        <span className="text-gray-700 font-semibold">Sign in with Google</span>
+                    </button>
+                </div>
 
                 <p className="mt-4 text-gray-500 text-center">
                     Don't have an account?{" "}
