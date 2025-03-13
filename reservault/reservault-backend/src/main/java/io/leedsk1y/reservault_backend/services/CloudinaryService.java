@@ -5,6 +5,8 @@ import com.cloudinary.utils.ObjectUtils;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -20,6 +22,12 @@ public class CloudinaryService {
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
             ObjectUtils.asMap("folder", "hotel_images"));
 
+        return uploadResult.get("secure_url").toString();
+    }
+
+    public String uploadImage(File file) throws IOException {
+        Map uploadResult = cloudinary.uploader().upload(file,
+                ObjectUtils.asMap("folder", "hotel_images"));
         return uploadResult.get("secure_url").toString();
     }
 

@@ -47,13 +47,14 @@ public class AdminController {
         }
     }
 
-    @PutMapping("/hotels/{id}")
+    @PutMapping(value="/hotels/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Hotel> updateHotel(
         @PathVariable UUID id,
-        @RequestPart("hotel") Hotel updatedHotel,
+        @RequestPart("hotel") String hotelJson,
         @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) {
-
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Hotel updatedHotel = objectMapper.readValue(hotelJson, Hotel.class);
             Optional<Hotel> hotel = adminService.updateHotel(id, updatedHotel, newImages);
             return hotel.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IOException e) {

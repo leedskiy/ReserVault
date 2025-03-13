@@ -1,0 +1,92 @@
+package io.leedsk1y.reservault_backend.config.seeder;
+
+import io.leedsk1y.reservault_backend.models.entities.Hotel;
+import io.leedsk1y.reservault_backend.models.entities.Location;
+import io.leedsk1y.reservault_backend.repositories.HotelRepository;
+import io.leedsk1y.reservault_backend.services.CloudinaryService;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Configuration
+public class HotelSeederConfig {
+    private final HotelRepository hotelRepository;
+    private final CloudinaryService cloudinaryService;
+
+    public HotelSeederConfig(HotelRepository hotelRepository, CloudinaryService cloudinaryService) {
+        this.hotelRepository = hotelRepository;
+        this.cloudinaryService = cloudinaryService;
+    }
+
+    @Bean
+    public ApplicationRunner seedHotels() {
+        return args -> {
+            if (hotelRepository.count() > 0) {
+                return;
+            }
+
+            List<Hotel> hotels = List.of(
+                    createHotel("The Manhattan Royale",
+                            "Nestled in the heart of Manhattan, The Manhattan Royale redefines luxury with breathtaking skyline views, opulent interiors, and world-class amenities.",
+                            5, new Location("USA", "New York", "5th Avenue", "10001"),
+                            List.of("hotel1_img2.png", "hotel1_img2.png", "hotel1_img3.png")),
+
+                    createHotel("Azure Palms Resort",
+                            "Overlooking the stunning Mediterranean coastline, Azure Palms Resort is an oasis of relaxation and sophistication, where elegance meets tranquility in Barcelona.",
+                            5, new Location("Spain", "Barcelona", "Beachfront Avenue", "08002"),
+                            List.of("hotel2_img1.png", "hotel2_img2.png", "hotel2_img3.png"))
+            );
+
+            hotels.forEach(hotelRepository::save);
+        };
+    }
+
+    private Hotel createHotel(String name, String description, int stars, Location location, List<String> imageFiles) throws IOException {
+        List<String> imageUrls = uploadImages(imageFiles);
+
+        Hotel hotel = new Hotel();
+        hotel.setId(UUID.randomUUID());
+        hotel.setName(name);
+        hotel.setDescription(description);
+        hotel.setStars(stars);
+        hotel.setLocation(location);
+        hotel.setImagesUrls(imageUrls);
+        hotel.setCreatedAt(Instant.now());
+
+        return hotel;
+    }
+
+    private List<String> uploadImages(List<String> imageFiles) throws IOException {
+        return imageFiles.stream()
+                .map(fileName -> {
+                    try {
+                        ClassPathResource resource = new ClassPathResource("static/hotel-images/" + fileName);
+
+                        if (!resource.exists()) {
+                            throw new RuntimeException("File not found: " + fileName);
+                        }
+
+                        File tempFile = File.createTempFile("upload_", "_" + fileName);
+                        try (InputStream inputStream = resource.getInputStream()) {
+                            Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        }
+
+                        return cloudinaryService.uploadImage(tempFile);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Error uploading image: " + fileName, e);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+}

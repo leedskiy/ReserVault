@@ -1,4 +1,4 @@
-package io.leedsk1y.reservault_backend.config;
+package io.leedsk1y.reservault_backend.config.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

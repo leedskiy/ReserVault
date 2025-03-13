@@ -1,4 +1,4 @@
-package io.leedsk1y.reservault_backend.config;
+package io.leedsk1y.reservault_backend.config.seeder;
 
 import io.leedsk1y.reservault_backend.models.entities.Role;
 import io.leedsk1y.reservault_backend.models.entities.User;

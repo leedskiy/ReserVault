@@ -1,4 +1,4 @@
-package io.leedsk1y.reservault_backend.config;
+package io.leedsk1y.reservault_backend.config.cloud;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
