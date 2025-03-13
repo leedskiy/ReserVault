@@ -62,6 +62,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorizeRequests ->
             authorizeRequests
                 .requestMatchers("/auth/register", "/auth/login", "/oauth2/**").permitAll() // security endpoints
+                .requestMatchers("/admin/**").hasRole("ADMIN") // admin endpoints
                 .anyRequest().authenticated());
 
         http.sessionManagement(session ->

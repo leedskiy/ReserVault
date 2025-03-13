@@ -19,7 +19,7 @@ public class RoleSeederConfig {
         this.roleRepository = roleRepository;
     }
 
-    @Bean
+    @Bean(name = "seedRoles")
     public CommandLineRunner seedRoles() {
         return args -> {
             Arrays.stream(ERole.values())
