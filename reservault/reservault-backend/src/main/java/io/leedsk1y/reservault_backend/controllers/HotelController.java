@@ -21,11 +21,6 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
-    @GetMapping
-    public List<Hotel> getAllHotels() {
-        return hotelService.getAllHotels();
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<Hotel> getHotelById(@PathVariable UUID id) {
         Optional<Hotel> hotel = hotelService.getHotelById(id);

@@ -2,7 +2,6 @@ package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -13,12 +12,17 @@ import java.util.UUID;
 
 @Service
 public class AdminService {
-
-    @Autowired
     private HotelRepository hotelRepository;
-
-    @Autowired
     private CloudinaryService cloudinaryService;
+
+    public AdminService(HotelRepository hotelRepository, CloudinaryService cloudinaryService) {
+        this.hotelRepository = hotelRepository;
+        this.cloudinaryService = cloudinaryService;
+    }
+
+    public List<Hotel> getAllHotels() {
+        return hotelRepository.findAll();
+    }
 
     public Hotel createHotel(Hotel hotel, List<MultipartFile> images) throws IOException {
         for (MultipartFile image : images) {

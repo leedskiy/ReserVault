@@ -9,6 +9,9 @@ import io.leedsk1y.reservault_backend.models.enums.ERole;
 import io.leedsk1y.reservault_backend.repositories.RoleRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
+import io.leedsk1y.reservault_backend.utils.CookieUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -86,5 +89,15 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("User not found"));
         return new UserDetailedResponseDTO(user);
+    }
+
+    public void logoutUser(HttpServletRequest request, HttpServletResponse response) {
+        String token = jwtUtils.getJwtFromCookies(request);
+
+        if (token != null) {
+            jwtUtils.blacklistToken(token);
+        }
+
+        CookieUtils.clearJwtCookie(response);
     }
 }

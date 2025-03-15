@@ -4,6 +4,7 @@ import java.util.Map;
 
 import io.leedsk1y.reservault_backend.utils.CookieUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,8 +52,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
-        CookieUtils.clearJwtCookie(response);
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        authService.logoutUser(request, response);
         return ResponseEntity.ok(Map.of("message", "User logged out successfully", "status", true));
     }
 

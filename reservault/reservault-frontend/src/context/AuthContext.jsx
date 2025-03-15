@@ -46,6 +46,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     const login = (credentials) => loginMutation.mutateAsync(credentials);
+
     const logout = async (navigate) => {
         await logoutMutation.mutateAsync();
         navigate('/');
