@@ -4,6 +4,7 @@ import WelcomePage from './pages/WelcomePage';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import AdminHotels from "./pages/AdminHotels";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<div>Profile Page (to be implemented)</div>} />
+          <Route path="/admin/hotels" element={<AdminHotels />} />
         </Routes>
       </Router>
     </AuthProvider>

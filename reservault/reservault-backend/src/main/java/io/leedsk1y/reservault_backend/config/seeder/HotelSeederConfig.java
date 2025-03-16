@@ -38,12 +38,21 @@ public class HotelSeederConfig {
 
             List<Hotel> hotels = List.of(
                     createHotel("The Manhattan Royale",
-                            "Nestled in the heart of Manhattan, The Manhattan Royale redefines luxury with breathtaking skyline views, opulent interiors, and world-class amenities.",
+                            "Nestled in the heart of Manhattan, The Manhattan Royale redefines luxury with its breathtaking skyline views, " +
+                                    "opulent interiors, and world-class amenities. Designed for those who appreciate sophistication, the hotel features " +
+                                    "grand chandeliers, plush suites with floor-to-ceiling windows, and an exclusive rooftop lounge offering panoramic " +
+                                    "views of the city that never sleeps. Whether indulging in gourmet dining, unwinding at the spa, or enjoying the " +
+                                    "vibrant nightlife just steps away, guests are treated to an unforgettable five-star experience in the heart of New York City.",
                             5, new Location("USA", "New York", "5th Avenue", "10001"),
-                            List.of("hotel1_img2.png", "hotel1_img2.png", "hotel1_img3.png")),
+                            List.of("hotel1_img1.png", "hotel1_img2.png", "hotel1_img3.png")),
 
                     createHotel("Azure Palms Resort",
-                            "Overlooking the stunning Mediterranean coastline, Azure Palms Resort is an oasis of relaxation and sophistication, where elegance meets tranquility in Barcelona.",
+                            "Overlooking the stunning Mediterranean coastline, Azure Palms Resort is an oasis of relaxation and sophistication, " +
+                                    "where elegance meets tranquility in Barcelona. Surrounded by lush palm gardens and boasting direct access " +
+                                    "to pristine sandy beaches, this resort offers an unparalleled blend of modern luxury and coastal charm. " +
+                                    "Guests can enjoy rejuvenating spa treatments, world-class cuisine featuring fresh Mediterranean flavors, " +
+                                    "and infinity pools that seem to blend seamlessly with the sparkling blue sea. Whether seeking a romantic " +
+                                    "getaway or a serene retreat, Azure Palms Resort delivers a refined escape in one of Europe’s most captivating destinations.",
                             5, new Location("Spain", "Barcelona", "Beachfront Avenue", "08002"),
                             List.of("hotel2_img1.png", "hotel2_img2.png", "hotel2_img3.png"))
             );

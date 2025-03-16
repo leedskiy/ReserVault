@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 import { FaUser, FaHotel, FaSignOutAlt } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 import logo from "../assets/logo.png";
 
 const Header = () => {
@@ -60,7 +61,7 @@ const Header = () => {
 
     return (
         <header className="bg-white shadow-md py-3 px-8">
-            <div className="container mx-auto flex justify-between items-center">
+            <div className="container max-w-6xl mx-auto flex justify-between items-center">
                 <Link to="/dashboard">
                     <img src={logo} alt="Logo" className="h-10 cursor-pointer" />
                 </Link>
@@ -69,7 +70,7 @@ const Header = () => {
                     <button
                         ref={buttonRef}
                         onClick={toggleMenu}
-                        className="flex items-center space-x-2 focus:outline-none hover:bg-gray-200 py-2 px-4 rounded-lg min-w-[12rem] justify-between"
+                        className="flex items-center space-x-2 focus:outline-none duration-200 hover:bg-gray-200 py-2 px-4 rounded-lg min-w-[12rem] justify-between"
                         style={{ minWidth: "14rem" }}
                     >
                         <div className="relative flex items-center justify-center h-11 w-11">
@@ -93,38 +94,46 @@ const Header = () => {
                         </div>
                     </button>
 
-                    <div
-                        className={`absolute right-0 mt-2 bg-white border rounded-lg shadow-lg transition-all transform ${menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
-                        style={{ minWidth: buttonRef.current ? buttonRef.current.offsetWidth : "14rem" }}
-                    >
-                        <Link
-                            to="/profile"
-                            className="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-200 active:bg-gray-300 rounded-t-lg transition-all duration-200 ease-in-out"
-                            onClick={() => setMenuOpen(false)}
-                        >
-                            <FaUser className="mr-2" />
-                            Profile
-                        </Link>
-
-                        {isAdmin && (
-                            <Link
-                                to="/admin/hotels"
-                                className="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-200 active:bg-gray-300 transition-all duration-200 ease-in-out"
-                                onClick={() => setMenuOpen(false)}
+                    <AnimatePresence>
+                        {menuOpen && (
+                            <motion.div
+                                className="absolute right-0 mt-2 bg-white border rounded-lg shadow-lg"
+                                style={{ minWidth: buttonRef.current ? buttonRef.current.offsetWidth : "14rem" }}
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2, ease: "easeOut" }}
                             >
-                                <FaHotel className="mr-2" />
-                                Hotels
-                            </Link>
-                        )}
+                                <Link
+                                    to="/profile"
+                                    className="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-200 active:bg-gray-300 rounded-t-lg transition-all duration-200 ease-in-out"
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <FaUser className="mr-2" />
+                                    Profile
+                                </Link>
 
-                        <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center px-4 py-2 text-gray-800 hover:bg-gray-200 active:bg-gray-300 rounded-b-lg transition-all duration-200 ease-in-out"
-                        >
-                            <FaSignOutAlt className="mr-2" />
-                            Logout
-                        </button>
-                    </div>
+                                {isAdmin && (
+                                    <Link
+                                        to="/admin/hotels"
+                                        className="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-200 active:bg-gray-300 transition-all duration-200 ease-in-out"
+                                        onClick={() => setMenuOpen(false)}
+                                    >
+                                        <FaHotel className="mr-2" />
+                                        Hotels
+                                    </Link>
+                                )}
+
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center px-4 py-2 text-gray-800 hover:bg-gray-200 active:bg-gray-300 rounded-b-lg transition-all duration-200 ease-in-out"
+                                >
+                                    <FaSignOutAlt className="mr-2" />
+                                    Logout
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </header>

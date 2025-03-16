@@ -1,9 +1,22 @@
 import { FaEnvelope } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const PopupModal = ({ message, onClose }) => {
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm text-center">
+        <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+            <motion.div
+                className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm text-center"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+            >
                 <FaEnvelope className="text-[#32492D] mx-auto text-5xl mb-3" />
                 <h2 className="text-lg font-semibold text-gray-900">Check Your Email</h2>
                 <p className="text-gray-600 mt-2">{message}</p>
@@ -14,8 +27,8 @@ const PopupModal = ({ message, onClose }) => {
                 >
                     OK
                 </button>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 
