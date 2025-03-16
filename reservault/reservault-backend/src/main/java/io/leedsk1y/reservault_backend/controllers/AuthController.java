@@ -2,7 +2,7 @@ package io.leedsk1y.reservault_backend.controllers;
 
 import java.util.Map;
 
-import io.leedsk1y.reservault_backend.utils.CookieUtils;
+import io.leedsk1y.reservault_backend.security.jwt.CookieUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +18,7 @@ import io.leedsk1y.reservault_backend.dto.LoginRequestDTO;
 import io.leedsk1y.reservault_backend.dto.RegisterRequestDTO;
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.services.AuthService;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/auth")
@@ -51,14 +52,20 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<?> getAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            UserDetailedResponseDTO user = authService.getAuthenticatedUser(request, response);
+            return ResponseEntity.ok(user);
+        } catch (ResponseStatusException e) {
+            CookieUtils.clearJwtCookie(response);
+            return ResponseEntity.status(e.getStatusCode()).body(Map.of("message", e.getReason(), "status", false));
+        }
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         authService.logoutUser(request, response);
         return ResponseEntity.ok(Map.of("message", "User logged out successfully", "status", true));
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<UserDetailedResponseDTO> getAuthenticatedUser() {
-        return ResponseEntity.ok(authService.getAuthenticatedUser());
     }
 }

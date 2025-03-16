@@ -1,9 +1,13 @@
-package io.leedsk1y.reservault_backend.utils;
+package io.leedsk1y.reservault_backend.security.jwt;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CookieUtils {
+    private static final Logger logger = LoggerFactory.getLogger(CookieUtils.class);
+
     public static void setJwtCookie(HttpServletResponse response, String jwtToken) {
         Cookie cookie = new Cookie("jwt", jwtToken);
         cookie.setHttpOnly(true);
@@ -13,6 +17,7 @@ public class CookieUtils {
         cookie.setAttribute("SameSite", "Strict");
 
         response.addCookie(cookie);
+        logger.debug("JWT cookie set successfully.");
     }
 
     public static void clearJwtCookie(HttpServletResponse response) {
@@ -24,5 +29,6 @@ public class CookieUtils {
         cookie.setAttribute("SameSite", "Strict");
 
         response.addCookie(cookie);
+        logger.debug("JWT cookie cleared.");
     }
 }

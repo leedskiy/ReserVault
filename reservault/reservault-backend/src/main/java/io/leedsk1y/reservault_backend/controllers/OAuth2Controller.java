@@ -2,7 +2,7 @@ package io.leedsk1y.reservault_backend.controllers;
 
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.services.OAuth2Service;
-import io.leedsk1y.reservault_backend.utils.CookieUtils;
+import io.leedsk1y.reservault_backend.security.jwt.CookieUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

@@ -10,10 +10,10 @@ import javax.crypto.SecretKey;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -22,7 +22,6 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.leedsk1y.reservault_backend.models.entities.User;
 
 @Component
 public class JwtUtils {
@@ -75,9 +74,10 @@ public class JwtUtils {
         return blacklistedTokens.contains(token);
     }
 
-    public boolean validateJwtToken(String authToken) {
+    public boolean validateJwtToken(String authToken, HttpServletResponse response) {
         if (isTokenBlacklisted(authToken)) {
             logger.error("JWT token is blacklisted");
+            CookieUtils.clearJwtCookie(response);
             return false;
         }
 
@@ -87,15 +87,19 @@ public class JwtUtils {
         }
         catch(MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
+            CookieUtils.clearJwtCookie(response);
         }
         catch (ExpiredJwtException e) {
             logger.error("JWT token is expired: {}", e.getMessage());
+            CookieUtils.clearJwtCookie(response);
         }
         catch (UnsupportedJwtException e) {
             logger.error("JWT token is unsupported: {}", e.getMessage());
+            CookieUtils.clearJwtCookie(response);
         }
         catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty: {}", e.getMessage());
+            CookieUtils.clearJwtCookie(response);
         }
 
         return false;

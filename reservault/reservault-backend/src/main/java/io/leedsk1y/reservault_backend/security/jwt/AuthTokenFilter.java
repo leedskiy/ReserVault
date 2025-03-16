@@ -35,7 +35,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         try {
             String jwt = jwtUtils.getJwtFromCookies(request);
             if (jwt != null) {
-                if (!jwtUtils.validateJwtToken(jwt)) {
+                if (!jwtUtils.validateJwtToken(jwt, response)) {
                     logger.warn("Invalid or blacklisted token detected: {}", jwt);
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("{\"error\":\"Unauthorized - Invalid or blacklisted token\"}");

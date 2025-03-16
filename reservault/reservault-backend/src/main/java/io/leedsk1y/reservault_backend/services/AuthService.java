@@ -9,9 +9,10 @@ import io.leedsk1y.reservault_backend.models.enums.ERole;
 import io.leedsk1y.reservault_backend.repositories.RoleRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
-import io.leedsk1y.reservault_backend.utils.CookieUtils;
+import io.leedsk1y.reservault_backend.security.jwt.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,9 +21,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -84,11 +87,22 @@ public class AuthService {
         }
     }
 
-    public UserDetailedResponseDTO getAuthenticatedUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        return new UserDetailedResponseDTO(user);
+    public UserDetailedResponseDTO getAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
+        String token = jwtUtils.getJwtFromCookies(request);
+
+        if (token == null || !jwtUtils.validateJwtToken(token, response)) {
+            CookieUtils.clearJwtCookie(response);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
+        }
+
+        String email = jwtUtils.getUserNameFromJwtToken(token);
+
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        return new UserDetailedResponseDTO(userOptional.get());
     }
 
     public void logoutUser(HttpServletRequest request, HttpServletResponse response) {
