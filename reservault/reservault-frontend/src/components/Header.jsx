@@ -115,7 +115,7 @@ const Header = () => {
 
                                 {isAdmin && (
                                     <Link
-                                        to="/admin/hotels"
+                                        to="/admin/hotels/list"
                                         className="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-200 active:bg-gray-300 transition-all duration-200 ease-in-out"
                                         onClick={() => setMenuOpen(false)}
                                     >

@@ -25,6 +25,10 @@ public class AdminService {
     }
 
     public Hotel createHotel(Hotel hotel, List<MultipartFile> images) throws IOException {
+        if (hotelRepository.findByIdentifier(hotel.getIdentifier()).isPresent()) {
+            throw new IllegalArgumentException("Hotel identifier already exists: " + hotel.getIdentifier());
+        }
+
         for (MultipartFile image : images) {
             String imageUrl = cloudinaryService.uploadImage(image);
             hotel.getImagesUrls().add(imageUrl);

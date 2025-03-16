@@ -37,7 +37,8 @@ public class HotelSeederConfig {
             }
 
             List<Hotel> hotels = List.of(
-                    createHotel("The Manhattan Royale",
+                    createHotel("mnhttnroyale",
+                            "The Manhattan Royale",
                             "Nestled in the heart of Manhattan, The Manhattan Royale redefines luxury with its breathtaking skyline views, " +
                                     "opulent interiors, and world-class amenities. Designed for those who appreciate sophistication, the hotel features " +
                                     "grand chandeliers, plush suites with floor-to-ceiling windows, and an exclusive rooftop lounge offering panoramic " +
@@ -46,7 +47,8 @@ public class HotelSeederConfig {
                             5, new Location("USA", "New York", "5th Avenue", "10001"),
                             List.of("hotel1_img1.png", "hotel1_img2.png", "hotel1_img3.png")),
 
-                    createHotel("Azure Palms Resort",
+                    createHotel("azurepalms",
+                            "Azure Palms Resort",
                             "Overlooking the stunning Mediterranean coastline, Azure Palms Resort is an oasis of relaxation and sophistication, " +
                                     "where elegance meets tranquility in Barcelona. Surrounded by lush palm gardens and boasting direct access " +
                                     "to pristine sandy beaches, this resort offers an unparalleled blend of modern luxury and coastal charm. " +
@@ -61,10 +63,11 @@ public class HotelSeederConfig {
         };
     }
 
-    private Hotel createHotel(String name, String description, int stars, Location location, List<String> imageFiles) throws IOException {
+    private Hotel createHotel(String identifier, String name, String description, int stars, Location location, List<String> imageFiles) throws IOException {
         List<String> imageUrls = uploadImages(imageFiles);
 
         Hotel hotel = new Hotel();
+        hotel.setIdentifier(identifier);
         hotel.setId(UUID.randomUUID());
         hotel.setName(name);
         hotel.setDescription(description);
