@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom"; // new
+import { Link } from "react-router-dom";
 
 const Sidebar = ({ options, activeView }) => {
     return (
@@ -25,14 +25,14 @@ const Sidebar = ({ options, activeView }) => {
                     <Link key={option.value} to={`/admin/hotels/${option.value}`} className="block">
                         <motion.button
                             className={`flex items-center gap-3 w-full text-left py-3 px-3 rounded-md font-semibold text-sm duration-200 transition ${activeView === option.value
-                                    ? "bg-gray-300 text-gray-900 shadow-md"
-                                    : "text-gray-600 hover:bg-gray-200"
+                                ? "bg-gray-300 text-gray-900 shadow-md"
+                                : "text-gray-600 hover:bg-gray-200"
                                 }`}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1, duration: 0.3, ease: "easeOut" }}
                         >
-                            {option.icon && <option.icon className="w-5 h-5 text-gray-700" />}
+                            {option.icon && <option.icon className="w-5 h-5 text-[#32492D]" />}
                             {option.label}
                         </motion.button>
                     </Link>

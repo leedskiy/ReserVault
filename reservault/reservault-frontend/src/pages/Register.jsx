@@ -101,7 +101,7 @@ const Register = () => {
 
                     <button
                         type="submit"
-                        className="w-full px-4 py-2 text-white bg-gray-900 rounded-lg hover:bg-[#32492D] transition-all duration-300 ease-in-out transform"
+                        className="w-full px-4 py-2 text-white rounded-lg bg-[#32492D] hover:bg-[#273823] transition-all duration-300 ease-in-out transform"
                         disabled={mutation.isLoading}
                     >
                         {mutation.isLoading ? "Registering..." : "Register"}

@@ -8,13 +8,13 @@ const WelcomePage = () => {
             <div className="flex space-x-4  mb-6">
                 <Link
                     to="/login"
-                    className="px-6 py-2 bg-gray-900 text-white rounded-lg shadow-md hover:bg-[#32492D] transition-all duration-300 ease-in-out transform"
+                    className="px-6 py-2 text-white rounded-lg shadow-md bg-[#32492D] hover:bg-[#273823] transition-all duration-300 ease-in-out transform"
                 >
                     Sign In
                 </Link>
                 <Link
                     to="/register"
-                    className="px-6 py-2 bg-gray-900 text-white rounded-lg shadow-md hover:bg-[#32492D] transition-all duration-300 ease-in-out transform"
+                    className="px-6 py-2 text-white rounded-lg shadow-md bg-[#32492D] hover:bg-[#273823] transition-all duration-300 ease-in-out transform"
                 >
                     Sign Up
                 </Link>
