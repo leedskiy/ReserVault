@@ -251,7 +251,7 @@ const HotelForm = ({ onSubmit, onCancel }) => {
                         type="submit"
                         className="w-full px-4 py-2 text-white rounded-lg bg-[#32492D] hover:bg-[#273823] transition-all duration-300 ease-in-out transform"
                     >
-                        Add Hotel
+                        Submit
                     </button>
 
                     <button

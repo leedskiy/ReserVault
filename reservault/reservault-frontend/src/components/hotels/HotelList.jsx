@@ -1,11 +1,44 @@
 import { motion } from "framer-motion";
 import { FaStar, FaEllipsisH, FaEdit, FaTrash } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "../../api/axios";
 import DropdownMenu from "../DropdownMenu";
 
-const HotelList = ({ hotels, isLoading, error, onModify, onDelete }) => {
+const HotelList = ({ hotels, isLoading, error, onModify }) => {
     const [openDropdown, setOpenDropdown] = useState(null);
-    const dropdownRefs = useRef([]);
+    const dropdownRef = useRef(null);
+    const queryClient = useQueryClient();
+    const [selectedHotel, setSelectedHotel] = useState(null);
+
+    const deleteMutation = useMutation({
+        mutationFn: async (hotelId) => {
+            await api.delete(`/admin/hotels/${hotelId}`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(["admin", "hotels"]);
+        },
+    });
+
+    const handleModify = (hotel) => {
+        setSelectedHotel(hotel);
+    };
+
+    const closePopup = () => {
+        setSelectedHotel(null);
+    };
+
+    const updateHotelMutation = useMutation({
+        mutationFn: async ({ id, formData }) => {
+            await api.put(`/admin/hotels/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(["admin", "hotels"]);
+            closePopup();
+        },
+    });
 
     const limitText = (text, maxLength) =>
         text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
@@ -14,19 +47,27 @@ const HotelList = ({ hotels, isLoading, error, onModify, onDelete }) => {
         setOpenDropdown((prev) => (prev === hotelId ? null : hotelId));
     };
 
-    const handleClickOutside = (event) => {
-        if (
-            dropdownRefs.current.length &&
-            !dropdownRefs.current.some((ref) => ref?.contains(event.target))
-        ) {
-            setOpenDropdown(null);
-        }
+    const handleDelete = async (hotelId) => {
+        await deleteMutation.mutateAsync(hotelId);
+        setOpenDropdown(null);
     };
 
     useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target) &&
+                openDropdown !== null
+            ) {
+                setTimeout(() => {
+                    setOpenDropdown(null);
+                }, 150);
+            }
+        };
+
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    }, [openDropdown]);
 
     return (
         <>
@@ -59,7 +100,7 @@ const HotelList = ({ hotels, isLoading, error, onModify, onDelete }) => {
                                 {limitText(`${hotel.location.city}, ${hotel.location.country}`, 40)}
                             </p>
 
-                            <div className="flex items-center space-x-1 text-yellow-500 mt-2">
+                            <div className="flex items-center space-x-1 text-[#32492D] mt-2">
                                 {Array.from({ length: hotel.stars }).map((_, i) => (
                                     <FaStar key={i} />
                                 ))}
@@ -70,11 +111,10 @@ const HotelList = ({ hotels, isLoading, error, onModify, onDelete }) => {
                             </p>
                         </div>
 
-                        <div className="relative flex">
+                        <div className="relative flex" ref={dropdownRef}>
                             <button
                                 onClick={() => handleToggleDropdown(hotel.id)}
-                                ref={(el) => (dropdownRefs.current[index] = el)}
-                                className="flex items-center justify-center w-8 h-8 rounded-lg text-[#32492D] hover:text-[#273823] hover:bg-gray-200 flex-shrink-0"
+                                className="duration-200 flex items-center justify-center w-8 h-8 rounded-lg text-[#32492D] hover:text-[#273823] hover:bg-gray-200"
                             >
                                 <FaEllipsisH size={20} />
                             </button>
@@ -87,12 +127,12 @@ const HotelList = ({ hotels, isLoading, error, onModify, onDelete }) => {
                                         {
                                             label: "Modify",
                                             icon: FaEdit,
-                                            onClick: () => onModify(hotel.id)
+                                            onClick: () => onModify(hotel),
                                         },
                                         {
                                             label: "Delete",
                                             icon: FaTrash,
-                                            onClick: () => onDelete(hotel.id)
+                                            onClick: () => handleDelete(hotel.id),
                                         },
                                     ]}
                                     position="left-0 top-10"

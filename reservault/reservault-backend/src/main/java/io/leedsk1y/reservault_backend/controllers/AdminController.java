@@ -50,11 +50,11 @@ public class AdminController {
     public ResponseEntity<Hotel> updateHotel(
         @PathVariable UUID id,
         @RequestPart("hotel") String hotelJson,
-        @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) {
+        @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Hotel updatedHotel = objectMapper.readValue(hotelJson, Hotel.class);
-            Optional<Hotel> hotel = adminService.updateHotel(id, updatedHotel, newImages);
+            Optional<Hotel> hotel = adminService.updateHotel(id, updatedHotel, images);
             return hotel.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IOException e) {
             return ResponseEntity.status(500).body(null);

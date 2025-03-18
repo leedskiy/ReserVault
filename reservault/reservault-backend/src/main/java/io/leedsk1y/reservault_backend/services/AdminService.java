@@ -42,9 +42,11 @@ public class AdminService {
     public Optional<Hotel> updateHotel(UUID id, Hotel updatedHotel, List<MultipartFile> newImages) throws IOException {
         return hotelRepository.findById(id).map(existingHotel -> {
             try {
-                for (MultipartFile image : newImages) {
-                    String imageUrl = cloudinaryService.uploadImage(image);
-                    existingHotel.getImagesUrls().add(imageUrl);
+                if (newImages != null && !newImages.isEmpty()) {
+                    for (MultipartFile image : newImages) {
+                        String imageUrl = cloudinaryService.uploadImage(image);
+                        existingHotel.getImagesUrls().add(imageUrl);
+                    }
                 }
 
                 existingHotel.setName(updatedHotel.getName());

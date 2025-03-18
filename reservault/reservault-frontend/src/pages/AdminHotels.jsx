@@ -8,13 +8,15 @@ import api from "../api/axios";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import HotelList from "../components/hotels/HotelList";
-import HotelForm from "../components/hotels/HotelForm";
+import HotelAddForm from "../components/hotels/HotelAddForm";
+import HotelModifyModal from "../components/hotels/HotelModifyModal";
 
 const AdminHotels = () => {
     const { isAuthenticated, isAdmin, loading } = useAuth();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { view } = useParams();
+    const [selectedHotel, setSelectedHotel] = useState(null);
 
     useEffect(() => {
         if (!loading && (!isAuthenticated || !isAdmin)) {
@@ -43,6 +45,18 @@ const AdminHotels = () => {
         },
     });
 
+    const updateHotelMutation = useMutation({
+        mutationFn: async ({ id, formData }) => {
+            await api.put(`/admin/hotels/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(["admin", "hotels"]);
+            setSelectedHotel(null);
+        },
+    });
+
     return (
         <>
             <Header />
@@ -60,13 +74,21 @@ const AdminHotels = () => {
 
                     <motion.div className="flex-grow rounded-md">
                         {view === "list" ? (
-                            <HotelList hotels={hotels} isLoading={isLoading} error={error} />
+                            <HotelList hotels={hotels} isLoading={isLoading} error={error} onModify={setSelectedHotel} />
                         ) : (
-                            <HotelForm onSubmit={addHotelMutation.mutate} onCancel={() => setView("list")} />
+                            <HotelAddForm onSubmit={addHotelMutation.mutate} onCancel={() => setView("list")} />
                         )}
                     </motion.div>
                 </div>
             </div>
+
+            {selectedHotel && (
+                <HotelModifyModal
+                    hotel={selectedHotel}
+                    onSubmit={(id, formData) => updateHotelMutation.mutate({ id, formData })}
+                    onClose={() => setSelectedHotel(null)}
+                />
+            )}
         </>
     );
 };

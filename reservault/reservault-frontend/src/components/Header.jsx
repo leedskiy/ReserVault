@@ -22,7 +22,7 @@ const Header = () => {
         user?.name.length > maxNameLength ? user.name.substring(0, maxNameLength) + "..." : user?.name;
 
     const roleLabels = {
-        ROLE_USER: { label: "User Account", color: "text-gray-500", border: "border-gray-500" },
+        ROLE_USER: { label: "User Account", color: "text-[#32492D]", border: "border-[#32492D]" },
         ROLE_MANAGER: { label: "Manager Account", color: "text-yellow-500", border: "border-yellow-500" },
         ROLE_ADMIN: { label: "Admin Account", color: "text-red-500", border: "border-red-500" },
     };
