@@ -66,4 +66,15 @@ public class AdminController {
         boolean deleted = adminService.deleteHotel(id);
         return deleted ? ResponseEntity.ok("Hotel deleted") : ResponseEntity.notFound().build();
     }
+
+    @DeleteMapping("/hotels/{hotelId}/images")
+    public ResponseEntity<String> removeHotelImage(
+            @PathVariable UUID hotelId,
+            @RequestParam("imageUrl") String imageUrl) {
+
+        boolean removed = adminService.removeHotelImage(hotelId, imageUrl);
+        return removed
+                ? ResponseEntity.ok("Image removed successfully")
+                : ResponseEntity.notFound().build();
+    }
 }

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaTimes } from "react-icons/fa";
 
-const HotelForm = ({ onSubmit, onCancel }) => {
+const HotelAddForm = ({ onSubmit, onCancel }) => {
     const [hotelData, setHotelData] = useState({
         identifier: "",
         name: "",
@@ -267,4 +267,4 @@ const HotelForm = ({ onSubmit, onCancel }) => {
     );
 };
 
-export default HotelForm;
+export default HotelAddForm;

@@ -74,7 +74,16 @@ const AdminHotels = () => {
 
                     <motion.div className="flex-grow rounded-md">
                         {view === "list" ? (
-                            <HotelList hotels={hotels} isLoading={isLoading} error={error} onModify={setSelectedHotel} />
+                            <HotelList
+                                hotels={hotels}
+                                isLoading={isLoading}
+                                error={error}
+                                onModify={(hotel) =>
+                                    setSelectedHotel({
+                                        ...hotel,
+                                        images: hotel.imagesUrls || [],
+                                    })
+                                } />
                         ) : (
                             <HotelAddForm onSubmit={addHotelMutation.mutate} onCancel={() => setView("list")} />
                         )}

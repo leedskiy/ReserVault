@@ -42,6 +42,10 @@ public class AdminService {
     public Optional<Hotel> updateHotel(UUID id, Hotel updatedHotel, List<MultipartFile> newImages) throws IOException {
         return hotelRepository.findById(id).map(existingHotel -> {
             try {
+                if (updatedHotel.getImagesUrls() != null && !updatedHotel.getImagesUrls().isEmpty()) {
+                    existingHotel.setImagesUrls(updatedHotel.getImagesUrls());
+                }
+
                 if (newImages != null && !newImages.isEmpty()) {
                     for (MultipartFile image : newImages) {
                         String imageUrl = cloudinaryService.uploadImage(image);
@@ -72,6 +76,23 @@ public class AdminService {
 
             hotelRepository.deleteById(id);
             return true;
+        }
+        return false;
+    }
+
+    public boolean removeHotelImage(UUID hotelId, String imageUrl) {
+        Optional<Hotel> hotelOptional = hotelRepository.findById(hotelId);
+
+        if (hotelOptional.isPresent()) {
+            Hotel hotel = hotelOptional.get();
+
+            if (hotel.getImagesUrls().contains(imageUrl)) {
+                cloudinaryService.deleteImage(imageUrl);
+
+                hotel.getImagesUrls().remove(imageUrl);
+                hotelRepository.save(hotel);
+                return true;
+            }
         }
         return false;
     }
