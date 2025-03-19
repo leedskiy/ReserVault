@@ -3,7 +3,7 @@ import { FaStar, FaEllipsisH, FaEdit, FaTrash } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
-import DropdownMenu from "../DropdownMenu";
+import DropdownMenu from "../common/DropdownMenu";
 
 const HotelList = ({ hotels, isLoading, error, onModify }) => {
     const [openDropdown, setOpenDropdown] = useState(null);

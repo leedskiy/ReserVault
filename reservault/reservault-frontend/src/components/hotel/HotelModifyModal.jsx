@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FaTimes } from "react-icons/fa";
 import api from "../../api/axios";
+import HotelStars from "./HotelStars";
+import ImageUploader from "../common/ImageUploader";
 
 const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
     const [isDirty, setIsDirty] = useState(false);
@@ -125,36 +127,6 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
         },
     });
 
-    const handleImgAddFileChange = (e) => {
-        setIsDirty(true);
-        const files = Array.from(e.target.files);
-        setNewImages((prev) => [...prev, ...files]);
-    };
-
-    const removeImgAddImage = (index) => {
-        setIsDirty(true);
-        setNewImages((prev) => prev.filter((_, i) => i !== index));
-    };
-
-    const handleImgAddDragOver = (e) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleImgAddDragLeave = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-    };
-
-    const handleImgAddDrop = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-        setIsDirty(true);
-
-        const files = Array.from(e.dataTransfer.files);
-        setNewImages((prev) => [...prev, ...files]);
-    };
-
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <motion.div
@@ -174,10 +146,10 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                     Modify Hotel
                 </h2>
 
-                <div className="flex space-x-6">
-                    <div className="w-1/2 space-y-4">
-                        <div className="flex space-x-4">
-                            <div className="w-1/2">
+                <div className="flex gap-10 h-full p-4">
+                    <div className="flex flex-col w-1/2 space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
                                 <label className="block text-gray-600">Identifier</label>
                                 <input
                                     type="text"
@@ -187,7 +159,7 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                                     disabled
                                 />
                             </div>
-                            <div className="w-1/2">
+                            <div>
                                 <label className="block text-gray-600">Hotel Name</label>
                                 <input
                                     type="text"
@@ -259,10 +231,10 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                         </div>
                     </div>
 
-                    <div className="w-1/2">
+                    <div className="flex flex-col flex-grow max-w-[40%] space-y-6">
                         <div>
                             <label className="block text-gray-600">Manage Images</label>
-                            <div className="flex space-x-4 overflow-x-auto p-2 border rounded-lg">
+                            <div className="flex gap-x-4 overflow-x-auto p-2 border rounded-lg whitespace-nowrap">
                                 {hotelData.images.map((img, index) => (
                                     <div
                                         key={img}
@@ -270,7 +242,7 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                                         onDragStart={() => handleDragStart(index)}
                                         onDragOver={handleDragOver}
                                         onDrop={() => handleDrop(index)}
-                                        className="relative flex flex-col items-center cursor-move"
+                                        className="relative inline-block cursor-move"
                                     >
                                         <button
                                             className="absolute top-6 right-0 bg-red-600 text-white rounded-full p-1"
@@ -279,82 +251,40 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                                             <FaTimes size={14} />
                                         </button>
 
-                                        <span className="text-sm font-bold mb-1">#{index + 1}</span>
-                                        <img src={img} alt="Hotel" className="w-24 h-24 rounded-lg shadow" />
+                                        <span className="text-sm font-bold mb-1 block text-center">#{index + 1}</span>
+                                        <img
+                                            src={img}
+                                            alt="Hotel"
+                                            className="w-24 h-24 rounded-lg shadow object-cover min-w-[96px] min-h-[96px]"
+                                        />
                                     </div>
                                 ))}
                             </div>
                         </div>
-                        <div>
-                            <div
-                                className={`border-dashed border-2 p-4 flex flex-col items-center cursor-pointer transition-all duration-300 ${isDragging ? "border-blue-500 bg-blue-100" : "border-gray-300 bg-gray-100"
-                                    }`}
-                                onDragOver={handleImgAddDragOver}
-                                onDragEnter={handleImgAddDragOver}
-                                onDragLeave={handleImgAddDragLeave}
-                                onDrop={handleImgAddDrop}
-                                onClick={() => document.getElementById("fileUpload").click()}
-                            >
-                                <input
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
-                                    onChange={handleImgAddFileChange}
-                                    className="hidden"
-                                    id="fileUpload"
-                                />
 
-                                <p className="text-gray-700 font-semibold hover:underline text-center">
-                                    Drag & Drop or Click to Upload Hotel Images
-                                </p>
-
-                                <div className="grid grid-cols-4 gap-2 mt-4">
-                                    {newImages.map((file, index) => (
-                                        <div key={index} className="relative">
-                                            <img
-                                                src={file instanceof File ? URL.createObjectURL(file) : file}
-                                                alt="Hotel"
-                                                className="w-24 h-24 rounded-lg shadow"
-                                            />
-                                            <button
-                                                type="button"
-                                                className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded"
-                                                onClick={() => removeImgAddImage(index)}
-                                            >
-                                                <FaTimes />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="block text-gray-600">Stars</label>
-                            <select
-                                name="stars"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                onChange={handleChange}
-                                required
-                            >
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <option key={star} value={star}>{star} Stars</option>
-                                ))}
-                            </select>
-                        </div>
+                        <ImageUploader
+                            images={newImages}
+                            setImages={setNewImages}
+                            isDragging={isDragging}
+                            setIsDragging={setIsDragging}
+                        />
                     </div>
+
+                    <HotelStars hotelData={hotelData} setHotelData={setHotelData} />
                 </div>
+
 
                 <div className="flex justify-end space-x-4 mt-6">
                     <button
                         type="button"
-                        className="px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-200 transition-all duration-300"
+                        className="px-8 py-2 text-gray-700 border rounded-lg hover:bg-gray-200 transition-all duration-300"
                         onClick={onClose}
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="px-6 py-2 text-white bg-[#32492D] hover:bg-[#273823] rounded-lg transition-all duration-300"
+                        className="px-8 py-2 text-white bg-[#32492D] hover:bg-[#273823] rounded-lg transition-all duration-300"
                         onClick={handleSubmit}
                     >
                         Submit

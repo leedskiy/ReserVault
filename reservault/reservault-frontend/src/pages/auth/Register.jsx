@@ -3,8 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import api from "../api/axios";
-import PopupModal from "../components/PopupModal";
+import api from "../../api/axios";
+import PopupModal from "../../components/common/PopupModal";
 
 const Register = () => {
     const { register, handleSubmit, watch, formState: { errors } } = useForm();

@@ -2,15 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
 const DropdownMenu = ({ isOpen, onClose, menuItems, position = "right-0" }) => {
-    const [isAnimating, setIsAnimating] = useState(false);
-
-    const handleClose = () => {
-        setIsAnimating(true);
-        setTimeout(() => {
-            setIsAnimating(false);
-            onClose();
-        }, 200);
-    };
+    const [isAnimating] = useState(false);
 
     const dropdownVariants = {
         hidden: { opacity: 0, y: -10 },

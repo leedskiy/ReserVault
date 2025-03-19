@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import WelcomePage from './pages/WelcomePage';
-import Register from './pages/Register';
-import Login from './pages/Login';
+import Register from './pages/auth/Register';
+import Login from './pages/auth/Login';
 import Dashboard from './pages/Dashboard';
-import AdminHotels from "./pages/AdminHotels";
+import AdminHotels from "./pages/admin/AdminHotels";
 
 const App = () => {
   return (

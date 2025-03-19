@@ -1,7 +1,7 @@
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import Header from "../components/Header";
+import Header from "../components/common/Header";
 
 const Dashboard = () => {
     const { user, isAuthenticated, loading } = useAuth();

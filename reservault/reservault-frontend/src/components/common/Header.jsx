@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 import { FaUser, FaHotel, FaSignOutAlt } from "react-icons/fa";
 import DropdownMenu from "./DropdownMenu";
-import logo from "../assets/logo.png";
+import logo from "../../assets/logo.png";
 
 const Header = () => {
     const { user, logout, isAdmin } = useAuth();

@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaTimes } from "react-icons/fa";
+import HotelStars from "./HotelStars";
+import ImageUploader from "../common/ImageUploader";
 
 const HotelAddForm = ({ onSubmit, onCancel }) => {
+    const navigate = useNavigate();
+
     const [hotelData, setHotelData] = useState({
         identifier: "",
         name: "",
@@ -12,6 +16,7 @@ const HotelAddForm = ({ onSubmit, onCancel }) => {
         images: [],
     });
 
+    const [newImages, setNewImages] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
 
@@ -43,45 +48,6 @@ const HotelAddForm = ({ onSubmit, onCancel }) => {
         }
     };
 
-    const handleFileChange = (e) => {
-        setIsDirty(true);
-        const files = Array.from(e.target.files);
-        setHotelData((prev) => ({
-            ...prev,
-            images: [...prev.images, ...files],
-        }));
-    };
-
-    const removeImage = (index) => {
-        setIsDirty(true);
-        setHotelData((prev) => ({
-            ...prev,
-            images: prev.images.filter((_, i) => i !== index),
-        }));
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-        setIsDirty(true);
-
-        const files = Array.from(e.dataTransfer.files);
-        setHotelData((prev) => ({
-            ...prev,
-            images: [...prev.images, ...files],
-        }));
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -95,12 +61,18 @@ const HotelAddForm = ({ onSubmit, onCancel }) => {
             location: hotelData.location,
         }));
 
-        hotelData.images.forEach((image) => {
-            formData.append("images", image);
-        });
+        if (newImages.length > 0) {
+            newImages.forEach((image) => {
+                formData.append("images", image);
+            });
+        }
 
         setIsDirty(false);
         onSubmit(formData);
+    };
+
+    const handleCancel = () => {
+        navigate("/admin/hotels/list");
     };
 
     return (
@@ -148,19 +120,7 @@ const HotelAddForm = ({ onSubmit, onCancel }) => {
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-gray-600">Stars</label>
-                        <select
-                            name="stars"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                            onChange={handleChange}
-                            required
-                        >
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <option key={star} value={star}>{star} Stars</option>
-                            ))}
-                        </select>
-                    </div>
+                    <HotelStars hotelData={hotelData} setHotelData={setHotelData} direction="horizontal" />
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -205,47 +165,12 @@ const HotelAddForm = ({ onSubmit, onCancel }) => {
                         </div>
                     </div>
 
-                    <div
-                        className={`border-dashed border-2 p-4 flex flex-col items-center cursor-pointer transition-all duration-300 ${isDragging ? "border-blue-500 bg-blue-100" : "border-gray-300 bg-gray-100"
-                            }`}
-                        onDragOver={handleDragOver}
-                        onDragEnter={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        onClick={() => document.getElementById("fileUpload").click()}
-                    >
-                        <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            id="fileUpload"
-                        />
-
-                        <p className="text-gray-700 font-semibold hover:underline text-center">
-                            Drag & Drop or Click to Upload Hotel Images
-                        </p>
-
-                        <div className="grid grid-cols-4 gap-2 mt-4">
-                            {hotelData.images.map((file, index) => (
-                                <div key={index} className="relative">
-                                    <img
-                                        src={URL.createObjectURL(file)}
-                                        className="w-20 h-20 object-cover rounded border"
-                                        alt="preview"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded"
-                                        onClick={() => removeImage(index)}
-                                    >
-                                        <FaTimes />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    <ImageUploader
+                        images={newImages}
+                        setImages={setNewImages}
+                        isDragging={isDragging}
+                        setIsDragging={setIsDragging}
+                    />
 
                     <button
                         type="submit"
@@ -257,7 +182,7 @@ const HotelAddForm = ({ onSubmit, onCancel }) => {
                     <button
                         type="button"
                         className="w-full px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-200 transition-all duration-300 ease-in-out transform"
-                        onClick={onCancel}
+                        onClick={handleCancel}
                     >
                         Cancel
                     </button>

@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaList, FaPlus, FaTimes } from "react-icons/fa";
+import { FaList, FaPlus } from "react-icons/fa";
 import { motion } from "framer-motion";
-import api from "../api/axios";
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
-import HotelList from "../components/hotels/HotelList";
-import HotelAddForm from "../components/hotels/HotelAddForm";
-import HotelModifyModal from "../components/hotels/HotelModifyModal";
+import api from "../../api/axios";
+import Header from "../../components/common/Header";
+import Sidebar from "../../components/common/Sidebar";
+import HotelList from "../../components/hotel/HotelList";
+import HotelAddForm from "../../components/hotel/HotelAddForm";
+import HotelModifyModal from "../../components/hotel/HotelModifyModal";
 
 const AdminHotels = () => {
     const { isAuthenticated, isAdmin, loading } = useAuth();
