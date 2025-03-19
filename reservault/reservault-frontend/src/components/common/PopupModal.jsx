@@ -23,7 +23,7 @@ const PopupModal = ({ message, onClose }) => {
 
                 <button
                     onClick={onClose}
-                    className="mt-4 px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-[#32492D] transition-all duration-300 ease-in-out transform"
+                    className="mt-4 px-6 py-2 text-white rounded-lg bg-[#32492D] hover:bg-[#273823] transition-all duration-300 ease-in-out transform"
                 >
                     OK
                 </button>
