@@ -1,6 +1,8 @@
 package io.leedsk1y.reservault_backend.controllers;
 
+import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
+import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.services.AdminService;
 
 import org.springframework.http.MediaType;
@@ -76,5 +78,49 @@ public class AdminController {
         return removed
                 ? ResponseEntity.ok("Image removed successfully")
                 : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDetailedResponseDTO>> getAllUsers() {
+        return ResponseEntity.ok(adminService.getAllUsers());
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable UUID id) {
+        Optional<UserDetailedResponseDTO> user = adminService.getUserById(id);
+        return user.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
+        adminService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/managers/{manager_id}/approve")
+    public ResponseEntity<?> approveManagerRequest(@PathVariable UUID manager_id) {
+        boolean approved = adminService.approveManagerRequest(manager_id);
+        return approved
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/managers/{manager_id}/reject")
+    public ResponseEntity<?> rejectManagerRequest(@PathVariable UUID manager_id) {
+        boolean rejected = adminService.rejectManagerRequest(manager_id);
+        return rejected
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/managers/{manager_id}/hotels")
+    public ResponseEntity<?> getHotelsByManager(@PathVariable UUID manager_id) {
+        try {
+            List<Hotel> hotels = adminService.getHotelsByManager(manager_id);
+            return ResponseEntity.ok(hotels);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
