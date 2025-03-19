@@ -19,6 +19,7 @@ import io.leedsk1y.reservault_backend.dto.RegisterRequestDTO;
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.services.AuthService;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.AuthenticationException;
 
 @RestController
 @RequestMapping("/auth")
@@ -47,8 +48,8 @@ public class AuthController {
 
             return ResponseEntity.ok(Map.of("message", "Login successful", "status", true));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "Bad credentials", "status", false));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage(), "status", false));
         }
     }
 
