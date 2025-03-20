@@ -51,7 +51,7 @@ public class AdminSeederConfig {
                     UUID.randomUUID(),
                     "Admin",
                     adminEmail,
-                    passwordEncoder.encode("password"),
+                    passwordEncoder.encode("pass"),
                     null,
                     Instant.now(),
                     true,

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
-import { FaUser, FaHotel, FaSignOutAlt } from "react-icons/fa";
+import { FaUser, FaUsers, FaHotel, FaSignOutAlt } from "react-icons/fa";
 import DropdownMenu from "./DropdownMenu";
 import logo from "../../assets/logo.png";
 
@@ -39,6 +39,7 @@ const Header = () => {
     const menuItems = [
         { label: "Profile", icon: FaUser, onClick: () => navigate("/profile") },
         isAdmin && { label: "Hotels", icon: FaHotel, onClick: () => navigate("/admin/hotels/list") },
+        isAdmin && { label: "Users", icon: FaUsers, onClick: () => navigate("/admin/users") },
         { label: "Logout", icon: FaSignOutAlt, onClick: handleLogout },
     ].filter(Boolean);
 

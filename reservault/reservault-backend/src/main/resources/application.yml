@@ -3,7 +3,7 @@ spring:
     name: ReserVault
   app:
     jwtSecret: ${JWT_SECRET}
-    jwtExpirationMs: 3600000
+    jwtExpirationMs: 7200000
   frontend:
     url: "http://localhost:5173"
   data:
