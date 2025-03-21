@@ -4,9 +4,25 @@ import { useRef } from "react";
 const ImageUploader = ({ images = [], setImages, isDragging, setIsDragging }) => {
     const fileInputRef = useRef(null);
 
+    const validateFiles = (files) => {
+        const sizeLimit = 1.5 * 1024 * 1024; // 1.5mb
+        const validFormats = ['image/png', 'image/jpeg'];
+
+        const invalidFiles = files.filter(file => !validFormats.includes(file.type) || file.size > sizeLimit);
+
+        return invalidFiles;
+    };
+
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
-        setImages((prev) => [...(Array.isArray(prev) ? prev : []), ...files]);
+        const invalidFiles = validateFiles(files);
+
+        if (invalidFiles.length > 0) {
+            alert("Please upload only PNG or JPG images that are less than 1.5 MB.");
+        } else {
+            setImages((prev) => [...(Array.isArray(prev) ? prev : []), ...files]);
+        }
+
         e.target.value = "";
     };
 
@@ -29,7 +45,13 @@ const ImageUploader = ({ images = [], setImages, isDragging, setIsDragging }) =>
         e.preventDefault();
         setIsDragging(false);
         const files = Array.from(e.dataTransfer.files);
-        setImages((prev) => [...(Array.isArray(prev) ? prev : []), ...files]);
+        const invalidFiles = validateFiles(files);
+
+        if (invalidFiles.length > 0) {
+            alert("Please upload only PNG or JPG images that are less than 1.5 MB.");
+        } else {
+            setImages((prev) => [...(Array.isArray(prev) ? prev : []), ...files]);
+        }
     };
 
     return (

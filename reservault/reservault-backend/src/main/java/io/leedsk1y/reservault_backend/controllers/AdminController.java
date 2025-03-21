@@ -5,6 +5,7 @@ import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.services.AdminService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,7 +35,7 @@ public class AdminController {
     }
 
     @PostMapping(value = "/hotels", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Hotel> createHotel(
+    public ResponseEntity<?> createHotel(
         @RequestPart("hotel") String hotelJson,
         @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         try {
@@ -43,13 +44,16 @@ public class AdminController {
 
             Hotel createdHotel = adminService.createHotel(hotel, images);
             return ResponseEntity.ok(createdHotel);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         } catch (IOException e) {
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal Server Error: " + e.getMessage());
         }
     }
 
     @PutMapping(value="/hotels/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Hotel> updateHotel(
+    public ResponseEntity<?> updateHotel(
         @PathVariable UUID id,
         @RequestPart("hotel") String hotelJson,
         @RequestPart(value = "images", required = false) List<MultipartFile> images) {
@@ -58,8 +62,11 @@ public class AdminController {
             Hotel updatedHotel = objectMapper.readValue(hotelJson, Hotel.class);
             Optional<Hotel> hotel = adminService.updateHotel(id, updatedHotel, images);
             return hotel.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         } catch (IOException e) {
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal Server Error: " + e.getMessage());
         }
     }
 
