@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface HotelManagerRepository extends MongoRepository<HotelManager, UUID> {
     List<HotelManager> findByManagerId(UUID managerId);
     void deleteByManagerId(UUID managerId);
+    void deleteByManagerIdAndHotelIdentifierIn(UUID managerId, List<String> hotelIdentifiers);
 }

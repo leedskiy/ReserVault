@@ -2,6 +2,7 @@ package io.leedsk1y.reservault_backend.controllers;
 
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
+import io.leedsk1y.reservault_backend.models.entities.HotelManager;
 import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.services.AdminService;
 
@@ -105,29 +106,44 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/managers/{manager_id}/approve")
-    public ResponseEntity<?> approveManagerRequest(@PathVariable UUID manager_id) {
-        boolean approved = adminService.approveManagerRequest(manager_id);
+    @PutMapping("/managers/{managerId}/approve")
+    public ResponseEntity<?> approveManagerRequest(@PathVariable UUID managerId) {
+        boolean approved = adminService.approveManagerRequest(managerId);
         return approved
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
     }
 
-    @DeleteMapping("/managers/{manager_id}/reject")
-    public ResponseEntity<?> rejectManagerRequest(@PathVariable UUID manager_id) {
-        boolean rejected = adminService.rejectManagerRequest(manager_id);
+    @DeleteMapping("/managers/{managerId}/reject")
+    public ResponseEntity<?> rejectManagerRequest(@PathVariable UUID managerId) {
+        boolean rejected = adminService.rejectManagerRequest(managerId);
         return rejected
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/managers/{manager_id}/hotels")
-    public ResponseEntity<?> getHotelsByManager(@PathVariable UUID manager_id) {
+    @GetMapping("/managers/{managerId}/hotels")
+    public ResponseEntity<?> getHotelsByManagerList(@PathVariable UUID managerId) {
         try {
-            List<Hotel> hotels = adminService.getHotelsByManager(manager_id);
-            return ResponseEntity.ok(hotels);
+            List<HotelManager> hotelManagers = adminService.getHotelsByManagerList(managerId);
+            return ResponseEntity.ok(hotelManagers);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/managers/{managerId}/hotels")
+    public ResponseEntity<?> updateHotelsByManagerList(
+            @PathVariable UUID managerId,
+            @RequestBody List<String> updatedHotelIdentifiers) {
+
+        try {
+            List<HotelManager> updatedHotelManagers = adminService.updateHotelsByManagerList(managerId, updatedHotelIdentifiers);
+            return ResponseEntity.ok(updatedHotelManagers);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 }

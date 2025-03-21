@@ -7,9 +7,9 @@ import { motion } from "framer-motion";
 import api from "../../api/axios";
 import Header from "../../components/common/Header";
 import Sidebar from "../../components/common/Sidebar";
-import HotelList from "../../components/hotel/HotelList";
-import HotelAddForm from "../../components/hotel/HotelAddForm";
-import HotelModifyModal from "../../components/hotel/HotelModifyModal";
+import HotelList from "../../components/admin/HotelList";
+import HotelAddForm from "../../components/admin/HotelAddForm";
+import HotelModifyModal from "../../components/admin/HotelModifyModal";
 
 const AdminHotels = () => {
     const { isAuthenticated, isAdmin, loading } = useAuth();

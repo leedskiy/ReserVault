@@ -13,6 +13,7 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
     const queryClient = useQueryClient();
     const [isDragging, setIsDragging] = useState(false);
     const [newImages, setNewImages] = useState([]);
+    const [imagesToDelete, setImagesToDelete] = useState([]);
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
@@ -70,6 +71,12 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
             });
         }
 
+        if (imagesToDelete.length > 0) {
+            for (const imageUrl of imagesToDelete) {
+                await deleteImageMutation.mutateAsync(imageUrl);
+            }
+        }
+
         setIsDirty(false);
         onSubmit(hotelData.id, formData);
     };
@@ -101,9 +108,12 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
     const handleRemoveImage = (index) => {
         const imageUrl = hotelData.images[index];
 
-        console.log("Attempting to delete:", imageUrl);
+        setImagesToDelete((prev) => [...prev, imageUrl]);
 
-        deleteImageMutation.mutate(imageUrl);
+        setHotelData((prev) => ({
+            ...prev,
+            images: prev.images.filter((img, i) => i !== index),
+        }));
     };
 
     const deleteImageMutation = useMutation({
@@ -113,8 +123,6 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
             });
         },
         onSuccess: (data, imageUrl) => {
-            console.log("Image deleted successfully:", imageUrl);
-
             setHotelData((prev) => ({
                 ...prev,
                 images: prev.images.filter((img) => img !== imageUrl),
@@ -127,6 +135,11 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
         },
     });
 
+    const handleClose = () => {
+        setImagesToDelete([]);
+        onClose();
+    };
+
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <motion.div
@@ -137,7 +150,7 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
             >
                 <button
                     className="duration-200 ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-[#32492D] hover:text-[#273823] hover:bg-gray-200"
-                    onClick={onClose}
+                    onClick={handleClose}
                 >
                     <FaTimes size={20} />
                 </button>
@@ -244,12 +257,14 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                                         onDrop={() => handleDrop(index)}
                                         className="relative inline-block cursor-move"
                                     >
-                                        <button
-                                            className="absolute top-6 right-0 bg-red-600 text-white rounded-full p-1"
-                                            onClick={() => handleRemoveImage(index)}
-                                        >
-                                            <FaTimes size={14} />
-                                        </button>
+                                        {hotelData.images.length > 1 && (
+                                            <button
+                                                className="absolute top-6 right-0 bg-red-600 text-white rounded-full p-1"
+                                                onClick={() => handleRemoveImage(index)}
+                                            >
+                                                <FaTimes size={14} />
+                                            </button>
+                                        )}
 
                                         <span className="text-sm font-bold mb-1 block text-center">#{index + 1}</span>
                                         <img
@@ -277,14 +292,14 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                 <div className="flex justify-end space-x-4 mt-6">
                     <button
                         type="button"
-                        className="px-8 py-2 text-gray-700 border rounded-lg hover:bg-gray-200 transition-all duration-300"
-                        onClick={onClose}
+                        className="px-8 py-2 min-w-32 text-gray-700 border rounded-lg hover:bg-gray-200 transition-all duration-300"
+                        onClick={handleClose}
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="px-8 py-2 text-white bg-[#32492D] hover:bg-[#273823] rounded-lg transition-all duration-300"
+                        className="px-8 py-2 min-w-32 text-white bg-[#32492D] hover:bg-[#273823] rounded-lg transition-all duration-300"
                         onClick={handleSubmit}
                     >
                         Submit

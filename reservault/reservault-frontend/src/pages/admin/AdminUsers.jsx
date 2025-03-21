@@ -8,6 +8,7 @@ import { FaEllipsisH, FaList, FaTrash } from "react-icons/fa";
 import api from "../../api/axios";
 import Header from "../../components/common/Header";
 import DropdownMenu from "../../components/common/DropdownMenu";
+import ManagerHotelsModifyModal from "../../components/admin/ManagerHotelsModifyModal";
 
 const AdminUsers = () => {
     const { isAuthenticated, isAdmin, loading } = useAuth();
@@ -16,6 +17,9 @@ const AdminUsers = () => {
     const dropdownRef = useRef(null);
     const [users, setUsers] = useState([]);
     const queryClient = useQueryClient();
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [managerId, setManagerId] = useState(null);
+    const [currentHotelIdentifiers, setCurrentHotelIdentifiers] = useState([]);
 
     useEffect(() => {
         if (!loading && (!isAuthenticated || !isAdmin)) {
@@ -69,7 +73,7 @@ const AdminUsers = () => {
                 {
                     label: "Edit Hotel List",
                     icon: FaList,
-                    onClick: () => handleViewManagerHotels(user.id),
+                    onClick: () => handleShowManagerHotels(user.id),
                 },
                 ...(!user.verified
                     ? [
@@ -85,6 +89,23 @@ const AdminUsers = () => {
         }
 
         return commonItems;
+    };
+
+    const handleShowManagerHotels = async (managerId) => {
+        try {
+            const { data } = await api.get(`/admin/managers/${managerId}/hotels`);
+            setManagerId(managerId);
+            setCurrentHotelIdentifiers(data.map((hotel) => hotel.hotelIdentifier));
+            setShowEditModal(true);
+        } catch (error) {
+            console.error("Failed to load manager's hotels:", error);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setShowEditModal(false);
+        setManagerId(null);
+        setCurrentHotelIdentifiers([]);
     };
 
     const deleteUserMutation = useMutation({
@@ -173,8 +194,8 @@ const AdminUsers = () => {
                                     </div>
                                     <div className="flex flex-col justify-center">
                                         <div className="flex space-x-1">
-                                            <div className="text-lg font-semibold text-gray-900">
-                                                {limitText(user.email, 25)}
+                                            <div className="text-lg font-semibold text-gray-900" title={user.email}>
+                                                {limitText(user.email, 17)}
                                             </div>
                                             {user.verified ? (
                                                 <MdVerified size={18} className="text-[#32492D]" />
@@ -218,6 +239,14 @@ const AdminUsers = () => {
                     ))}
                 </motion.div>
             </div>
+
+            {showEditModal && (
+                <ManagerHotelsModifyModal
+                    managerId={managerId}
+                    currentHotelIdentifiers={currentHotelIdentifiers}
+                    onClose={handleCloseModal}
+                />
+            )}
         </>
     );
 };

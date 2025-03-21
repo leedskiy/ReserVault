@@ -92,11 +92,11 @@ const HotelList = ({ hotels, isLoading, error, onModify }) => {
                         </div>
 
                         <div className="w-full px-6 flex flex-col">
-                            <h2 className="text-lg font-semibold text-gray-900">
+                            <h2 className="text-lg font-semibold text-gray-900" title={hotel.name}>
                                 {limitText(hotel.name, 35)}
                             </h2>
 
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600" title={hotel.location.city + ", " + hotel.location.country}>
                                 {limitText(`${hotel.location.city}, ${hotel.location.country}`, 40)}
                             </p>
 

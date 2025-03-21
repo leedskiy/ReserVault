@@ -43,7 +43,6 @@ const Register = () => {
             isManager,
             hotelIdentifiers: isManager ? hotelIdentifiers : [],
         };
-        console.log("Submitting data:", formattedData);
         mutation.mutate(formattedData);
     };
 
@@ -177,7 +176,7 @@ const Register = () => {
                             </button>
                         </div>
 
-                        <div className="mt-2 flex flex-wrap gap-2">
+                        <div className="mt-4 flex flex-wrap gap-2">
                             {hotelIdentifiers.map((identifier, index) => (
                                 <div key={index} className="flex items-center gap-1 bg-gray-200 px-2 py-1 rounded duration-300">
                                     <span>{identifier}</span>

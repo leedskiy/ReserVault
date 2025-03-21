@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -176,7 +177,7 @@ public class AdminService {
         return true;
     }
 
-    public List<Hotel> getHotelsByManager(UUID managerId) {
+    public List<HotelManager> getHotelsByManagerList(UUID managerId) {
         Optional<User> userOptional = userRepository.findById(managerId);
 
         if (userOptional.isEmpty()) {
@@ -189,14 +190,68 @@ public class AdminService {
             throw new RuntimeException("User is not a manager.");
         }
 
-        List<String> hotelIdentifiers = hotelManagerRepository.findByManagerId(managerId)
-                .stream()
-                .map(HotelManager::getHotelIdentifier)
+        return hotelManagerRepository.findByManagerId(managerId);
+    }
+
+    public List<HotelManager> updateHotelsByManagerList(UUID managerId, List<String> updatedHotelIdentifiers) {
+        Optional<User> userOpt = userRepository.findById(managerId);
+
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("Manager not found.");
+        }
+
+        User manager = userOpt.get();
+
+        if (!manager.getRoles().contains("ROLE_MANAGER")) {
+            throw new IllegalArgumentException("User is not a manager.");
+        }
+
+        // 1. validate identifiers
+        Set<String> validHotelIdentifiers = hotelRepository.findAll().stream()
+                .map(Hotel::getIdentifier)
+                .collect(Collectors.toSet());
+
+        List<String> invalidIdentifiers = updatedHotelIdentifiers.stream()
+                .filter(id -> !validHotelIdentifiers.contains(id))
                 .collect(Collectors.toList());
 
-        return hotelRepository.findAll()
-                .stream()
-                .filter(hotel -> hotelIdentifiers.contains(hotel.getIdentifier()))
+        if (!invalidIdentifiers.isEmpty()) {
+            throw new IllegalArgumentException("Invalid hotel identifiers: " + invalidIdentifiers);
+        }
+
+        // 2. get list of hotels managed by the manager
+        List<HotelManager> existingHotelManagers = hotelManagerRepository.findByManagerId(managerId);
+        Set<String> existingHotelIdentifiers = existingHotelManagers.stream()
+                .map(HotelManager::getHotelIdentifier)
+                .collect(Collectors.toSet());
+
+        // 3. find the identifiers to remove
+        List<String> toRemove = existingHotelIdentifiers.stream()
+                .filter(hotelId -> !updatedHotelIdentifiers.contains(hotelId))
                 .collect(Collectors.toList());
+
+        // 4. find the identifiers to add
+        List<String> toAdd = updatedHotelIdentifiers.stream()
+                .filter(hotelId -> !existingHotelIdentifiers.contains(hotelId))
+                .collect(Collectors.toList());
+
+        // 5. Check if only one hotel relation remains before allowing deletion
+        if (existingHotelManagers.size() - toRemove.size() + toAdd.size() <= 1) {
+            throw new IllegalArgumentException("Manager must have at least one hotel-manager relation.");
+        }
+
+        // 6. remove old hotel-manager associations
+        hotelManagerRepository.deleteByManagerIdAndHotelIdentifierIn(managerId, toRemove);
+
+        // 7. add new hotel-manager associations
+        for (String hotelIdentifier : toAdd) {
+            HotelManager hotelManager = new HotelManager(hotelIdentifier, managerId);
+            hotelManager.setStatus(manager.isVerified() ? EHotelManagerStatus.APPROVED : EHotelManagerStatus.PENDING);
+            hotelManagerRepository.save(hotelManager);
+        }
+
+        // 8. return updated hotels
+        return hotelManagerRepository.findByManagerId(managerId);
     }
+
 }
