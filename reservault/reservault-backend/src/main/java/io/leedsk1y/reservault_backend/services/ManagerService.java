@@ -1,0 +1,114 @@
+package io.leedsk1y.reservault_backend.services;
+
+import io.leedsk1y.reservault_backend.models.entities.Hotel;
+import io.leedsk1y.reservault_backend.models.entities.HotelManager;
+import io.leedsk1y.reservault_backend.models.entities.Offer;
+import io.leedsk1y.reservault_backend.models.entities.User;
+import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
+import io.leedsk1y.reservault_backend.repositories.OfferRepository;
+import io.leedsk1y.reservault_backend.repositories.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class ManagerService {
+    private final UserRepository userRepository;
+    private final OfferRepository offerRepository;
+    private final CloudinaryService cloudinaryService;
+    private final HotelManagerRepository hotelManagerRepository;
+
+    public ManagerService(UserRepository userRepository, OfferRepository offerRepository,
+                          CloudinaryService cloudinaryService, HotelManagerRepository hotelManagerRepository) {
+        this.userRepository = userRepository;
+        this.offerRepository = offerRepository;
+        this.cloudinaryService = cloudinaryService;
+        this.hotelManagerRepository = hotelManagerRepository;
+    }
+
+    public List<Offer> getManagerOffers() {
+        User user = validateAndGetManager();
+        return offerRepository.findByManagerId(user.getId());
+    }
+
+    public Offer createOffer(Offer offer, List<MultipartFile> images) throws IOException {
+        User user = validateAndGetManager();
+
+        if (images == null || images.isEmpty()) {
+            throw new IllegalArgumentException("At least one image is required to create an offer.");
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
+        LocalDate fromDate;
+        LocalDate untilDate;
+        try {
+            fromDate = LocalDate.parse(offer.getDateFrom(), formatter);
+            untilDate = LocalDate.parse(offer.getDateUntil(), formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Dates must be in mm.dd.yyyy format.");
+        }
+
+        if (!fromDate.isBefore(untilDate)) {
+            throw new IllegalArgumentException("dateFrom must be before dateUntil.");
+        }
+
+        HotelManager hotelManager = hotelManagerRepository
+                .findByManagerIdAndHotelIdentifier(user.getId(), offer.getHotelIdentifier())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not a manager for this hotel."));
+
+        offer.setId(UUID.randomUUID());
+        offer.setManagerId(user.getId());
+        offer.setHotelManagerId(hotelManager.getId());
+        offer.setCreatedAt(Instant.now());
+
+        for (MultipartFile image : images) {
+            String imageUrl = cloudinaryService.uploadImage(image, "offers_images");
+            offer.getImagesUrls().add(imageUrl);
+        }
+
+        return offerRepository.save(offer);
+    }
+
+    public boolean deleteOffer(UUID offerId) {
+        User user = validateAndGetManager();
+
+        Offer offer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found"));
+
+        if (!offer.getManagerId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to delete this offer");
+        }
+
+        for (String imageUrl : offer.getImagesUrls()) {
+            cloudinaryService.deleteImage(imageUrl, "offers_images");
+        }
+
+        offerRepository.deleteById(offerId);
+
+        return true;
+    }
+
+    private User validateAndGetManager() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (!user.getRoles().contains("ROLE_MANAGER") || !user.isVerified()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied: not a verified manager");
+        }
+
+        return user;
+    }
+}

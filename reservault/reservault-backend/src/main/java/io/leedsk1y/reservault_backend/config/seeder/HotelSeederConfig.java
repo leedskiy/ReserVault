@@ -29,8 +29,8 @@ public class HotelSeederConfig {
         this.cloudinaryService = cloudinaryService;
     }
 
-    @Bean
-    public ApplicationRunner seedHotels() {
+    @Bean()
+    public ApplicationRunner runHotelSeeder() {
         return args -> {
             if (hotelRepository.count() > 0) {
                 return;
@@ -94,7 +94,7 @@ public class HotelSeederConfig {
                             Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         }
 
-                        return cloudinaryService.uploadImage(tempFile);
+                        return cloudinaryService.uploadImage(tempFile, "hotels_images");
                     } catch (IOException e) {
                         throw new RuntimeException("Error uploading image: " + fileName, e);
                     }

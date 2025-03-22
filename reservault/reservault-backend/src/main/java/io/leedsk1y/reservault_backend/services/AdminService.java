@@ -42,8 +42,12 @@ public class AdminService {
             throw new IllegalArgumentException("Hotel identifier already exists: " + hotel.getIdentifier());
         }
 
+        if (images == null || images.isEmpty()) {
+            throw new IllegalArgumentException("At least one image is required to create a hotel.");
+        }
+
         for (MultipartFile image : images) {
-            String imageUrl = cloudinaryService.uploadImage(image);
+            String imageUrl = cloudinaryService.uploadImage(image, "hotels_images");
             hotel.getImagesUrls().add(imageUrl);
         }
 
@@ -61,7 +65,7 @@ public class AdminService {
 
                 if (newImages != null && !newImages.isEmpty()) {
                     for (MultipartFile image : newImages) {
-                        String imageUrl = cloudinaryService.uploadImage(image);
+                        String imageUrl = cloudinaryService.uploadImage(image, "hotels_images");
                         existingHotel.getImagesUrls().add(imageUrl);
                     }
                 }
@@ -84,7 +88,7 @@ public class AdminService {
             Hotel h = hotel.get();
 
             for (String imageUrl : h.getImagesUrls()) {
-                cloudinaryService.deleteImage(imageUrl);
+                cloudinaryService.deleteImage(imageUrl, "hotels_images");
             }
 
             hotelRepository.deleteById(id);
@@ -100,7 +104,7 @@ public class AdminService {
             Hotel hotel = hotelOptional.get();
 
             if (hotel.getImagesUrls().contains(imageUrl)) {
-                cloudinaryService.deleteImage(imageUrl);
+                cloudinaryService.deleteImage(imageUrl, "hotels_images");
 
                 hotel.getImagesUrls().remove(imageUrl);
                 hotelRepository.save(hotel);

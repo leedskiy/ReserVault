@@ -36,40 +36,34 @@ public class CloudinaryService {
         }
     }
 
-    public String uploadImage(MultipartFile file) throws IOException {
+    public String uploadImage(MultipartFile file, String folder) throws IOException {
         validateFile(file);
-
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", "hotel_images"));
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", folder));
         return uploadResult.get("secure_url").toString();
     }
 
-
-    public String uploadImage(File file) throws IOException {
+    public String uploadImage(File file, String folder) throws IOException {
         validateFile(file);
-
-        Map uploadResult = cloudinary.uploader().upload(file, ObjectUtils.asMap("folder", "hotel_images"));
+        Map uploadResult = cloudinary.uploader().upload(file, ObjectUtils.asMap("folder", folder));
         return uploadResult.get("secure_url").toString();
     }
 
-
-    public void deleteImage(String imageUrl) {
+    public void deleteImage(String imageUrl, String folder) {
         try {
-            String publicId = extractPublicId(imageUrl);
+            String publicId = extractPublicId(imageUrl, folder);
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         } catch (IOException e) {
             throw new RuntimeException("Failed to delete image: " + e.getMessage());
         }
     }
 
-    private String extractPublicId(String imageUrl) {
+    private String extractPublicId(String imageUrl, String folder) {
         try {
             String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
             String publicId = fileName.split("\\.")[0];
-
-            return "hotel_images/" + publicId;
+            return folder + "/" + publicId;
         } catch (Exception e) {
             throw new RuntimeException("Invalid image URL format: " + imageUrl);
         }
     }
-
 }
