@@ -36,4 +36,5 @@ build/
 .env
 
 ### images ###
-src/main/resources/static/hotel-images/
+src/main/resources/static/hotels-images/
+src/main/resources/static/offers-images/

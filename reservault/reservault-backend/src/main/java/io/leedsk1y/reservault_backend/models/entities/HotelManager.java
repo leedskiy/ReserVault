@@ -14,6 +14,22 @@ import java.util.UUID;
 @Setter
 @Document(collection = "hotel_managers")
 public class HotelManager {
+    public HotelManager(String hotelIdentifier, UUID managerId) {
+        this.id = UUID.randomUUID();
+        this.hotelIdentifier = hotelIdentifier;
+        this.managerId = managerId;
+        this.status = EHotelManagerStatus.PENDING;
+        this.createdAt = Instant.now();
+    }
+
+    public HotelManager(String hotelIdentifier, UUID managerId, EHotelManagerStatus status) {
+        this.id = UUID.randomUUID();
+        this.hotelIdentifier = hotelIdentifier;
+        this.managerId = managerId;
+        this.status = status;
+        this.createdAt = Instant.now();
+    }
+
     @Id
     private UUID id;
 
@@ -25,12 +41,4 @@ public class HotelManager {
 
     @CreatedDate
     private Instant createdAt;
-
-    public HotelManager(String hotelIdentifier, UUID managerId) {
-        this.id = UUID.randomUUID();
-        this.hotelIdentifier = hotelIdentifier;
-        this.managerId = managerId;
-        this.status = EHotelManagerStatus.PENDING;
-        this.createdAt = Instant.now();
-    }
 }

@@ -163,10 +163,10 @@ const AdminUsers = () => {
             <div className="container mx-auto max-w-6xl py-6">
                 <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Users</h1>
 
-                <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {isLoading && <div className="text-center text-gray-600">Loading users...</div>}
-                    {error && <div className="text-center text-red-500">Failed to load users.</div>}
+                {isLoading && <div className="text-center mb-6 text-gray-600">Loading users...</div>}
+                {error && <div className="text-center mb-6 text-red-500">Failed to load users.</div>}
 
+                <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {users?.map((user, index) => (
                         <motion.div
                             key={user.id}

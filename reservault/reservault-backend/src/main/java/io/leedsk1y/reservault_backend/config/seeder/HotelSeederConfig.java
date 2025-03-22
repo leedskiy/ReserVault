@@ -83,7 +83,7 @@ public class HotelSeederConfig {
         return imageFiles.stream()
                 .map(fileName -> {
                     try {
-                        ClassPathResource resource = new ClassPathResource("static/hotel-images/" + fileName);
+                        ClassPathResource resource = new ClassPathResource("static/hotels-images/" + fileName);
 
                         if (!resource.exists()) {
                             throw new RuntimeException("File not found: " + fileName);

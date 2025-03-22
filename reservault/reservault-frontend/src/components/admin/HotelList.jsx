@@ -71,8 +71,8 @@ const HotelList = ({ hotels, isLoading, error, onModify }) => {
 
     return (
         <>
-            {isLoading && <div className="text-center text-gray-600">Loading hotels...</div>}
-            {error && <div className="text-center text-red-500">Failed to load hotels.</div>}
+            {isLoading && <div className="text-center mb-6 text-gray-600">Loading hotels...</div>}
+            {error && <div className="text-center mb-6 text-red-500">Failed to load hotels.</div>}
 
             <motion.div className="space-y-6 flex flex-col items-center w-full">
                 {hotels?.map((hotel, index) => (
