@@ -1,10 +1,12 @@
 package io.leedsk1y.reservault_backend.services;
 
+import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
+import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -28,18 +30,45 @@ public class ManagerService {
     private final OfferRepository offerRepository;
     private final CloudinaryService cloudinaryService;
     private final HotelManagerRepository hotelManagerRepository;
+    private final HotelRepository hotelRepository;
 
     public ManagerService(UserRepository userRepository, OfferRepository offerRepository,
-                          CloudinaryService cloudinaryService, HotelManagerRepository hotelManagerRepository) {
+                          CloudinaryService cloudinaryService, HotelManagerRepository hotelManagerRepository,
+                          HotelRepository hotelRepository) {
         this.userRepository = userRepository;
         this.offerRepository = offerRepository;
         this.cloudinaryService = cloudinaryService;
         this.hotelManagerRepository = hotelManagerRepository;
+        this.hotelRepository = hotelRepository;
     }
 
-    public List<Offer> getManagerOffers() {
+    public List<OfferWithLocationDTO> getManagerOffers() {
         User user = validateAndGetManager();
-        return offerRepository.findByManagerId(user.getId());
+        List<Offer> offers = offerRepository.findByManagerId(user.getId());
+
+        return offers.stream().map(offer -> {
+            Hotel hotel = hotelRepository.findByIdentifier(offer.getHotelIdentifier())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel not found for offer"));
+
+            return new OfferWithLocationDTO(
+                    offer.getId(),
+                    offer.getTitle(),
+                    offer.getDescription(),
+                    offer.getRating(),
+                    offer.getDateFrom(),
+                    offer.getDateUntil(),
+                    offer.getFacilities(),
+                    offer.getRoomCount(),
+                    offer.getPeopleCount(),
+                    offer.getPricePerNight(),
+                    offer.getImagesUrls(),
+                    offer.getCreatedAt(),
+                    offer.getReviews(),
+                    hotel.getLocation(),
+                    hotel.getName(),
+                    hotel.getStars()
+            );
+        }).toList();
     }
 
     public Offer createOffer(Offer offer, List<MultipartFile> images) throws IOException {

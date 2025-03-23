@@ -240,7 +240,7 @@ public class AdminService {
                 .collect(Collectors.toList());
 
         // 5. Check if only one hotel relation remains before allowing deletion
-        if (existingHotelManagers.size() - toRemove.size() + toAdd.size() <= 1) {
+        if (existingHotelManagers.size() - toRemove.size() + toAdd.size() < 1) {
             throw new IllegalArgumentException("Manager must have at least one hotel-manager relation.");
         }
 

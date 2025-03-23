@@ -6,6 +6,7 @@ import Login from './pages/auth/Login';
 import Dashboard from './pages/Dashboard';
 import AdminHotels from "./pages/admin/AdminHotels";
 import AdminUsers from "./pages/admin/AdminUsers";
+import ManagerOffers from "./pages/manager/ManagerOffers";
 
 const App = () => {
   return (
@@ -19,7 +20,9 @@ const App = () => {
           <Route path="/profile" element={<div>Profile Page (to be implemented)</div>} />
           <Route path="/admin/hotels/:view" element={<AdminHotels />} />
           <Route path="/admin/hotels" element={<AdminHotels />} />
-          <Route path="/admin/users" element={<AdminUsers els />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/manager/offers" element={<ManagerOffers />} />
+          <Route path="/manager/offers/:view" element={<ManagerOffers />} />
         </Routes>
       </Router>
     </AuthProvider>

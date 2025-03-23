@@ -38,7 +38,7 @@ public class AdminController {
     @PostMapping(value = "/hotels", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createHotel(
         @RequestPart("hotel") String hotelJson,
-        @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+        @RequestPart(value = "images") List<MultipartFile> images) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Hotel hotel = objectMapper.readValue(hotelJson, Hotel.class);
@@ -57,7 +57,7 @@ public class AdminController {
     public ResponseEntity<?> updateHotel(
         @PathVariable UUID id,
         @RequestPart("hotel") String hotelJson,
-        @RequestPart(value = "images") List<MultipartFile> images) {
+        @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Hotel updatedHotel = objectMapper.readValue(hotelJson, Hotel.class);

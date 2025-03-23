@@ -1,20 +1,18 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { MdVerified } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { FaEllipsisH, FaList, FaTrash } from "react-icons/fa";
+import { FaList, FaTrash } from "react-icons/fa";
 import api from "../../api/axios";
 import Header from "../../components/common/Header";
-import DropdownMenu from "../../components/common/DropdownMenu";
 import ManagerHotelsModifyModal from "../../components/admin/ManagerHotelsModifyModal";
+import DropdownButton from "../../components/common/DropdownButton";
 
 const AdminUsers = () => {
     const { isAuthenticated, isAdmin, loading } = useAuth();
     const navigate = useNavigate();
-    const [openDropdown, setOpenDropdown] = useState(null);
-    const dropdownRef = useRef(null);
     const [users, setUsers] = useState([]);
     const queryClient = useQueryClient();
     const [showEditModal, setShowEditModal] = useState(false);
@@ -140,23 +138,6 @@ const AdminUsers = () => {
         verifyManagerMutation.mutate(userId);
     };
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target) &&
-                openDropdown !== null
-            ) {
-                setTimeout(() => {
-                    setOpenDropdown(null);
-                }, 150);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [openDropdown]);
-
     return (
         <>
             <Header />
@@ -208,23 +189,13 @@ const AdminUsers = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {user.roles?.includes("ROLE_ADMIN") ? null : (
-                                    <div className="flex justify-center ml-auto relative flex" ref={dropdownRef}>
-                                        <button
-                                            onClick={() => handleToggleDropdown(user.id)}
-                                            className="duration-200 flex items-center justify-center w-8 h-8 rounded-lg text-[#32492D] hover:text-[#273823] hover:bg-gray-200"
-                                        >
-                                            <FaEllipsisH size={20} />
-                                        </button>
-
-                                        {openDropdown === user.id && (
-                                            <DropdownMenu
-                                                isOpen={openDropdown === user.id}
-                                                onClose={() => setOpenDropdown(null)}
-                                                menuItems={getDropdownItems(user)}
-                                                position="left-0 top-10"
-                                            />
-                                        )}
+                                {!user.roles?.includes("ROLE_ADMIN") && (
+                                    <div className="ml-auto">
+                                        <DropdownButton
+                                            itemId={user.id}
+                                            menuItems={getDropdownItems(user)}
+                                            position="left-0 top-10"
+                                        />
                                     </div>
                                 )}
                             </div>

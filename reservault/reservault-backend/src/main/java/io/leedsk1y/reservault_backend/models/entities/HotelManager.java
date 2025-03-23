@@ -2,6 +2,7 @@ package io.leedsk1y.reservault_backend.models.entities;
 
 import io.leedsk1y.reservault_backend.models.enums.EHotelManagerStatus;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Document(collection = "hotel_managers")
 public class HotelManager {
     public HotelManager(String hotelIdentifier, UUID managerId) {

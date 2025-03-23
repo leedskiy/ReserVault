@@ -1,6 +1,7 @@
 package io.leedsk1y.reservault_backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.services.ManagerService;
 import org.springframework.http.HttpStatus;
@@ -29,10 +30,9 @@ public class ManagerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Offer>> getManagerOffers() {
+    public ResponseEntity<List<OfferWithLocationDTO>> getManagerOffers() {
         return ResponseEntity.ok(managerService.getManagerOffers());
     }
-
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createOffer(

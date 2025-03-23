@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
 
     const isAuthenticated = !!user;
     const isAdmin = user?.roles?.includes('ROLE_ADMIN') ?? false;
+    const isManager = user?.roles?.includes('ROLE_MANAGER') ?? false;
 
     const loginMutation = useMutation({
         mutationFn: async (credentials) => {
@@ -58,6 +59,7 @@ export const AuthProvider = ({ children }) => {
                 user,
                 isAuthenticated,
                 isAdmin,
+                isManager,
                 loading,
                 login,
                 logout,
