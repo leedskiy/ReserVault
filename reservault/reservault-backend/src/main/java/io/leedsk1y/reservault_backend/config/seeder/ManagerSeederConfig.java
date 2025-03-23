@@ -30,35 +30,32 @@ public class ManagerSeederConfig {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Bean
-    public ApplicationRunner runManagerSeeder() {
-        return args -> {
-            String managerEmail = "manager@example.moc";
+    public void seedManager() {
+        String managerEmail = "manager@example.moc";
 
-            if (!userRepository.existsByEmail(managerEmail)) {
-                Role adminRole = roleRepository.findByName(ERole.ROLE_MANAGER)
+        if (!userRepository.existsByEmail(managerEmail)) {
+            Role adminRole = roleRepository.findByName(ERole.ROLE_MANAGER)
                     .orElseGet(() -> {
                         Role newRole = new Role(ERole.ROLE_MANAGER);
                         return roleRepository.save(newRole);
                     });
 
-                Set<String> roles = new HashSet<>();
-                roles.add(adminRole.getName().name());
+            Set<String> roles = new HashSet<>();
+            roles.add(adminRole.getName().name());
 
-                User managerUser = new User(
+            User managerUser = new User(
                     UUID.randomUUID(),
                     "Manager",
-                        managerEmail,
+                    managerEmail,
                     passwordEncoder.encode("pass"),
                     null,
                     Instant.now(),
                     true,
                     EAuthProvider.DEFAULT,
                     roles
-                );
+            );
 
-                userRepository.save(managerUser);
-            }
-        };
+            userRepository.save(managerUser);
+        }
     }
 }

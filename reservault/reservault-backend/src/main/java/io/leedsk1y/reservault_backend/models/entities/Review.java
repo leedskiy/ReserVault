@@ -28,7 +28,7 @@ public class Review {
 
     private String comment;
 
-    private int rating;
+    private double rating;
 
     private Instant createdAt;
 

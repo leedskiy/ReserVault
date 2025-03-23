@@ -12,8 +12,6 @@ import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import io.leedsk1y.reservault_backend.services.CloudinaryService;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
@@ -26,7 +24,6 @@ import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -50,28 +47,32 @@ public class OfferSeederConfig {
         this.cloudinaryService = cloudinaryService;
     }
 
-    @Bean
-    public ApplicationRunner runOfferSeeder() {
-        return args -> {
+    public void seedOffers() throws IOException {
             if (offerRepository.count() > 0) return;
 
-            String managerEmail = "manager@example.moc";
-            User manager = waitForManager(managerEmail, 5, 2000);
+            User manager = userRepository.findByEmail("manager@example.moc")
+                    .orElseThrow(() -> new RuntimeException("Manager user not found"));
 
-            String hotelIdentifier = "azurepalms";
-            Hotel hotel = waitForHotel(hotelIdentifier, 5, 2000);
+            Hotel hotel = hotelRepository.findByIdentifier("azurepalms")
+                    .orElseThrow(() -> new RuntimeException("Hotel not found"));
 
             HotelManager hotelManager = hotelManagerRepository
-                    .findByManagerIdAndHotelIdentifier(manager.getId(), hotelIdentifier)
-                    .orElseGet(() -> {
-                        HotelManager newManager = new HotelManager(hotelIdentifier, manager.getId(), EHotelManagerStatus.APPROVED);
-                        return hotelManagerRepository.save(newManager);
-                    });
+                    .findByManagerIdAndHotelIdentifier(manager.getId(), hotel.getIdentifier())
+                    .orElseGet(() -> hotelManagerRepository.save(
+                            new HotelManager(hotel.getIdentifier(), manager.getId(), EHotelManagerStatus.APPROVED)
+                    ));
 
             createOffer(
                     manager,
                     hotel,
                     hotelManager,
+                    "Spring Serenity Escape",
+                    "Experience the refreshing beauty of Barcelona in full bloom with our Spring Serenity Escape. " +
+                            "Nestled within the peaceful grounds of Azure Palms Resort, this 5-night stay offers spacious " +
+                            "accommodations for up to 6 guests across 3 serene rooms. Wake up to the sound of ocean waves, " +
+                            "unwind in our infinity pool, and explore vibrant city life just moments away. Whether you're " +
+                            "traveling with friends or family, this escape blends coastal relaxation with cultural discovery.",
+                    10,
                     "04.10.2025",
                     "04.15.2025",
                     3,
@@ -85,6 +86,12 @@ public class OfferSeederConfig {
                     manager,
                     hotel,
                     hotelManager,
+                    "Mediterranean Bliss Getaway",
+                    "Soak up the early summer sun with our Mediterranean Bliss Getaway at the stunning Azure Palms " +
+                            "Resort. Ideal for couples or small groups, this 6-night package invites you to indulge in gourmet " +
+                            "cuisine, rejuvenating spa treatments, and breathtaking sea views. With luxurious amenities and " +
+                            "direct beach access, it's the perfect way to recharge and celebrate the start of the season in style.",
+                    7.5,
                     "05.01.2025",
                     "05.07.2025",
                     2,
@@ -93,12 +100,14 @@ public class OfferSeederConfig {
                     new Facilities(true, false, true, false, false),
                     List.of("hotel2_offer2_img1.png", "hotel2_offer2_img2.png")
             );
-        };
     }
 
     private void createOffer(User manager,
                              Hotel hotel,
                              HotelManager hotelManager,
+                             String title,
+                             String description,
+                             double rating,
                              String dateFrom,
                              String dateUntil,
                              int roomCount,
@@ -114,6 +123,9 @@ public class OfferSeederConfig {
         offer.setHotelIdentifier(hotel.getIdentifier());
         offer.setManagerId(manager.getId());
         offer.setHotelManagerId(hotelManager.getId());
+        offer.setTitle(title);
+        offer.setDescription(description);
+        offer.setRating(rating);
         offer.setDateFrom(dateFrom);
         offer.setDateUntil(dateUntil);
         offer.setRoomCount(roomCount);
@@ -148,41 +160,5 @@ public class OfferSeederConfig {
                     }
                 })
                 .collect(Collectors.toList());
-    }
-
-    private User waitForManager(String email, int maxAttempts, long delayMillis) {
-        for (int i = 0; i < maxAttempts; i++) {
-            Optional<User> userOpt = userRepository.findByEmail(email);
-            if (userOpt.isPresent()) {
-                System.out.println("[OfferSeeder] Manager loaded after " + (i + 1) + " attempt(s).");
-                return userOpt.get();
-            }
-
-            try {
-                Thread.sleep(delayMillis);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        throw new RuntimeException("Manager user not found after waiting: " + email);
-    }
-
-    private Hotel waitForHotel(String identifier, int maxAttempts, long delayMillis) {
-        for (int i = 0; i < maxAttempts; i++) {
-            Optional<Hotel> hotelOpt = hotelRepository.findByIdentifier(identifier);
-            if (hotelOpt.isPresent()) {
-                System.out.println("[OfferSeeder] Hotel loaded after " + (i + 1) + " attempt(s).");
-                return hotelOpt.get();
-            }
-
-            try {
-                Thread.sleep(delayMillis);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        throw new RuntimeException("Hotel not found after waiting: " + identifier);
     }
 }

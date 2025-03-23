@@ -31,6 +31,12 @@ public class Offer {
 
     private UUID managerId;
 
+    private String title;
+
+    private String description;
+
+    private double rating;
+
     private String dateFrom;
 
     private String dateUntil;

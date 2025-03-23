@@ -70,6 +70,7 @@ public class ManagerService {
         offer.setId(UUID.randomUUID());
         offer.setManagerId(user.getId());
         offer.setHotelManagerId(hotelManager.getId());
+        offer.setRating(10);
         offer.setCreatedAt(Instant.now());
 
         for (MultipartFile image : images) {
