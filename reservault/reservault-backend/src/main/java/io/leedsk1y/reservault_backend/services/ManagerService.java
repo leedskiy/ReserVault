@@ -52,6 +52,7 @@ public class ManagerService {
 
             return new OfferWithLocationDTO(
                     offer.getId(),
+                    offer.getHotelIdentifier(),
                     offer.getTitle(),
                     offer.getDescription(),
                     offer.getRating(),
@@ -116,6 +117,68 @@ public class ManagerService {
         return offerRepository.save(offer);
     }
 
+    public Offer updateOffer(UUID offerId, Offer updatedOffer, List<MultipartFile> newImages) throws IOException {
+        User user = validateAndGetManager();
+
+        Offer existingOffer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found"));
+
+        if (!existingOffer.getManagerId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this offer");
+        }
+
+        hotelManagerRepository.findByManagerIdAndHotelIdentifier(user.getId(), existingOffer.getHotelIdentifier())
+                .orElseThrow(() -> new IllegalArgumentException("You are not a manager for the specified hotel."));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
+        LocalDate fromDate, untilDate;
+        try {
+            fromDate = LocalDate.parse(updatedOffer.getDateFrom(), formatter);
+            untilDate = LocalDate.parse(updatedOffer.getDateUntil(), formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Dates must be in MM.dd.yyyy format.");
+        }
+
+        if (!fromDate.isBefore(untilDate) && !fromDate.equals(untilDate)) {
+            throw new IllegalArgumentException("date from must be before date until.");
+        }
+
+        existingOffer.setTitle(updatedOffer.getTitle());
+        existingOffer.setDescription(updatedOffer.getDescription());
+        existingOffer.setDateFrom(updatedOffer.getDateFrom());
+        existingOffer.setDateUntil(updatedOffer.getDateUntil());
+        existingOffer.setFacilities(updatedOffer.getFacilities());
+        existingOffer.setRoomCount(updatedOffer.getRoomCount());
+        existingOffer.setPeopleCount(updatedOffer.getPeopleCount());
+        existingOffer.setPricePerNight(updatedOffer.getPricePerNight());
+
+        if (updatedOffer.getImagesUrls() != null && !updatedOffer.getImagesUrls().isEmpty()) {
+            existingOffer.setImagesUrls(updatedOffer.getImagesUrls());
+        }
+        
+        if (newImages != null && !newImages.isEmpty()) {
+            for (MultipartFile image : newImages) {
+                String imageUrl = cloudinaryService.uploadImage(image, "hotels_images");
+                existingOffer.getImagesUrls().add(imageUrl);
+            }
+        }
+
+        return offerRepository.save(existingOffer);
+    }
+
+    private User validateAndGetManager() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (!user.getRoles().contains("ROLE_MANAGER") || !user.isVerified()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied: not a verified manager");
+        }
+
+        return user;
+    }
+
     public boolean deleteOffer(UUID offerId) {
         User user = validateAndGetManager();
 
@@ -135,16 +198,25 @@ public class ManagerService {
         return true;
     }
 
-    private User validateAndGetManager() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    public boolean removeOfferImage(UUID offerId, String imageUrl) {
+        User user = validateAndGetManager();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Offer offer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found"));
 
-        if (!user.getRoles().contains("ROLE_MANAGER") || !user.isVerified()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied: not a verified manager");
+        if (!offer.getManagerId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to modify this offer");
         }
 
-        return user;
+        if (!offer.getImagesUrls().contains(imageUrl)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image URL not found in this offer");
+        }
+
+        cloudinaryService.deleteImage(imageUrl, "offers_images");
+
+        offer.getImagesUrls().remove(imageUrl);
+        offerRepository.save(offer);
+
+        return true;
     }
 }

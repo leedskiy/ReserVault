@@ -9,7 +9,7 @@ import Header from "../../components/common/Header";
 import Sidebar from "../../components/common/Sidebar";
 import OfferList from "../../components/manager/OfferList";
 import OfferAddForm from "../../components/manager/OfferAddForm";
-// import OfferModifyModal from "../../components/manager/OfferModifyModal";
+import OfferModifyModal from "../../components/manager/OfferModifyModal";
 
 const ManagerOffers = () => {
     const { isAuthenticated, isManager, loading } = useAuth();
@@ -92,13 +92,13 @@ const ManagerOffers = () => {
                 </div>
             </div>
 
-            {/* {selectedOffer && (
+            {selectedOffer && (
                 <OfferModifyModal
                     offer={selectedOffer}
                     onSubmit={(id, formData) => updateOfferMutation.mutate({ id, formData })}
                     onClose={() => setSelectedOffer(null)}
                 />
-            )} */}
+            )}
         </>
     );
 };

@@ -11,6 +11,7 @@ import {
 import api from "../../api/axios";
 import AddFormContainer from "../common/AddFormContainer";
 import TextInput from "../common/TextInput";
+import FacilitiesSelector from "../common/FacilitiesSelector";
 
 const OfferAddForm = ({ onSubmit }) => {
     const navigate = useNavigate();
@@ -190,6 +191,12 @@ const OfferAddForm = ({ onSubmit }) => {
                 />
             </div>
 
+            <FacilitiesSelector
+                facilities={offerData.facilities}
+                onToggle={handleFacilityToggle}
+                layout="horizontal"
+            />
+
             <div className="grid grid-cols-2 gap-4">
                 <TextInput
                     name="roomCount"
@@ -215,26 +222,6 @@ const OfferAddForm = ({ onSubmit }) => {
                 value={offerData.pricePerNight}
                 onChange={handleChange}
             />
-
-            <div>
-                <label className="block text-gray-600 mb-2">Facilities</label>
-                <div className="flex flex-wrap gap-4">
-                    {facilityIcons.map(({ key, icon: Icon, label }) => (
-                        <button
-                            type="button"
-                            key={key}
-                            title={label}
-                            onClick={() => handleFacilityToggle(key)}
-                            className={`p-2 rounded-full transition-colors duration-200 ${offerData.facilities[key]
-                                ? "text-[#32492D]"
-                                : "text-gray-400"
-                                }`}
-                        >
-                            <Icon size={24} />
-                        </button>
-                    ))}
-                </div>
-            </div>
 
             <ImageUploader
                 images={newImages}

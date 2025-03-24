@@ -17,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class OfferWithLocationDTO {
     private UUID id;
+    private String hotelIdentifier;
     private String title;
     private String description;
     private double rating;

@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FaTimes } from "react-icons/fa";
 import api from "../../api/axios";
 import HotelStars from "./HotelStars";
-import ImageUploader from "../common/ImageUploader";
+import ModifyFormContainer from "../common/ModifyFormContainer";
 
 const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
     const [isDirty, setIsDirty] = useState(false);
@@ -140,174 +138,116 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <motion.div
-                className="flex flex-col justify-between bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl relative"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-            >
-                <button
-                    className="duration-200 ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-[#32492D] hover:text-[#273823] hover:bg-gray-200"
-                    onClick={handleClose}
-                >
-                    <FaTimes size={20} />
-                </button>
-
-                <h2 className="text-2xl font-semibold text-gray-900 text-center mb-4">
-                    Modify Hotel
-                </h2>
-
-                <div className="flex gap-10 h-full p-4">
-                    <div className="flex flex-col w-1/2 space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-gray-600">Identifier</label>
-                                <input
-                                    type="text"
-                                    name="identifier"
-                                    className="w-full px-4 py-2 bg-gray-200 border rounded-lg"
-                                    value={hotelData.identifier}
-                                    disabled
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-gray-600">Hotel Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                    onChange={handleChange}
-                                    value={hotelData.name}
-                                    required
-                                />
-                            </div>
-                        </div>
-
+        <ModifyFormContainer
+            title="Modify Hotel"
+            onClose={handleClose}
+            onSubmit={handleSubmit}
+            images={hotelData.images}
+            handleDragStart={handleDragStart}
+            handleDragOver={handleDragOver}
+            handleDrop={handleDrop}
+            handleRemoveImage={handleRemoveImage}
+            newImages={newImages}
+            setNewImages={setNewImages}
+            isDragging={isDragging}
+            setIsDragging={setIsDragging}
+            isDirty={isDirty}
+            setImagesToDelete={setImagesToDelete}
+            itemsName="Hotel"
+            leftContent={(
+                <div className="flex flex-col w-1/2 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-gray-600">Description</label>
-                            <textarea
-                                name="description"
+                            <label className="block text-gray-600">Identifier</label>
+                            <input
+                                type="text"
+                                name="identifier"
+                                className="w-full px-4 py-2 bg-gray-200 border rounded-lg"
+                                value={hotelData.identifier}
+                                disabled
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-600">Hotel Name</label>
+                            <input
+                                type="text"
+                                name="name"
                                 className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
                                 onChange={handleChange}
-                                value={hotelData.description}
+                                value={hotelData.name}
                                 required
                             />
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-gray-600">Country</label>
-                                <input
-                                    type="text"
-                                    name="country"
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                    onChange={handleChange}
-                                    value={hotelData.location.country}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-gray-600">City</label>
-                                <input
-                                    type="text"
-                                    name="city"
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                    onChange={handleChange}
-                                    value={hotelData.location.city}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-gray-600">Street</label>
-                                <input
-                                    type="text"
-                                    name="street"
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                    onChange={handleChange}
-                                    value={hotelData.location.street}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-gray-600">Postal Code</label>
-                                <input
-                                    type="text"
-                                    name="postalCode"
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                    onChange={handleChange}
-                                    value={hotelData.location.postalCode}
-                                    required
-                                />
-                            </div>
-                        </div>
                     </div>
 
-                    <div className="flex flex-col flex-grow max-w-[40%] space-y-6">
-                        <div>
-                            <label className="block text-gray-600">Manage Images</label>
-                            <div className="flex gap-x-4 overflow-x-auto p-2 border rounded-lg whitespace-nowrap">
-                                {hotelData.images.map((img, index) => (
-                                    <div
-                                        key={img}
-                                        draggable
-                                        onDragStart={() => handleDragStart(index)}
-                                        onDragOver={handleDragOver}
-                                        onDrop={() => handleDrop(index)}
-                                        className="relative inline-block cursor-move"
-                                    >
-                                        {hotelData.images.length > 1 && (
-                                            <button
-                                                className="absolute top-6 right-0 bg-red-600 text-white rounded-full p-1"
-                                                onClick={() => handleRemoveImage(index)}
-                                            >
-                                                <FaTimes size={14} />
-                                            </button>
-                                        )}
-
-                                        <span className="text-sm font-bold mb-1 block text-center">#{index + 1}</span>
-                                        <img
-                                            src={img}
-                                            alt="Hotel"
-                                            className="w-24 h-24 rounded-lg shadow object-cover min-w-[96px] min-h-[96px]"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <ImageUploader
-                            images={newImages}
-                            setImages={setNewImages}
-                            isDragging={isDragging}
-                            setIsDragging={setIsDragging}
-                            itemsName={"Hotel"}
+                    <div>
+                        <label className="block text-gray-600">Description</label>
+                        <textarea
+                            name="description"
+                            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                            onChange={handleChange}
+                            value={hotelData.description}
+                            required
                         />
                     </div>
 
-                    <HotelStars hotelData={hotelData} setHotelData={setHotelData} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-gray-600">Country</label>
+                            <input
+                                type="text"
+                                name="country"
+                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                onChange={handleChange}
+                                value={hotelData.location.country}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-600">City</label>
+                            <input
+                                type="text"
+                                name="city"
+                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                onChange={handleChange}
+                                value={hotelData.location.city}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-600">Street</label>
+                            <input
+                                type="text"
+                                name="street"
+                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                onChange={handleChange}
+                                value={hotelData.location.street}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-600">Postal Code</label>
+                            <input
+                                type="text"
+                                name="postalCode"
+                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                onChange={handleChange}
+                                value={hotelData.location.postalCode}
+                                required
+                            />
+                        </div>
+                    </div>
                 </div>
-
-
-                <div className="flex justify-end space-x-4 mt-6">
-                    <button
-                        type="button"
-                        className="px-8 py-2 min-w-32 text-gray-700 border rounded-lg hover:bg-gray-200 transition-all duration-300"
-                        onClick={handleClose}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        className="px-8 py-2 min-w-32 text-white bg-[#32492D] hover:bg-[#273823] rounded-lg transition-all duration-300"
-                        onClick={handleSubmit}
-                    >
-                        Submit
-                    </button>
-                </div>
-            </motion.div>
-        </div>
+            )}
+            rightContent={(
+                <HotelStars
+                    hotelData={hotelData}
+                    setHotelData={setHotelData}
+                />
+            )}
+        />
     );
+
 };
 
 export default HotelModifyModal;
