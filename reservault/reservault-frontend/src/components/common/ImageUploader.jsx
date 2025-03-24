@@ -1,7 +1,7 @@
 import { FaTimes } from "react-icons/fa";
 import { useRef } from "react";
 
-const ImageUploader = ({ images = [], setImages, isDragging, setIsDragging }) => {
+const ImageUploader = ({ images = [], setImages, isDragging, setIsDragging, itemsName }) => {
     const fileInputRef = useRef(null);
 
     const validateFiles = (files) => {
@@ -78,7 +78,7 @@ const ImageUploader = ({ images = [], setImages, isDragging, setIsDragging }) =>
 
                 {images.length === 0 && (
                     <p className="text-gray-700 font-semibold text-center mx-auto">
-                        Upload Hotel Images
+                        Upload {itemsName} Images
                     </p>
                 )}
 
@@ -95,7 +95,7 @@ const ImageUploader = ({ images = [], setImages, isDragging, setIsDragging }) =>
                         <img
                             src={file instanceof File ? URL.createObjectURL(file) : file}
                             className="w-24 h-24 rounded-lg shadow object-cover min-w-[96px] min-h-[96px]"
-                            alt="Hotel Preview"
+                            alt={`${itemsName} Preview`}
                         />
                     </div>
                 ))}

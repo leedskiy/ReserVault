@@ -47,7 +47,6 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
         e.preventDefault();
 
         if (!hotelData.id) {
-            console.error("Hotel ID is missing.");
             return;
         }
 
@@ -282,6 +281,7 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                             setImages={setNewImages}
                             isDragging={isDragging}
                             setIsDragging={setIsDragging}
+                            itemsName={"Hotel"}
                         />
                     </div>
 

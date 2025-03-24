@@ -70,6 +70,7 @@ const AdminHotels = () => {
                             { label: "Add Hotel", value: "add", icon: FaPlus },
                         ]}
                         activeView={view || "list"}
+                        basePath="admin/hotels"
                     />
 
                     <motion.div className="flex-grow rounded-md">

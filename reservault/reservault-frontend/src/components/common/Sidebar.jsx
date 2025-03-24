@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-const Sidebar = ({ options, activeView }) => {
+const Sidebar = ({ options, activeView, basePath }) => {
     return (
         <motion.aside
             className="w-72 bg-white shadow-lg h-full p-4 rounded-md flex-shrink-0"
@@ -22,7 +22,7 @@ const Sidebar = ({ options, activeView }) => {
                 }}
             >
                 {options.map((option, index) => (
-                    <Link key={option.value} to={`/admin/hotels/${option.value}`} className="block">
+                    <Link key={option.value} to={`/${basePath}/${option.value}`} className="block">
                         <motion.button
                             className={`flex items-center gap-3 w-full text-left py-3 px-3 rounded-md font-semibold text-sm duration-200 transition ${activeView === option.value
                                 ? "bg-gray-300 text-gray-900 shadow-md"

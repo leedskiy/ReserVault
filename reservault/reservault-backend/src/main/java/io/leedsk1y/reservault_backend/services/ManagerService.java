@@ -71,6 +71,12 @@ public class ManagerService {
         }).toList();
     }
 
+    public List<HotelManager> getHotelsByManagerList() {
+        User user = validateAndGetManager();
+
+        return hotelManagerRepository.findByManagerId(user.getId());
+    }
+
     public Offer createOffer(Offer offer, List<MultipartFile> images) throws IOException {
         User user = validateAndGetManager();
 
@@ -88,8 +94,8 @@ public class ManagerService {
             throw new IllegalArgumentException("Dates must be in mm.dd.yyyy format.");
         }
 
-        if (!fromDate.isBefore(untilDate)) {
-            throw new IllegalArgumentException("dateFrom must be before dateUntil.");
+        if (!fromDate.isBefore(untilDate) && !fromDate.equals(untilDate)) {
+            throw new IllegalArgumentException("date from must be before date until.");
         }
 
         HotelManager hotelManager = hotelManagerRepository

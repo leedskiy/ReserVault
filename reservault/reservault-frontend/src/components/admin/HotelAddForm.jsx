@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import HotelStars from "./HotelStars";
 import ImageUploader from "../common/ImageUploader";
+import AddFormContainer from "../common/AddFormContainer";
+import TextInput from "../common/TextInput";
 
-const HotelAddForm = ({ onSubmit, onCancel }) => {
+const HotelAddForm = ({ onSubmit }) => {
     const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState("");
 
     const [hotelData, setHotelData] = useState({
         identifier: "",
@@ -53,6 +55,11 @@ const HotelAddForm = ({ onSubmit, onCancel }) => {
 
         const formData = new FormData();
 
+        if (newImages.length === 0) {
+            setErrorMessage("Please upload at least one image.");
+            return;
+        }
+
         formData.append("hotel", JSON.stringify({
             identifier: hotelData.identifier,
             name: hotelData.name,
@@ -61,11 +68,7 @@ const HotelAddForm = ({ onSubmit, onCancel }) => {
             location: hotelData.location,
         }));
 
-        if (newImages.length > 0) {
-            newImages.forEach((image) => {
-                formData.append("images", image);
-            });
-        }
+        newImages.forEach((image) => formData.append("images", image));
 
         setIsDirty(false);
         onSubmit(formData);
@@ -76,120 +79,94 @@ const HotelAddForm = ({ onSubmit, onCancel }) => {
     };
 
     return (
-        <motion.div
-            className="flex items-center justify-center flex flex-col"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+        <AddFormContainer
+            title="Add Hotel"
+            errorMessage={errorMessage}
+            onSubmit={handleSubmit}
         >
-            <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg w-full">
-                <h2 className="text-2xl font-semibold text-gray-900 text-center mb-4">
-                    Add Hotel
-                </h2>
+            <TextInput
+                name="identifier"
+                label="Identifier"
+                value={hotelData.identifier}
+                onChange={handleChange}
+            />
 
-                <form onSubmit={handleSubmit} className="space-y-4 w-3/4">
-                    <div>
-                        <label className="block text-gray-600">Identifier</label>
-                        <input
-                            type="text"
-                            name="identifier"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+            <TextInput
+                name="name"
+                label="Hotel Name"
+                value={hotelData.name}
+                onChange={handleChange}
+            />
 
-                    <div>
-                        <label className="block text-gray-600">Hotel Name</label>
-                        <input
-                            type="text"
-                            name="name"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-gray-600">Description</label>
-                        <textarea
-                            name="description"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <HotelStars hotelData={hotelData} setHotelData={setHotelData} direction="horizontal" />
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-gray-600">Country</label>
-                            <input
-                                type="text"
-                                name="country"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-gray-600">City</label>
-                            <input
-                                type="text"
-                                name="city"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-gray-600">Street</label>
-                            <input
-                                type="text"
-                                name="street"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-gray-600">Postal Code</label>
-                            <input
-                                type="text"
-                                name="postalCode"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <ImageUploader
-                        images={newImages}
-                        setImages={setNewImages}
-                        isDragging={isDragging}
-                        setIsDragging={setIsDragging}
-                    />
-
-                    <button
-                        type="submit"
-                        className="w-full px-4 py-2 text-white rounded-lg bg-[#32492D] hover:bg-[#273823] transition-all duration-300 ease-in-out transform"
-                    >
-                        Submit
-                    </button>
-
-                    <button
-                        type="button"
-                        className="w-full px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-200 transition-all duration-300 ease-in-out transform"
-                        onClick={handleCancel}
-                    >
-                        Cancel
-                    </button>
-                </form>
+            <div>
+                <label className="block text-gray-600">Description</label>
+                <textarea
+                    name="description"
+                    value={hotelData.description}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                    required
+                />
             </div>
-        </motion.div>
+
+            <HotelStars
+                hotelData={hotelData}
+                setHotelData={setHotelData}
+                direction="horizontal"
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+                <TextInput
+                    name="country"
+                    label="Country"
+                    value={hotelData.location.country}
+                    onChange={handleChange}
+                />
+                <TextInput
+                    name="city"
+                    label="City"
+                    value={hotelData.location.city}
+                    onChange={handleChange}
+                />
+                <TextInput
+                    name="street"
+                    label="Street"
+                    value={hotelData.location.street}
+                    onChange={handleChange}
+                />
+                <TextInput
+                    name="postalCode"
+                    label="Postal Code"
+                    value={hotelData.location.postalCode}
+                    onChange={handleChange}
+                />
+            </div>
+
+            <ImageUploader
+                images={newImages}
+                setImages={setNewImages}
+                isDragging={isDragging}
+                setIsDragging={setIsDragging}
+                itemsName="Hotel"
+            />
+
+            <button
+                type="submit"
+                className="w-full px-4 py-2 text-white rounded-lg bg-[#32492D] hover:bg-[#273823] transition-all duration-300 ease-in-out transform"
+            >
+                Submit
+            </button>
+
+            <button
+                type="button"
+                onClick={handleCancel}
+                className="w-full px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-200 transition-all duration-300 ease-in-out transform"
+            >
+                Cancel
+            </button>
+        </AddFormContainer>
     );
+
 };
 
 export default HotelAddForm;

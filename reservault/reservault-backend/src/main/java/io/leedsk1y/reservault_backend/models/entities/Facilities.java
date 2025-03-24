@@ -14,5 +14,5 @@ public class Facilities {
     private boolean parking;
     private boolean pool;
     private boolean airConditioning;
-    private boolean breakfastIncluded;
+    private boolean breakfast;
 }

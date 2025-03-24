@@ -2,6 +2,7 @@ package io.leedsk1y.reservault_backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
+import io.leedsk1y.reservault_backend.models.entities.HotelManager;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.services.ManagerService;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/manager/offers")
+@RequestMapping("/manager")
 public class ManagerController {
     private final ManagerService managerService;
 
@@ -29,12 +30,22 @@ public class ManagerController {
         this.managerService = managerService;
     }
 
-    @GetMapping
+    @GetMapping("/offers")
     public ResponseEntity<List<OfferWithLocationDTO>> getManagerOffers() {
         return ResponseEntity.ok(managerService.getManagerOffers());
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @GetMapping("/hotels")
+    public ResponseEntity<?> getHotelsByManagerList() {
+        try {
+            List<HotelManager> hotelManagers = managerService.getHotelsByManagerList();
+            return ResponseEntity.ok(hotelManagers);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping(value="/offers", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createOffer(
             @RequestPart("offer") String offerJson,
             @RequestPart(value = "images") List<MultipartFile> images) {

@@ -8,7 +8,7 @@ import api from "../../api/axios";
 import Header from "../../components/common/Header";
 import Sidebar from "../../components/common/Sidebar";
 import OfferList from "../../components/manager/OfferList";
-// import OfferAddForm from "../../components/manager/OfferAddForm";
+import OfferAddForm from "../../components/manager/OfferAddForm";
 // import OfferModifyModal from "../../components/manager/OfferModifyModal";
 
 const ManagerOffers = () => {
@@ -70,6 +70,7 @@ const ManagerOffers = () => {
                             { label: "Add Offer", value: "add", icon: FaPlus },
                         ]}
                         activeView={view || "list"}
+                        basePath="manager/offers"
                     />
 
                     <motion.div className="flex-grow rounded-md">
@@ -85,8 +86,7 @@ const ManagerOffers = () => {
                                     })
                                 } />
                         ) : (
-                            // <OfferAddForm onSubmit={addOfferMutation.mutate} onCancel={() => setView("list")} />
-                            <div></div>
+                            <OfferAddForm onSubmit={addOfferMutation.mutate} onCancel={() => setView("list")} />
                         )}
                     </motion.div>
                 </div>
