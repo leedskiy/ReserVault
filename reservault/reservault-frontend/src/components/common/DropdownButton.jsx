@@ -22,7 +22,10 @@ const DropdownButton = ({ itemId, menuItems = [], position = "left-0 top-10" }) 
     return (
         <div className="relative flex" ref={dropdownRef}>
             <button
-                onClick={() => setOpen((prev) => !prev)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setOpen((prev) => !prev);
+                }}
                 className="duration-200 flex items-center justify-center w-8 h-8 rounded-lg text-[#32492D] hover:text-[#273823] hover:bg-gray-200"
             >
                 <FaEllipsisH size={20} />

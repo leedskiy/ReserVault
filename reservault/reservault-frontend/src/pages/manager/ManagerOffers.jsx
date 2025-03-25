@@ -84,7 +84,8 @@ const ManagerOffers = () => {
                                         ...offer,
                                         images: offer.imagesUrls || [],
                                     })
-                                } />
+                                }
+                            />
                         ) : (
                             <OfferAddForm onSubmit={addOfferMutation.mutate} onCancel={() => setView("list")} />
                         )}

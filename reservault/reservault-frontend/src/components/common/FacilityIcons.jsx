@@ -2,8 +2,8 @@ import {
     FaWifi, FaParking, FaSwimmingPool, FaSnowflake, FaCoffee
 } from "react-icons/fa";
 
-const FacilityIcons = ({ facilities = {} }) => {
-    const iconProps = { size: 20 };
+const FacilityIcons = ({ facilities = {}, size = 20 }) => {
+    const iconProps = { size: size };
 
     const icons = [
         {

@@ -17,6 +17,7 @@ const ItemCardList = ({
     onDelete,
     contentWrapperClassName = "",
     descriptionLimit = 200,
+    onCardClick,
 }) => {
     const limitText = (text, maxLength) =>
         text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
@@ -34,6 +35,7 @@ const ItemCardList = ({
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1, duration: 0.4, ease: "easeOut" }}
+                        onClick={() => onCardClick?.(item)}
                     >
                         <div className="w-64 h-64 flex-shrink-0 rounded-md overflow-hidden">
                             <img
@@ -52,7 +54,7 @@ const ItemCardList = ({
                                     {getExtraIcons(item)}
                                 </div>
                             )}
-                            {getPrice && <p>{getPrice(item)}</p>}
+                            {getPrice && <p className="text-sm text-gray-600">{getPrice(item)}</p>}
                             {getDescription && (
                                 <p className="text-sm text-gray-700 mt-4">
                                     {limitText(getDescription(item), descriptionLimit)}
