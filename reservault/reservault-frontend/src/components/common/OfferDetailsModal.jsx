@@ -7,7 +7,7 @@ import FacilityIcons from "../common/FacilityIcons";
 import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
-const OfferDetailsModal = ({ offer, onClose }) => {
+const OfferDetailsModal = ({ offer, onClose, onHotelClick }) => {
     if (!offer) return null;
 
     const limitText = (text, maxLength) =>
@@ -40,7 +40,12 @@ const OfferDetailsModal = ({ offer, onClose }) => {
                     <FaTimes size={20} />
                 </button>
 
-                <h2 className="text-2xl font-semibold text-gray-900 text-center mb-2">
+                <h2 className="text-2xl font-semibold text-[#32492D] text-center mb-2 hover:text-[#273823] transition-all duration-100 ease-in-out transform cursor-pointer"
+                    onClick={() => {
+                        onClose();
+                        onHotelClick?.(offer.hotelIdentifier);
+                    }}
+                >
                     {offer.hotelName}
                 </h2>
 

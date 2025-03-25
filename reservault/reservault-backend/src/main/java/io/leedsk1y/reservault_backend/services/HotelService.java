@@ -16,7 +16,7 @@ public class HotelService {
         this.hotelRepository = hotelRepository;
     }
 
-    public Optional<Hotel> getHotelById(UUID id) {
-        return hotelRepository.findById(id);
+    public Optional<Hotel> getHotelByIdentifier(String identifier) {
+        return hotelRepository.findByIdentifier(identifier);
     }
 }

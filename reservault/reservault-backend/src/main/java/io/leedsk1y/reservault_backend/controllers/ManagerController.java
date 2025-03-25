@@ -83,7 +83,7 @@ public class ManagerController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value="/offers/{id}")
     public ResponseEntity<?> deleteOffer(@PathVariable UUID id) {
         managerService.deleteOffer(id);
         return ResponseEntity.ok().body("Offer deleted successfully");

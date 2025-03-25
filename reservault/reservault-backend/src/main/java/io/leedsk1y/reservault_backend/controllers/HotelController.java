@@ -21,9 +21,9 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Hotel> getHotelById(@PathVariable UUID id) {
-        Optional<Hotel> hotel = hotelService.getHotelById(id);
+    @GetMapping("/{identifier}")
+    public ResponseEntity<Hotel> getHotelByIdentifier(@PathVariable String identifier) {
+        Optional<Hotel> hotel = hotelService.getHotelByIdentifier(identifier);
         return hotel.map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.notFound().build());
     }

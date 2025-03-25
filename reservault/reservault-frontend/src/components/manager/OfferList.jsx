@@ -5,9 +5,26 @@ import ItemCardList from "../common/ItemCardList";
 import FacilityIcons from "../common/FacilityIcons";
 import api from "../../api/axios";
 import OfferDetailsModal from "../../components/common/OfferDetailsModal";
+import HotelDetailsModal from "../common/HotelDetailsModal";
 
 const OfferList = ({ offers, isLoading, error, onModify }) => {
     const [selectedOfferDetails, setSelectedOfferDetails] = useState(null);
+    const [selectedHotel, setSelectedHotel] = useState(null);
+    const [hotelError, setHotelError] = useState(null);
+    const [hotelLoading, setHotelLoading] = useState(false);
+
+    const fetchHotelDetails = async (hotelIdentifier) => {
+        try {
+            setHotelLoading(true);
+            const { data } = await api.get(`/hotels/${hotelIdentifier}`);
+            setSelectedHotel(data);
+        } catch (error) {
+            console.error("Failed to fetch hotel details:", error);
+            setHotelError("Failed to fetch hotel details.");
+        } finally {
+            setHotelLoading(false);
+        }
+    };
 
     const queryClient = useQueryClient();
 
@@ -29,7 +46,7 @@ const OfferList = ({ offers, isLoading, error, onModify }) => {
                 getImage={(offer) => offer.imagesUrls?.[0] || "https://via.placeholder.com/200"}
                 getTitle={(offer) => (
                     <div className="flex items-center space-x-4">
-                        <h2 className="text-lg font-semibold text-[#32492D] hover:text-[#273823] transition-all duration-100 ease-in-out transform cursor-pointer">
+                        <h2 className="text-lg font-semibold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer">
                             {offer.title}
                         </h2>
                         <div className="flex items-center justify-center text-l bg-[#32492D] text-white rounded-lg px-4">
@@ -40,7 +57,15 @@ const OfferList = ({ offers, isLoading, error, onModify }) => {
 
                 getSubtitle={(offer) => (
                     <div className="flex items-center space-x-4">
-                        <p>{offer.hotelName}</p>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                fetchHotelDetails(offer.hotelIdentifier);
+                            }}
+                            className="text-base font-bold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer"
+                        >
+                            {offer.hotelName}
+                        </button>
                         <div className="flex items-center space-x-1 text-[#32492D]">
                             {Array.from({ length: offer.stars }).map((_, i) => (
                                 <FaStar key={i} />
@@ -48,6 +73,7 @@ const OfferList = ({ offers, isLoading, error, onModify }) => {
                         </div>
                     </div>
                 )}
+
                 getDetails={(offer) => (
                     <>
                         <p className="text-sm">{offer.location.city}, {offer.location.country}</p>
@@ -76,14 +102,20 @@ const OfferList = ({ offers, isLoading, error, onModify }) => {
                 onCardClick={(offer) => setSelectedOfferDetails(offer)}
             />
 
-            {
-                selectedOfferDetails && (
-                    <OfferDetailsModal
-                        offer={selectedOfferDetails}
-                        onClose={() => setSelectedOfferDetails(null)}
-                    />
-                )
-            }
+            {selectedOfferDetails && (
+                <OfferDetailsModal
+                    offer={selectedOfferDetails}
+                    onClose={() => setSelectedOfferDetails(null)}
+                    onHotelClick={(identifier) => fetchHotelDetails(identifier)}
+                />
+            )}
+
+            {selectedHotel && (
+                <HotelDetailsModal
+                    hotel={selectedHotel}
+                    onClose={() => setSelectedHotel(null)}
+                />
+            )}
         </>
     );
 };

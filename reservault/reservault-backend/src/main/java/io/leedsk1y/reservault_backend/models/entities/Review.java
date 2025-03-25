@@ -11,9 +11,10 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class Review {
-    public Review(UUID userId, String title, String comment, int rating) {
+    public Review(UUID userId, String userEmail, String title, String comment, int rating) {
         this.id = UUID.randomUUID();
         this.userId = userId;
+        this.userEmail = userEmail;
         this.title = title;
         this.comment = comment;
         this.rating = rating;
@@ -23,6 +24,8 @@ public class Review {
     private UUID id;
 
     private UUID userId;
+
+    private String userEmail;
 
     private String title;
 

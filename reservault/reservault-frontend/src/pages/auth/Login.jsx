@@ -97,7 +97,7 @@ const Login = () => {
 
                 <p className="mt-4 text-gray-500 text-center">
                     Don't have an account?{" "}
-                    <Link to="/register" className="text-[#32492D] font-semibold hover:text-[#273823] transition-all duration-100 ease-in-out transform cursor-pointer">
+                    <Link to="/register" className="text-[#32492D] font-semibold hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer">
                         Sign up
                     </Link>
                 </p>
