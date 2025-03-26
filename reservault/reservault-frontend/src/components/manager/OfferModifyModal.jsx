@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import api from "../../api/axios";
 import FacilitiesSelector from "../common/FacilitiesSelector";
 import ModifyFormContainer from "../common/ModifyFormContainer";
@@ -97,10 +98,7 @@ const OfferModifyModal = ({ offer, onSubmit, onClose }) => {
 
     const formatDateForBackend = (dateStr) => {
         const date = new Date(dateStr);
-        const month = (date.getMonth() + 1).toString().padStart(2, "0");
-        const day = date.getDate().toString().padStart(2, "0");
-        const year = date.getFullYear();
-        return `${month}.${day}.${year}`;
+        return format(date, "MM.dd.yyyy");
     };
 
     const handleDrop = (index) => {

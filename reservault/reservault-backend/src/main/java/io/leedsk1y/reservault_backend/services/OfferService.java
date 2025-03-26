@@ -38,17 +38,25 @@ public class OfferService {
     public List<OfferWithLocationDTO> searchOffers(String location, Integer rooms, Integer people, String dateFrom, String dateUntil) {
         List<Offer> allOffers = offerRepository.findAll();
 
+        final String inputCity;
+        final String inputCountry;
+        final String rawLocation = location != null ? location.trim().toLowerCase() : null;
+
+        if (rawLocation != null && rawLocation.contains(",")) {
+            String[] parts = rawLocation.split(",", 2);
+            inputCity = parts[0].trim();
+            inputCountry = parts[1].trim();
+        } else {
+            inputCity = null;
+            inputCountry = rawLocation;
+        }
+
         return allOffers.stream()
                 .filter(offer -> {
                     Hotel hotel = hotelRepository.findByIdentifier(offer.getHotelIdentifier()).orElse(null);
                     if (hotel == null) return false;
 
-                    boolean matchesLocation = true;
-                    if (location != null && !location.isBlank()) {
-                        String loc = location.toLowerCase();
-                        matchesLocation = hotel.getLocation().getCity().toLowerCase().contains(loc)
-                                || hotel.getLocation().getCountry().toLowerCase().contains(loc);
-                    }
+                    boolean matchesLocation = matchesLocation(hotel, inputCity, inputCountry);
 
                     boolean matchesRooms = rooms == null || offer.getRoomCount() >= rooms;
                     boolean matchesPeople = people == null || offer.getPeopleCount() >= people;
@@ -73,6 +81,16 @@ public class OfferService {
                 })
                 .map(this::toOfferWithLocationDTO)
                 .toList();
+    }
+
+    private boolean matchesLocation(Hotel hotel, String inputCity, String inputCountry) {
+        if (inputCity == null && inputCountry == null) return true;
+
+        String hotelCity = hotel.getLocation().getCity().toLowerCase();
+        String hotelCountry = hotel.getLocation().getCountry().toLowerCase();
+
+        return (inputCity != null && (hotelCity.contains(inputCity) || hotelCountry.contains(inputCity)))
+                || (inputCountry != null && hotelCountry.contains(inputCountry));
     }
 
     private OfferWithLocationDTO toOfferWithLocationDTO(Offer offer) {

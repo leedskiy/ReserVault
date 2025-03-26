@@ -8,6 +8,7 @@ import {
     FaSnowflake,
     FaCoffee,
 } from "react-icons/fa";
+import { format } from "date-fns";
 import api from "../../api/axios";
 import AddFormContainer from "../common/AddFormContainer";
 import TextInput from "../common/TextInput";
@@ -88,10 +89,7 @@ const OfferAddForm = ({ onSubmit }) => {
 
     const formatDateForBackend = (dateStr) => {
         const date = new Date(dateStr);
-        const month = (date.getMonth() + 1).toString().padStart(2, "0");
-        const day = date.getDate().toString().padStart(2, "0");
-        const year = date.getFullYear();
-        return `${month}.${day}.${year}`;
+        return format(date, "MM.dd.yyyy");
     };
 
     const handleSubmit = async (e) => {

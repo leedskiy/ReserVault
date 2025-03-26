@@ -13,6 +13,7 @@ const SmartOfferSearch = () => {
     const [people, setPeople] = useState(Number(params.get("people")) || 1);
     const [dateFrom, setDateFrom] = useState(params.get("dateFrom") || "");
     const [dateUntil, setDateUntil] = useState(params.get("dateUntil") || "");
+    const [selectedLocation, setSelectedLocation] = useState(params.get("selectedLocation") || null);
 
     const [showRoomDropdown, setShowRoomDropdown] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);
@@ -21,8 +22,62 @@ const SmartOfferSearch = () => {
     const roomRef = useRef(null);
     const calendarRef = useRef(null);
 
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (location.length < 2 || selectedLocation) {
+                setSuggestions([]);
+                setShowSuggestions(false);
+                return;
+            }
+
+            try {
+                const geoNamesUsername = import.meta.env.VITE_GEONAMES_USERNAME;
+                const cityRes = await fetch(
+                    `https://secure.geonames.org/searchJSON?q=${location}&maxRows=5&featureClass=P&username=${geoNamesUsername}`
+                );
+                const cityData = await cityRes.json();
+
+                const citySuggestions = cityData.geonames?.map((place) => ({
+                    id: place.geonameId,
+                    display: `${place.name}, ${place.countryName}`,
+                })) || [];
+
+                let countrySuggestions = [];
+                if (location.length >= 2) {
+                    const countryRes = await fetch(
+                        `https://secure.geonames.org/countryInfoJSON?username=${geoNamesUsername}`
+                    );
+                    const countryData = await countryRes.json();
+
+                    countrySuggestions = countryData.geonames
+                        .filter((country) =>
+                            country.countryName.toLowerCase().includes(location.toLowerCase())
+                        )
+                        .slice(0, 3)
+                        .map((country) => ({
+                            id: `country-${country.geonameId}`,
+                            display: country.countryName,
+                        }));
+                }
+
+                const combined = [...citySuggestions, ...countrySuggestions];
+                setSuggestions(combined);
+                setShowSuggestions(true);
+            } catch (err) {
+                console.error("GeoNames error:", err);
+            }
+        };
+
+        const timeout = setTimeout(fetchSuggestions, 300);
+        return () => clearTimeout(timeout);
+    }, [location, selectedLocation]);
+
+
     const handleSearch = () => {
-        const isValid = location.trim() && dateFrom && dateUntil;
+        const isValid = selectedLocation && dateFrom && dateUntil;
         setError(isValid ? "" : "error");
 
         if (!isValid) return;
@@ -33,6 +88,7 @@ const SmartOfferSearch = () => {
         newParams.append("people", people);
         newParams.append("dateFrom", dateFrom);
         newParams.append("dateUntil", dateUntil);
+        newParams.append("selectedLocation", selectedLocation);
 
         navigate(`/offers/search?${newParams.toString()}`);
     };
@@ -56,17 +112,67 @@ const SmartOfferSearch = () => {
         <div className="flex flex-col items-center justify-center w-full">
             <div className="rounded-lg w-full flex flex-col space-y-4">
                 <div className="flex">
-                    <div className="flex gap-2 flex-grow relative">
-                        <div className="w-2/5">
+                    <div className="flex gap-2 flex-grow ">
+                        <div className="w-2/5 relative">
                             <input
                                 type="text"
                                 value={location}
-                                onChange={(e) => setLocation(e.target.value)}
+                                onChange={(e) => {
+                                    setLocation(e.target.value);
+                                    setSelectedLocation(null);
+                                }}
                                 placeholder="Where are you going?"
-                                className={`bg-white shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-100 ease-in-out transform
-                                    focus:ring-1 ${!location && error ? errorInputClass : "focus:border-[#32492D] focus:ring-[#32492D]"}`}
+                                className={`shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-100 ease-in-out transform
+                                        focus:ring-1 ${!selectedLocation && error
+                                        ? errorInputClass
+                                        : "focus:border-[#32492D] focus:ring-[#32492D]"}`}
                             />
+
+                            <AnimatePresence>
+                                {showSuggestions && !selectedLocation && (
+                                    (() => {
+                                        const filteredSuggestions = suggestions
+                                            .map((place, index) => {
+                                                const display = place.display;
+                                                if (!display) return null;
+
+                                                const isFirst = index === 0;
+                                                const isLast = index === suggestions.length - 1;
+
+                                                return (
+                                                    <li
+                                                        key={place.id || `${display}-${index}`}
+                                                        onClick={() => {
+                                                            setLocation(display);
+                                                            setSelectedLocation(place);
+                                                            setShowSuggestions(false);
+                                                            setSuggestions([]);
+                                                        }}
+                                                        className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${isFirst ? "rounded-t-md" : ""
+                                                            } ${isLast ? "rounded-b-md" : ""}`}
+                                                    >
+                                                        {display}
+                                                    </li>
+                                                );
+                                            })
+                                            .filter(Boolean);
+
+                                        return filteredSuggestions.length > 0 ? (
+                                            <motion.ul
+                                                key="suggestion-dropdown"
+                                                className="absolute top-full left-0 bg-white border rounded-md shadow-lg w-full z-10 mt-2 overflow-hidden"
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                            >
+                                                {filteredSuggestions}
+                                            </motion.ul>
+                                        ) : null;
+                                    })()
+                                )}
+                            </AnimatePresence>
                         </div>
+
 
                         <div className="w-2/5 relative" ref={calendarRef}>
                             <DateRangeSelector
@@ -134,7 +240,7 @@ const SmartOfferSearch = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

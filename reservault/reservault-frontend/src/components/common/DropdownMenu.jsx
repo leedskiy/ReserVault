@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
-const DropdownMenu = ({ isOpen, onClose, menuItems, position = "right-0" }) => {
+const DropdownMenu = ({ isOpen, onClose, menuItems, position = "right-0 top-full mt-2" }) => {
     const [isAnimating] = useState(false);
 
     const dropdownVariants = {
