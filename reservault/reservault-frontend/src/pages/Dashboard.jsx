@@ -43,7 +43,7 @@ const Dashboard = () => {
     return (
         <>
             <Header />
-            <div className="flex flex-col container mx-auto justify-center max-w-4xl" style={{ minHeight: `calc(100vh - 88px)` }}>
+            <div className="flex flex-col container mx-auto max-w-5xl py-64" style={{ minHeight: `calc(100vh - 88px)` }}>
                 <h1 className="text-4xl font-bold text-[#32492D] mb-6">
                     Search for Accommodation
                 </h1>

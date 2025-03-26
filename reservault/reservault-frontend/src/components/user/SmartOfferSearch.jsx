@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
+import DateRangeSelector from "../common/DateRangeSelector";
 
 const SmartOfferSearch = () => {
     const navigate = useNavigate();
@@ -13,9 +14,12 @@ const SmartOfferSearch = () => {
     const [dateFrom, setDateFrom] = useState(params.get("dateFrom") || "");
     const [dateUntil, setDateUntil] = useState(params.get("dateUntil") || "");
 
-    const [showDropdown, setShowDropdown] = useState(false);
+    const [showRoomDropdown, setShowRoomDropdown] = useState(false);
+    const [showCalendar, setShowCalendar] = useState(false);
     const [error, setError] = useState("");
-    const dropdownRef = useRef(null);
+
+    const roomRef = useRef(null);
+    const calendarRef = useRef(null);
 
     const handleSearch = () => {
         const isValid = location.trim() && dateFrom && dateUntil;
@@ -33,11 +37,13 @@ const SmartOfferSearch = () => {
         navigate(`/offers/search?${newParams.toString()}`);
     };
 
-
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-                setShowDropdown(false);
+            if (roomRef.current && !roomRef.current.contains(e.target)) {
+                setShowRoomDropdown(false);
+            }
+            if (calendarRef.current && !calendarRef.current.contains(e.target)) {
+                setShowCalendar(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -48,32 +54,43 @@ const SmartOfferSearch = () => {
 
     return (
         <div className="flex flex-col items-center justify-center w-full">
-            <div className="rounded-lg w-full max-w-4xl flex flex-col space-y-4">
+            <div className="rounded-lg w-full flex flex-col space-y-4">
                 <div className="flex">
-                    <div className="grid grid-cols-2 gap-6 flex-grow relative">
-                        <div>
+                    <div className="flex gap-2 flex-grow relative">
+                        <div className="w-2/5">
                             <input
                                 type="text"
                                 value={location}
                                 onChange={(e) => setLocation(e.target.value)}
                                 placeholder="Where are you going?"
                                 className={`bg-white shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-100 ease-in-out transform
-                                    focus:ring-1 ${!location && error ? errorInputClass : "focus:border-[#32492D] focus:ring-[#32492D]"
-                                    }`}
+                                    focus:ring-1 ${!location && error ? errorInputClass : "focus:border-[#32492D] focus:ring-[#32492D]"}`}
                             />
                         </div>
 
-                        <div className="relative" ref={dropdownRef}>
+                        <div className="w-2/5 relative" ref={calendarRef}>
+                            <DateRangeSelector
+                                startDate={dateFrom}
+                                endDate={dateUntil}
+                                onChange={({ startDate, endDate }) => {
+                                    setDateFrom(startDate);
+                                    setDateUntil(endDate);
+                                }}
+                                hasError={!dateFrom && !dateUntil && error}
+                            />
+                        </div>
+
+                        <div className="relative w-1/5" ref={roomRef}>
                             <button
-                                onClick={() => setShowDropdown((prev) => !prev)}
-                                className="text-left bg-white shadow-lg w-full px-4 py-2 border border-gray-300 transition-all duration-100 ease-in-out transform
+                                onClick={() => setShowRoomDropdown((prev) => !prev)}
+                                className="text-left bg-white shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-100 ease-in-out transform
                                 rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                             >
                                 {rooms} Room{rooms > 1 ? "s" : ""}, {people} {people > 1 ? "People" : "Person"}
                             </button>
 
                             <AnimatePresence>
-                                {showDropdown && (
+                                {showRoomDropdown && (
                                     <motion.div
                                         key="room-people-dropdown"
                                         className="absolute mt-2 w-full bg-white shadow-lg border border-gray-200 rounded-md z-10 p-4"
@@ -106,36 +123,14 @@ const SmartOfferSearch = () => {
                             </AnimatePresence>
                         </div>
 
-                        <div>
-                            <input
-                                type="date"
-                                value={dateFrom}
-                                onChange={(e) => setDateFrom(e.target.value)}
-                                className={`bg-white shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-1 transition-all duration-100 ease-in-out transform
-                                    ${!dateFrom && error ? errorInputClass : "focus:border-[#32492D] focus:ring-[#32492D]"
-                                    }`}
-                            />
+                        <div className="flex flex-col justify-center">
+                            <button
+                                onClick={handleSearch}
+                                className="shadow-lg bg-[#32492D] hover:bg-[#273823] text-white font-semibold px-6 py-2 w-full rounded-md transition-all duration-200 ease-in-out transform"
+                            >
+                                Search
+                            </button>
                         </div>
-
-                        <div>
-                            <input
-                                type="date"
-                                value={dateUntil}
-                                onChange={(e) => setDateUntil(e.target.value)}
-                                className={`bg-white shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-1 transition-all duration-100 ease-in-out transform
-                                    ${!dateUntil && error ? errorInputClass : "focus:border-[#32492D] focus:ring-[#32492D]"
-                                    }`}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col justify-center pl-6">
-                        <button
-                            onClick={handleSearch}
-                            className="shadow-lg bg-[#32492D] hover:bg-[#273823] text-white font-semibold px-6 py-2 rounded-md transition-all duration-200 ease-in-out transform"
-                        >
-                            Search
-                        </button>
                     </div>
                 </div>
             </div>

@@ -56,14 +56,12 @@ public class OfferService {
                     boolean matchesDates = true;
                     if (dateFrom != null && dateUntil != null) {
                         try {
-                            DateTimeFormatter frontendFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                            DateTimeFormatter offerFormat = DateTimeFormatter.ofPattern("MM.dd.yyyy");
+                            DateTimeFormatter format = DateTimeFormatter.ofPattern("MM.dd.yyyy");
 
-                            LocalDate reqFrom = LocalDate.parse(dateFrom, frontendFormat);
-                            LocalDate reqUntil = LocalDate.parse(dateUntil, frontendFormat);
-
-                            LocalDate offerFrom = LocalDate.parse(offer.getDateFrom(), offerFormat);
-                            LocalDate offerUntil = LocalDate.parse(offer.getDateUntil(), offerFormat);
+                            LocalDate reqFrom = LocalDate.parse(dateFrom, format);
+                            LocalDate reqUntil = LocalDate.parse(dateUntil, format);
+                            LocalDate offerFrom = LocalDate.parse(offer.getDateFrom(), format);
+                            LocalDate offerUntil = LocalDate.parse(offer.getDateUntil(), format);
 
                             matchesDates = !(offerUntil.isBefore(reqFrom) || offerFrom.isAfter(reqUntil));
                         } catch (DateTimeParseException e) {

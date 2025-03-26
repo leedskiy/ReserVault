@@ -12,6 +12,7 @@ import api from "../../api/axios";
 import AddFormContainer from "../common/AddFormContainer";
 import TextInput from "../common/TextInput";
 import FacilitiesSelector from "../common/FacilitiesSelector";
+import DateRangeSelector from "../common/DateRangeSelector";
 
 const OfferAddForm = ({ onSubmit }) => {
     const navigate = useNavigate();
@@ -174,20 +175,21 @@ const OfferAddForm = ({ onSubmit }) => {
                 />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                <TextInput
-                    name="dateFrom"
-                    label="Date From"
-                    type="date"
-                    value={offerData.dateFrom}
-                    onChange={handleChange}
-                />
-                <TextInput
-                    name="dateUntil"
-                    label="Date Until"
-                    type="date"
-                    value={offerData.dateUntil}
-                    onChange={handleChange}
+            <div>
+                <label className="block text-gray-600 mb-1">Date Range</label>
+
+                <DateRangeSelector
+                    startDate={offerData.dateFrom}
+                    endDate={offerData.dateUntil}
+                    onChange={({ startDate, endDate }) => {
+                        setIsDirty(true);
+                        setOfferData((prev) => ({
+                            ...prev,
+                            dateFrom: startDate,
+                            dateUntil: endDate,
+                        }));
+                    }}
+                    shadow={false}
                 />
             </div>
 

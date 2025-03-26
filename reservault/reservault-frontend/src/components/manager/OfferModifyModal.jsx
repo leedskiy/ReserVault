@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import FacilitiesSelector from "../common/FacilitiesSelector";
 import ModifyFormContainer from "../common/ModifyFormContainer";
+import DateRangeSelector from "../common/DateRangeSelector";
 
 const OfferModifyModal = ({ offer, onSubmit, onClose }) => {
     const [isDirty, setIsDirty] = useState(false);
@@ -13,19 +14,6 @@ const OfferModifyModal = ({ offer, onSubmit, onClose }) => {
     const [newImages, setNewImages] = useState([]);
     const [imagesToDelete, setImagesToDelete] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
-
-    useEffect(() => {
-        const parseDate = (mmddyyyy) => {
-            const [month, day, year] = mmddyyyy.split(".");
-            return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-        };
-
-        setOfferData((prev) => ({
-            ...prev,
-            dateFrom: parseDate(prev.dateFrom),
-            dateUntil: parseDate(prev.dateUntil),
-        }));
-    }, []);
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
@@ -223,29 +211,22 @@ const OfferModifyModal = ({ offer, onSubmit, onClose }) => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-gray-600">Date From</label>
-                            <input
-                                type="date"
-                                name="dateFrom"
-                                value={offerData.dateFrom}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border rounded-lg"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-gray-600">Date Until</label>
-                            <input
-                                type="date"
-                                name="dateUntil"
-                                value={offerData.dateUntil}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border rounded-lg"
-                                required
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-gray-600">Date Range</label>
+
+                        <DateRangeSelector
+                            startDate={offerData.dateFrom}
+                            endDate={offerData.dateUntil}
+                            onChange={({ startDate, endDate }) => {
+                                setIsDirty(true);
+                                setOfferData((prev) => ({
+                                    ...prev,
+                                    dateFrom: startDate,
+                                    dateUntil: endDate,
+                                }));
+                            }}
+                            shadow={false}
+                        />
                     </div>
 
                     <div className="grid grid-cols-3 gap-4">
