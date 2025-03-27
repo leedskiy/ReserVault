@@ -1,18 +1,22 @@
 package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
+import io.leedsk1y.reservault_backend.models.entities.Facilities;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OfferService {
@@ -35,7 +39,10 @@ public class OfferService {
                 .map(this::toOfferWithLocationDTO);
     }
 
-    public List<OfferWithLocationDTO> searchOffers(String location, Integer rooms, Integer people, String dateFrom, String dateUntil) {
+    public List<OfferWithLocationDTO> searchOffers(String location, Integer rooms, Integer people, String dateFrom, String dateUntil,
+                                                   Double minPrice, Double maxPrice, Boolean wifi, Boolean parking, Boolean pool,
+                                                   Boolean airConditioning, Boolean breakfast, Integer offerRating, Integer hotelStars,
+                                                   String sortBy, String sortOrder) {
         List<Offer> allOffers = offerRepository.findAll();
 
         final String inputCity;
@@ -51,36 +58,55 @@ public class OfferService {
             inputCountry = rawLocation;
         }
 
-        return allOffers.stream()
+        // filtering
+        List<Offer> filteredOffers = allOffers.stream()
                 .filter(offer -> {
                     Hotel hotel = hotelRepository.findByIdentifier(offer.getHotelIdentifier()).orElse(null);
                     if (hotel == null) return false;
 
                     boolean matchesLocation = matchesLocation(hotel, inputCity, inputCountry);
-
                     boolean matchesRooms = rooms == null || offer.getRoomCount() >= rooms;
                     boolean matchesPeople = people == null || offer.getPeopleCount() >= people;
+                    boolean matchesDates = checkDateRange(offer, dateFrom, dateUntil);
+                    boolean matchesPrice = (minPrice == null || offer.getPricePerNight().compareTo(BigDecimal.valueOf(minPrice)) >= 0) &&
+                            (maxPrice == null || offer.getPricePerNight().compareTo(BigDecimal.valueOf(maxPrice)) <= 0);
+                    boolean matchesFacilities = matchesFacilities(offer, wifi, parking, pool, airConditioning, breakfast);
+                    boolean matchesRating = offerRating == null || offer.getRating() >= offerRating;
+                    boolean matchesHotelStars = hotelStars == null || hotel.getStars() >= hotelStars;
 
-                    boolean matchesDates = true;
-                    if (dateFrom != null && dateUntil != null) {
-                        try {
-                            DateTimeFormatter format = DateTimeFormatter.ofPattern("MM.dd.yyyy");
-
-                            LocalDate reqFrom = LocalDate.parse(dateFrom, format);
-                            LocalDate reqUntil = LocalDate.parse(dateUntil, format);
-                            LocalDate offerFrom = LocalDate.parse(offer.getDateFrom(), format);
-                            LocalDate offerUntil = LocalDate.parse(offer.getDateUntil(), format);
-
-                            matchesDates = !(offerUntil.isBefore(reqFrom) || offerFrom.isAfter(reqUntil));
-                        } catch (DateTimeParseException e) {
-                            return false;
-                        }
-                    }
-
-                    return matchesLocation && matchesRooms && matchesPeople && matchesDates;
+                    return matchesLocation && matchesRooms && matchesPeople && matchesDates && matchesPrice &&
+                            matchesFacilities && matchesRating && matchesHotelStars;
                 })
+                .collect(Collectors.toList());
+
+        // sorting
+        Comparator<Offer> comparator = null;
+        if (sortBy != null) {
+            switch (sortBy.toLowerCase()) {
+                case "price":
+                    comparator = Comparator.comparing(Offer::getPricePerNight);
+                    break;
+                case "rating":
+                    comparator = Comparator.comparing(Offer::getRating);
+                    break;
+                case "stars":
+                    comparator = Comparator.comparing(offer -> hotelRepository.findByIdentifier(offer.getHotelIdentifier())
+                            .map(Hotel::getStars).orElse(0));
+                    break;
+                default:
+                    break;
+            }
+
+            if (comparator != null && "desc".equalsIgnoreCase(sortOrder)) {
+                comparator = comparator.reversed();
+            }
+
+            filteredOffers.sort(comparator);
+        }
+
+        return filteredOffers.stream()
                 .map(this::toOfferWithLocationDTO)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private boolean matchesLocation(Hotel hotel, String inputCity, String inputCountry) {
@@ -91,6 +117,33 @@ public class OfferService {
 
         return (inputCity != null && (hotelCity.contains(inputCity) || hotelCountry.contains(inputCity)))
                 || (inputCountry != null && hotelCountry.contains(inputCountry));
+    }
+
+    private boolean checkDateRange(Offer offer, String dateFrom, String dateUntil) {
+        if (dateFrom != null && dateUntil != null) {
+            try {
+                DateTimeFormatter format = DateTimeFormatter.ofPattern("MM.dd.yyyy");
+
+                LocalDate reqFrom = LocalDate.parse(dateFrom, format);
+                LocalDate reqUntil = LocalDate.parse(dateUntil, format);
+                LocalDate offerFrom = LocalDate.parse(offer.getDateFrom(), format);
+                LocalDate offerUntil = LocalDate.parse(offer.getDateUntil(), format);
+
+                return !(offerUntil.isBefore(reqFrom) || offerFrom.isAfter(reqUntil));
+            } catch (DateTimeParseException e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean matchesFacilities(Offer offer, Boolean wifi, Boolean parking, Boolean pool, Boolean airConditioning, Boolean breakfast) {
+        Facilities facilities = offer.getFacilities();
+        return (wifi == null || facilities.isWifi() == wifi) &&
+                (parking == null || facilities.isParking() == parking) &&
+                (pool == null || facilities.isPool() == pool) &&
+                (airConditioning == null || facilities.isAirConditioning() == airConditioning) &&
+                (breakfast == null || facilities.isBreakfast() == breakfast);
     }
 
     private OfferWithLocationDTO toOfferWithLocationDTO(Offer offer) {

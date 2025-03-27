@@ -39,10 +39,23 @@ public class OfferController {
             @RequestParam Integer rooms,
             @RequestParam Integer people,
             @RequestParam String dateFrom,
-            @RequestParam String dateUntil
+            @RequestParam String dateUntil,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Boolean wifi,
+            @RequestParam(required = false) Boolean parking,
+            @RequestParam(required = false) Boolean pool,
+            @RequestParam(required = false) Boolean airConditioning,
+            @RequestParam(required = false) Boolean breakfast,
+            @RequestParam(required = false) Integer offerRating,
+            @RequestParam(required = false) Integer hotelStars,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortOrder
     ) {
         return ResponseEntity.ok(
-                offerService.searchOffers(location, rooms, people, dateFrom, dateUntil)
+                offerService.searchOffers(location, rooms, people, dateFrom, dateUntil,
+                        minPrice, maxPrice, wifi, parking, pool, airConditioning,
+                        breakfast, offerRating, hotelStars, sortBy, sortOrder)
         );
     }
 }
