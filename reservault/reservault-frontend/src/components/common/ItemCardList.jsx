@@ -56,7 +56,7 @@ const ItemCardList = ({
                             )}
                             {getPrice && <p className="text-sm text-gray-600">{getPrice(item)}</p>}
                             {getDescription && (
-                                <p className="text-sm text-gray-700 mt-4">
+                                <p className="text-sm text-gray-600 mt-4">
                                     {limitText(getDescription(item), descriptionLimit)}
                                 </p>
                             )}

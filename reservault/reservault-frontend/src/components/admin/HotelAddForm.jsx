@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import HotelStars from "./HotelStars";
+import HotelStars from "../common/HotelStars";
 import ImageUploader from "../common/ImageUploader";
 import AddFormContainer from "../common/AddFormContainer";
 import TextInput from "../common/TextInput";
@@ -109,11 +109,14 @@ const HotelAddForm = ({ onSubmit }) => {
                 />
             </div>
 
-            <HotelStars
-                hotelData={hotelData}
-                setHotelData={setHotelData}
-                direction="horizontal"
-            />
+            <div>
+                <label className="block text-gray-600">Stars</label>
+                <HotelStars
+                    hotelData={hotelData}
+                    setHotelData={setHotelData}
+                    direction="horizontal"
+                />
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <TextInput
@@ -164,7 +167,7 @@ const HotelAddForm = ({ onSubmit }) => {
             >
                 Cancel
             </button>
-        </AddFormContainer>
+        </AddFormContainer >
     );
 
 };

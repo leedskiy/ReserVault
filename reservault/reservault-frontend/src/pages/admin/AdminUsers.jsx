@@ -49,10 +49,6 @@ const AdminUsers = () => {
         ROLE_ADMIN: { label: "Admin Account", color: "text-red-500" },
     };
 
-    const handleToggleDropdown = (userId) => {
-        setOpenDropdown((prev) => (prev === userId ? null : userId));
-    };
-
     const getDropdownItems = (user) => {
         if (user.roles?.includes("ROLE_ADMIN")) {
             return [];

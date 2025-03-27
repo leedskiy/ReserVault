@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { FaStar } from "react-icons/fa";
 
-const HotelStars = ({ hotelData, setHotelData, direction = "vertical" }) => {
+const HotelStars = ({ hotelData, setHotelData, direction = "vertical", forOfferSearchSidebar = false }) => {
     const [hoveredStars, setHoveredStars] = useState(null);
 
     return (
-        <div className={`flex flex-col w-1/8 h-auto ${direction === "vertical" ? "items-center" : ""}`}>
-            <label className={`block text-gray-600  ${direction === "vertical" ? "mb-4" : ""}`}>Stars</label>
+        <div className={`flex flex-col w-1/8 h-full ${direction === "vertical" ? "items-center" : ""}`}>
             <div
-                className={`flex ${direction === "vertical" ? "flex-col flex-grow justify-between h-full" : "space-x-2"}`}
+                className={`flex ${direction === "vertical" ? "flex-col flex-grow justify-between h-full" : "space-x-2"} ${forOfferSearchSidebar ? "justify-between" : ""}`}
                 onMouseLeave={() => setHoveredStars(null)}
             >
                 {[...Array(5)].map((_, index) => (

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
-import HotelStars from "./HotelStars";
+import HotelStars from "../common/HotelStars";
 import ModifyFormContainer from "../common/ModifyFormContainer";
+import { div } from "framer-motion/client";
 
 const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
     const [isDirty, setIsDirty] = useState(false);
@@ -240,10 +241,13 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                 </div>
             )}
             rightContent={(
-                <HotelStars
-                    hotelData={hotelData}
-                    setHotelData={setHotelData}
-                />
+                <div className="h-auto flex flex-col">
+                    <label className="block text-gray-600 mb-4">Stars</label>
+                    <HotelStars
+                        hotelData={hotelData}
+                        setHotelData={setHotelData}
+                    />
+                </div >
             )}
         />
     );

@@ -148,7 +148,7 @@ const SmartOfferSearch = () => {
                                                             setShowSuggestions(false);
                                                             setSuggestions([]);
                                                         }}
-                                                        className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${isFirst ? "rounded-t-md" : ""
+                                                        className={`px-4 py-2 cursor-pointer hover:bg-gray-200 ${isFirst ? "rounded-t-md" : ""
                                                             } ${isLast ? "rounded-b-md" : ""}`}
                                                     >
                                                         {display}
@@ -172,7 +172,6 @@ const SmartOfferSearch = () => {
                                 )}
                             </AnimatePresence>
                         </div>
-
 
                         <div className="w-2/5 relative" ref={calendarRef}>
                             <DateRangeSelector

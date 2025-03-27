@@ -15,14 +15,13 @@ const facilityOptions = [
     { key: "breakfast", icon: FaCoffee, label: "Breakfast" },
 ];
 
-const FacilitiesSelector = ({ facilities, onToggle, layout = "horizontal" }) => {
+const FacilitiesSelector = ({ facilities, onToggle, layout = "horizontal", forOfferSearchSidebar = false }) => {
     const isVertical = layout === "vertical";
 
     return (
-        <div className={`${isVertical ? "flex flex-col items-center" : ""}`}>
-            <label className="block text-gray-600 mb-2">Facilities</label>
+        <div className={`${isVertical ? "h-full flex flex-col items-center" : ""}`}>
             <div
-                className={`flex ${isVertical ? "flex-col justify-between h-full" : "flex-wrap gap-4"}`}
+                className={`flex ${forOfferSearchSidebar ? "justify-between" : isVertical ? "flex-col justify-between h-full" : "flex-wrap gap-4"}`}
             >
                 {facilityOptions.map(({ key, icon: Icon, label }) => (
                     <button

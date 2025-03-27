@@ -5,6 +5,7 @@ import api from "../../api/axios";
 import FacilitiesSelector from "../common/FacilitiesSelector";
 import ModifyFormContainer from "../common/ModifyFormContainer";
 import DateRangeSelector from "../common/DateRangeSelector";
+import { div } from "framer-motion/client";
 
 const OfferModifyModal = ({ offer, onSubmit, onClose }) => {
     const [isDirty, setIsDirty] = useState(false);
@@ -307,20 +308,24 @@ const OfferModifyModal = ({ offer, onSubmit, onClose }) => {
                 </div>
             )}
             rightContent={(
-                <FacilitiesSelector
-                    facilities={offerData.facilities}
-                    onToggle={(key) => {
-                        setOfferData((prev) => ({
-                            ...prev,
-                            facilities: {
-                                ...prev.facilities,
-                                [key]: !prev.facilities?.[key],
-                            },
-                        }));
-                        setIsDirty(true);
-                    }}
-                    layout="vertical"
-                />
+                <div className="h-auto flex flex-col">
+                    <label className="block text-gray-600">Facilities</label>
+
+                    <FacilitiesSelector
+                        facilities={offerData.facilities}
+                        onToggle={(key) => {
+                            setOfferData((prev) => ({
+                                ...prev,
+                                facilities: {
+                                    ...prev.facilities,
+                                    [key]: !prev.facilities?.[key],
+                                },
+                            }));
+                            setIsDirty(true);
+                        }}
+                        layout="vertical"
+                    />
+                </div>
             )}
         />
     );

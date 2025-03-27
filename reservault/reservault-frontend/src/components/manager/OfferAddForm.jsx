@@ -129,14 +129,6 @@ const OfferAddForm = ({ onSubmit }) => {
         navigate("/manager/offers/list");
     };
 
-    const facilityIcons = [
-        { key: "wifi", icon: FaWifi, label: "Wi-Fi" },
-        { key: "parking", icon: FaParking, label: "Parking" },
-        { key: "pool", icon: FaSwimmingPool, label: "Pool" },
-        { key: "airConditioning", icon: FaSnowflake, label: "Air Conditioning" },
-        { key: "breakfast", icon: FaCoffee, label: "Breakfast" },
-    ];
-
     return (
         <AddFormContainer title="Add Offer" errorMessage={errorMessage} onSubmit={handleSubmit}>
             <div>
@@ -191,11 +183,14 @@ const OfferAddForm = ({ onSubmit }) => {
                 />
             </div>
 
-            <FacilitiesSelector
-                facilities={offerData.facilities}
-                onToggle={handleFacilityToggle}
-                layout="horizontal"
-            />
+            <div>
+                <label className="block text-gray-600">Facilities</label>
+                <FacilitiesSelector
+                    facilities={offerData.facilities}
+                    onToggle={handleFacilityToggle}
+                    layout="horizontal"
+                />
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <TextInput
