@@ -47,7 +47,7 @@ public class OfferController {
             @RequestParam(required = false) Boolean pool,
             @RequestParam(required = false) Boolean airConditioning,
             @RequestParam(required = false) Boolean breakfast,
-            @RequestParam(required = false) Integer offerRating,
+            @RequestParam(required = false) Integer rating,
             @RequestParam(required = false) Integer hotelStars,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortOrder
@@ -55,7 +55,7 @@ public class OfferController {
         return ResponseEntity.ok(
                 offerService.searchOffers(location, rooms, people, dateFrom, dateUntil,
                         minPrice, maxPrice, wifi, parking, pool, airConditioning,
-                        breakfast, offerRating, hotelStars, sortBy, sortOrder)
+                        breakfast, rating, hotelStars, sortBy, sortOrder)
         );
     }
 }

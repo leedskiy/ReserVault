@@ -43,27 +43,42 @@ const OfferSearchResults = () => {
                 pool,
                 airConditioning,
                 breakfast,
-                offerScore,
+                rating,
                 hotelStars
             },
         } = filterData;
 
         const updatedParams = new URLSearchParams(searchParams);
 
-        if (sortingOption) {
-            updatedParams.set('sortBy', sortingOption.split('_')[0]);
-            updatedParams.set('sortOrder', sortingOption.split('_')[1]);
+        const sortingMap = {
+            "Price (Low to High)": { sortBy: "price", sortOrder: "asc" },
+            "Price (High to Low)": { sortBy: "price", sortOrder: "desc" },
+            "Offer Rating (Low to High)": { sortBy: "rating", sortOrder: "asc" },
+            "Offer Rating (High to Low)": { sortBy: "rating", sortOrder: "desc" },
+            "Hotel Stars (Low to High)": { sortBy: "stars", sortOrder: "asc" },
+            "Hotel Stars (High to Low)": { sortBy: "stars", sortOrder: "desc" },
+        };
+
+        if (sortingOption && sortingMap[sortingOption]) {
+            const { sortBy, sortOrder } = sortingMap[sortingOption];
+            updatedParams.set("sortBy", sortBy);
+            updatedParams.set("sortOrder", sortOrder);
+        } else {
+            updatedParams.delete("sortBy");
+            updatedParams.delete("sortOrder");
         }
 
-        if (minPrice) updatedParams.set('minPrice', minPrice);
-        if (maxPrice) updatedParams.set('maxPrice', maxPrice);
-        if (wifi !== undefined) updatedParams.set('wifi', wifi);
-        if (parking !== undefined) updatedParams.set('parking', parking);
-        if (pool !== undefined) updatedParams.set('pool', pool);
-        if (airConditioning !== undefined) updatedParams.set('airConditioning', airConditioning);
-        if (breakfast !== undefined) updatedParams.set('breakfast', breakfast);
-        if (offerScore) updatedParams.set('offerScore', offerScore.join(','));
-        if (hotelStars) updatedParams.set('hotelStars', hotelStars.join(','));
+        if (minPrice !== undefined) updatedParams.set("minPrice", minPrice);
+        if (maxPrice !== undefined) updatedParams.set("maxPrice", maxPrice);
+        if (wifi !== undefined) updatedParams.set("wifi", wifi);
+        if (parking !== undefined) updatedParams.set("parking", parking);
+        if (pool !== undefined) updatedParams.set("pool", pool);
+        if (airConditioning !== undefined) updatedParams.set("airConditioning", airConditioning);
+        if (breakfast !== undefined) updatedParams.set("breakfast", breakfast);
+        if (rating?.length) updatedParams.set("rating", rating[0]);
+        else updatedParams.delete("rating");
+        if (hotelStars) updatedParams.set("hotelStars", hotelStars);
+        else updatedParams.delete("hotelStars");
 
         setSearchParams(updatedParams);
     }, [searchParams, setSearchParams]);

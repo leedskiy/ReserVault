@@ -39,7 +39,7 @@ const DateRangeSelector = ({
                 type="button"
                 onClick={() => setShowCalendar((prev) => !prev)}
                 className={`bg-white ${shadow ? "shadow-lg" : ""} text-left w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-100 ease-in-out transform
-                focus:ring-1 ${hasError ? "border-red-500 ring-red-500" : "focus:border-[#32492D] focus:ring-[#32492D]"} ${startDate && endDate ? "" : "text-gray-400"}`}
+                focus:ring-1 ${hasError ? "border-red-500 ring-red-500" : "focus:border-[#32492D] focus:ring-[#32492D]"} text-gray-600`}
             >
                 {startDate && endDate
                     ? `${startDate} → ${endDate}`

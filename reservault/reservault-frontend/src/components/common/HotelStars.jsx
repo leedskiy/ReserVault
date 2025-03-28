@@ -3,6 +3,15 @@ import { FaStar } from "react-icons/fa";
 
 const HotelStars = ({ hotelData, setHotelData, direction = "vertical", forOfferSearchSidebar = false }) => {
     const [hoveredStars, setHoveredStars] = useState(null);
+    const starField = forOfferSearchSidebar ? "hotelStars" : "stars";
+    const selectedStars = hotelData?.[starField] ?? 0;
+
+    const handleClick = (index) => {
+        setHotelData((prev) => ({
+            ...prev,
+            [starField]: index + 1,
+        }));
+    };
 
     return (
         <div className={`flex flex-col w-1/8 h-full ${direction === "vertical" ? "items-center" : ""}`}>
@@ -20,12 +29,12 @@ const HotelStars = ({ hotelData, setHotelData, direction = "vertical", forOfferS
                                 ? index < hoveredStars
                                     ? "#32492D"
                                     : "gray"
-                                : index < hotelData.stars
+                                : index < selectedStars
                                     ? "#32492D"
                                     : "gray"
                         }
                         onMouseEnter={() => setHoveredStars(index + 1)}
-                        onClick={() => setHotelData((prev) => ({ ...prev, stars: index + 1 }))}
+                        onClick={() => handleClick(index)}
                     />
                 ))}
             </div>

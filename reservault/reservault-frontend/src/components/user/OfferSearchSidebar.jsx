@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Range } from "react-range";
@@ -6,16 +7,28 @@ import HotelStars from "../common/HotelStars";
 
 const OfferSearchSidebar = ({ onApplyFilters }) => {
     // general
-    const [filters, setFilters] = useState({
-        minPrice: 0,
-        maxPrice: 1000,
-        wifi: false,
-        parking: false,
-        pool: false,
-        airConditioning: false,
-        breakfast: false,
-        offerScore: [6, 7, 8, 9],
-        hotelStars: [1, 2, 3, 4, 5],
+    const [searchParams] = useSearchParams();
+
+    const [filters, setFilters] = useState(() => {
+        const getBoolean = (key) => searchParams.get(key) === "true";
+        const getNumber = (key, fallback = null) => {
+            const val = searchParams.get(key);
+            return val !== null ? Number(val) : fallback;
+        };
+
+        return {
+            minPrice: getNumber("minPrice", 0),
+            maxPrice: getNumber("maxPrice", 1000),
+            wifi: getBoolean("wifi"),
+            parking: getBoolean("parking"),
+            pool: getBoolean("pool"),
+            airConditioning: getBoolean("airConditioning"),
+            breakfast: getBoolean("breakfast"),
+            rating: searchParams.get("rating")
+                ? [Number(searchParams.get("rating"))]
+                : [],
+            hotelStars: getNumber("hotelStars"),
+        };
     });
 
     const applyFilters = () => {
@@ -26,9 +39,27 @@ const OfferSearchSidebar = ({ onApplyFilters }) => {
     };
 
     // sorting
-    const [sortingOption, setSortingOption] = useState(null);
     const [isSortingDropdownOpen, setIsSortingDropdownOpen] = useState(false);
     const sortingDropdownRef = useRef(null);
+
+    const reverseSortingMap = {
+        "price_asc": "Price (Low to High)",
+        "price_desc": "Price (High to Low)",
+        "rating_asc": "Offer Rating (Low to High)",
+        "rating_desc": "Offer Rating (High to Low)",
+        "stars_asc": "Hotel Stars (Low to High)",
+        "stars_desc": "Hotel Stars (High to Low)",
+    };
+
+    const [sortingOption, setSortingOption] = useState(() => {
+        const sortBy = searchParams.get("sortBy");
+        const sortOrder = searchParams.get("sortOrder");
+        if (sortBy && sortOrder) {
+            const label = reverseSortingMap[`${sortBy}_${sortOrder}`];
+            return label || null;
+        }
+        return null;
+    });
 
     const handleSortingSelection = (option) => {
         setSortingOption(option);
@@ -53,24 +84,27 @@ const OfferSearchSidebar = ({ onApplyFilters }) => {
         }));
     };
 
-    // score
-    const [offerScore, setOfferScore] = useState(null);
-    const [isOfferScoreDropdownOpen, setIsOfferScoreDropdownOpen] = useState(false);
-    const offerScoreDropdownRef = useRef(null);
+    // rating
+    const [rating, setRating] = useState(() => {
+        const rating = searchParams.get("rating");
+        return rating ? Number(rating) : null;
+    });
+    const [isRatingDropdownOpen, setIsRatingDropdownOpen] = useState(false);
+    const ratingDropdownRef = useRef(null);
 
-    const handleOfferScoreSelection = (score) => {
-        setOfferScore(score);
-        setIsOfferScoreDropdownOpen(false);
+    const handleRatingSelection = (rating) => {
+        setRating(rating);
+        setIsRatingDropdownOpen(false);
         setFilters((prevFilters) => ({
             ...prevFilters,
-            offerScore: score ? [score] : [],
+            rating: rating ? [rating] : [],
         }));
     };
 
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (offerScoreDropdownRef.current && !offerScoreDropdownRef.current.contains(e.target)) {
-                setIsOfferScoreDropdownOpen(false);
+            if (ratingDropdownRef.current && !ratingDropdownRef.current.contains(e.target)) {
+                setIsRatingDropdownOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -100,7 +134,7 @@ const OfferSearchSidebar = ({ onApplyFilters }) => {
                             onClick={() => setIsSortingDropdownOpen((prev) => !prev)}
                             className="w-full text-left py-2 px-4 border rounded-md bg-white 
                                 focus:outline-none transition-all duration-100 ease-in-out transform 
-                                rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
+                                rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D] text-gray-600"
                         >
                             {sortingOption ? sortingOption : "Select Sorting Option"}
                         </button>
@@ -109,7 +143,7 @@ const OfferSearchSidebar = ({ onApplyFilters }) => {
                             {isSortingDropdownOpen && (
                                 <motion.ul
                                     key="room-people-dropdown"
-                                    className="absolute mt-2 w-full bg-white shadow-lg border border-gray-200 rounded-md z-10"
+                                    className="absolute mt-2 w-full bg-white shadow-lg border border-gray-200 rounded-md z-10 text-gray-600"
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
@@ -223,44 +257,44 @@ const OfferSearchSidebar = ({ onApplyFilters }) => {
                             />
                         </div>
 
-                        <div className="space-y-2" ref={offerScoreDropdownRef}>
-                            <h4 className="text-base text-gray-600">Offer Score</h4>
+                        <div className="space-y-2" ref={ratingDropdownRef}>
+                            <h4 className="text-base text-gray-600">Offer Rating</h4>
                             <div className="relative">
                                 <button
-                                    onClick={() => setIsOfferScoreDropdownOpen((prev) => !prev)}
+                                    onClick={() => setIsRatingDropdownOpen((prev) => !prev)}
                                     className="w-full text-left py-2 px-4 border rounded-md bg-white focus:outline-none
                                         focus:outline-none transition-all duration-100 ease-in-out transform 
-                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D] text-gray-600"
                                 >
-                                    {offerScore ? `${offerScore}+` : "Select Offer Score"}
+                                    {rating ? `${rating}+` : "Select Offer Rating"}
                                 </button>
 
                                 <AnimatePresence>
-                                    {isOfferScoreDropdownOpen && (
+                                    {isRatingDropdownOpen && (
                                         <motion.ul
 
-                                            key="offer-score-dropdown"
-                                            className="absolute mt-2 w-full bg-white shadow-lg border border-gray-200 rounded-md z-10"
+                                            key="rating-dropdown"
+                                            className="absolute mt-2 w-full bg-white shadow-lg border border-gray-200 rounded-md z-10 text-gray-600"
                                             initial={{ opacity: 0, y: -10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
                                         >
                                             <li
-                                                onClick={() => handleOfferScoreSelection(null)}
+                                                onClick={() => handleRatingSelection(null)}
                                                 className="px-4 py-2 cursor-pointer hover:bg-gray-200 rounded-t-md"
                                             >
                                                 None
                                             </li>
-                                            {[6, 7, 8, 9].map((score, index) => {
+                                            {[6, 7, 8, 9].map((rating, index) => {
                                                 const isLast = index === 3;
 
                                                 return (
                                                     <li
-                                                        key={score}
-                                                        onClick={() => handleOfferScoreSelection(score)}
+                                                        key={rating}
+                                                        onClick={() => handleRatingSelection(rating)}
                                                         className={`px-4 py-2 cursor-pointer hover:bg-gray-200 ${isLast ? "rounded-b-md" : ""}`}
                                                     >
-                                                        {score}+
+                                                        {rating}+
                                                     </li>
                                                 );
                                             })}
@@ -282,12 +316,59 @@ const OfferSearchSidebar = ({ onApplyFilters }) => {
                     </div>
                 </div>
 
-                <div>
+                <div className="flex flex-col gap-2">
                     <button
                         onClick={applyFilters}
-                        className="w-full py-2 px-4 bg-[#32492D] text-white rounded-md bg-[#32492D] hover:bg-[#273823] transition-all duration-300 ease-in-out transform"
+                        className="w-full py-2 px-4 bg-[#32492D] text-white rounded-md hover:bg-[#273823] transition-all duration-300 ease-in-out transform"
                     >
                         Apply
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            setFilters({
+                                minPrice: 0,
+                                maxPrice: 1000,
+                                wifi: false,
+                                parking: false,
+                                pool: false,
+                                airConditioning: false,
+                                breakfast: false,
+                                rating: [],
+                                hotelStars: null,
+                            });
+                            setRating(null);
+                            setSortingOption(null);
+
+                            const preservedParams = new URLSearchParams();
+                            const keysToPreserve = ["location", "rooms", "people", "dateFrom", "dateUntil", "selectedLocation"];
+                            keysToPreserve.forEach((key) => {
+                                const value = searchParams.get(key);
+                                if (value !== null) {
+                                    preservedParams.set(key, value);
+                                }
+                            });
+
+                            onApplyFilters({
+                                sortingOption: null,
+                                filters: {
+                                    minPrice: 0,
+                                    maxPrice: 1000,
+                                    wifi: false,
+                                    parking: false,
+                                    pool: false,
+                                    airConditioning: false,
+                                    breakfast: false,
+                                    rating: [],
+                                    hotelStars: null,
+                                },
+                            });
+
+                            window.history.replaceState(null, "", `/offers/search?${preservedParams.toString()}`);
+                        }}
+                        className="text-gray-700 w-full px-4 py-2 border rounded-lg bg-white shadow-md hover:bg-gray-200 transition-all duration-300"
+                    >
+                        Clear
                     </button>
                 </div>
             </motion.nav>

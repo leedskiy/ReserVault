@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import WelcomePage from './pages/WelcomePage';
+import WelcomePage from './pages/common/WelcomePage';
 import Register from './pages/auth/Register';
 import Login from './pages/auth/Login';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/common/Dashboard';
 import AdminHotels from "./pages/admin/AdminHotels";
 import AdminUsers from "./pages/admin/AdminUsers";
 import ManagerOffers from "./pages/manager/ManagerOffers";

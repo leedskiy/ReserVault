@@ -122,7 +122,7 @@ const SmartOfferSearch = () => {
                                     setSelectedLocation(null);
                                 }}
                                 placeholder="Where are you going?"
-                                className={`shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-100 ease-in-out transform
+                                className={`text-gray-600 shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-100 ease-in-out transform
                                         focus:ring-1 ${!selectedLocation && error
                                         ? errorInputClass
                                         : "focus:border-[#32492D] focus:ring-[#32492D]"}`}
@@ -148,7 +148,7 @@ const SmartOfferSearch = () => {
                                                             setShowSuggestions(false);
                                                             setSuggestions([]);
                                                         }}
-                                                        className={`px-4 py-2 cursor-pointer hover:bg-gray-200 ${isFirst ? "rounded-t-md" : ""
+                                                        className={`text-gray-600 px-4 py-2 cursor-pointer hover:bg-gray-200 ${isFirst ? "rounded-t-md" : ""
                                                             } ${isLast ? "rounded-b-md" : ""}`}
                                                     >
                                                         {display}
@@ -188,7 +188,7 @@ const SmartOfferSearch = () => {
                         <div className="relative w-1/5" ref={roomRef}>
                             <button
                                 onClick={() => setShowRoomDropdown((prev) => !prev)}
-                                className="text-left bg-white shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-100 ease-in-out transform
+                                className="text-gray-600 text-left bg-white shadow-lg w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-100 ease-in-out transform
                                 rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                             >
                                 {rooms} Room{rooms > 1 ? "s" : ""}, {people} {people > 1 ? "People" : "Person"}
@@ -198,7 +198,7 @@ const SmartOfferSearch = () => {
                                 {showRoomDropdown && (
                                     <motion.div
                                         key="room-people-dropdown"
-                                        className="absolute mt-2 w-full bg-white shadow-lg border border-gray-200 rounded-md z-10 p-4"
+                                        className="text-gray-600 absolute mt-2 w-full bg-white shadow-lg border border-gray-200 rounded-md z-10 p-4"
                                         initial={{ opacity: 0, y: -10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}

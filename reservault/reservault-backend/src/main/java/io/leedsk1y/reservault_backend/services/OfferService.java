@@ -41,7 +41,7 @@ public class OfferService {
 
     public List<OfferWithLocationDTO> searchOffers(String location, Integer rooms, Integer people, String dateFrom, String dateUntil,
                                                    Double minPrice, Double maxPrice, Boolean wifi, Boolean parking, Boolean pool,
-                                                   Boolean airConditioning, Boolean breakfast, Integer offerRating, Integer hotelStars,
+                                                   Boolean airConditioning, Boolean breakfast, Integer rating, Integer hotelStars,
                                                    String sortBy, String sortOrder) {
         List<Offer> allOffers = offerRepository.findAll();
 
@@ -71,7 +71,7 @@ public class OfferService {
                     boolean matchesPrice = (minPrice == null || offer.getPricePerNight().compareTo(BigDecimal.valueOf(minPrice)) >= 0) &&
                             (maxPrice == null || offer.getPricePerNight().compareTo(BigDecimal.valueOf(maxPrice)) <= 0);
                     boolean matchesFacilities = matchesFacilities(offer, wifi, parking, pool, airConditioning, breakfast);
-                    boolean matchesRating = offerRating == null || offer.getRating() >= offerRating;
+                    boolean matchesRating = rating == null || offer.getRating() >= rating;
                     boolean matchesHotelStars = hotelStars == null || hotel.getStars() >= hotelStars;
 
                     return matchesLocation && matchesRooms && matchesPeople && matchesDates && matchesPrice &&
@@ -139,11 +139,14 @@ public class OfferService {
 
     private boolean matchesFacilities(Offer offer, Boolean wifi, Boolean parking, Boolean pool, Boolean airConditioning, Boolean breakfast) {
         Facilities facilities = offer.getFacilities();
-        return (wifi == null || facilities.isWifi() == wifi) &&
-                (parking == null || facilities.isParking() == parking) &&
-                (pool == null || facilities.isPool() == pool) &&
-                (airConditioning == null || facilities.isAirConditioning() == airConditioning) &&
-                (breakfast == null || facilities.isBreakfast() == breakfast);
+
+        if (wifi != null && wifi && !facilities.isWifi()) return false;
+        if (parking != null && parking && !facilities.isParking()) return false;
+        if (pool != null && pool && !facilities.isPool()) return false;
+        if (airConditioning != null && airConditioning && !facilities.isAirConditioning()) return false;
+        if (breakfast != null && breakfast && !facilities.isBreakfast()) return false;
+
+        return true;
     }
 
     private OfferWithLocationDTO toOfferWithLocationDTO(Offer offer) {

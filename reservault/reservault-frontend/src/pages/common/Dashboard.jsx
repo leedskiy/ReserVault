@@ -1,8 +1,8 @@
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import Header from "../components/common/Header";
-import SmartOfferSearch from "../components/user/SmartOfferSearch";
+import Header from "../../components/common/Header";
+import SmartOfferSearch from "../../components/user/SmartOfferSearch";
 
 const Dashboard = () => {
     const { user, isAuthenticated, loading, isUser } = useAuth();
