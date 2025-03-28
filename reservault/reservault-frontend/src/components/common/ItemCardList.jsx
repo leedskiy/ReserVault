@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaCommentAlt } from "react-icons/fa";
 import DropdownButton from "../common/DropdownButton";
 
 const ItemCardList = ({
@@ -18,6 +19,7 @@ const ItemCardList = ({
     contentWrapperClassName = "",
     descriptionLimit = 200,
     onCardClick,
+    variant = "manager"
 }) => {
     const limitText = (text, maxLength) =>
         text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
@@ -49,12 +51,12 @@ const ItemCardList = ({
                             {getTitle && <div>{getTitle(item)}</div>}
                             {getSubtitle && <div className="text-sm text-gray-600">{getSubtitle(item)}</div>}
                             {getDetails && <div className="text-sm text-gray-600 space-y-2">{getDetails(item)}</div>}
-                            {getExtraIcons && (
+                            {variant !== "user" && getExtraIcons && (
                                 <div className="text-sm text-gray-600 flex flex-wrap gap-2">
                                     {getExtraIcons(item)}
                                 </div>
                             )}
-                            {getPrice && <p className="text-sm text-gray-600">{getPrice(item)}</p>}
+                            {variant !== "user" && getPrice && <p className="text-sm text-gray-600">{getPrice(item)}</p>}
                             {getDescription && (
                                 <p className="text-sm text-gray-600 mt-4">
                                     {limitText(getDescription(item), descriptionLimit)}
@@ -62,21 +64,43 @@ const ItemCardList = ({
                             )}
                         </div>
 
-                        <DropdownButton
-                            itemId={item.id}
-                            menuItems={[
-                                {
-                                    label: "Modify",
-                                    icon: FaEdit,
-                                    onClick: () => onModify(item),
-                                },
-                                {
-                                    label: "Delete",
-                                    icon: FaTrash,
-                                    onClick: () => onDelete(item.id),
-                                },
-                            ]}
-                        />
+                        <div className="flex flex-col justify-between items-end text-right">
+                            {variant === "manager" ? (
+                                <DropdownButton
+                                    itemId={item.id}
+                                    menuItems={[
+                                        {
+                                            label: "Modify",
+                                            icon: FaEdit,
+                                            onClick: () => onModify(item),
+                                        },
+                                        {
+                                            label: "Delete",
+                                            icon: FaTrash,
+                                            onClick: () => onDelete(item.id),
+                                        },
+                                    ]}
+                                />
+                            ) : (
+                                <div className="flex flex-col items-end space-y-3">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-1 text-[#32492D]" title={`${item.reviews.length} review(s)`}>
+                                            <FaCommentAlt size={15} />
+                                            <span>{item.reviews.length}</span>
+                                        </div>
+                                        <div className="flex items-center justify-center text-l bg-[#32492D] text-white rounded-lg px-2 max-w-16 py-1">
+                                            {item.rating}
+                                        </div>
+                                    </div>
+
+                                    <div className="text-lg text-gray-600">{getPrice(item)}</div>
+
+                                    <div className="flex flex-col text-sm gap-2 mt-auto">
+                                        {getExtraIcons && getExtraIcons(item)}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </motion.div>
                 ))}
             </motion.div>

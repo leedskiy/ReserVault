@@ -99,6 +99,7 @@ const OfferSearchResults = () => {
                             isLoading={isLoading}
                             error={error}
                             onModify={null}
+                            variant="user"
                         />
                     </div>
                 </div>

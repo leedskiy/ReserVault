@@ -2,7 +2,7 @@ import {
     FaWifi, FaParking, FaSwimmingPool, FaSnowflake, FaCoffee
 } from "react-icons/fa";
 
-const FacilityIcons = ({ facilities = {}, size = 20 }) => {
+const FacilityIcons = ({ facilities = {}, size = 20, direction = "row" }) => {
     const iconProps = { size: size };
 
     const icons = [
@@ -44,7 +44,7 @@ const FacilityIcons = ({ facilities = {}, size = 20 }) => {
     ];
 
     return (
-        <div className="flex flex-wrap gap-2 items-center text-sm">
+        <div className={`flex items-center text-sm ${direction === "column" ? "flex-col gap-1" : "flex-wrap gap-2"}`}>
             {icons.map(({ key, icon: Icon, availableText, unavailableText }) => {
                 const available = facilities[key];
                 return (
