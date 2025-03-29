@@ -12,6 +12,10 @@ const DateRangeSelector = ({
     placeholder = "Select date range",
     shadow = true,
     hasError = false,
+    disabledDates = [],
+    minDate = new Date(),
+    maxDate = undefined,
+    popupPosition = "bottom",
 }) => {
     const [showCalendar, setShowCalendar] = useState(false);
     const calendarRef = useRef(null);
@@ -33,6 +37,11 @@ const DateRangeSelector = ({
         ? parse(endDate, "MM.dd.yyyy", new Date())
         : new Date();
 
+    const popupClasses =
+        popupPosition === "right"
+            ? "left-full top-0 ml-4 -mt-28"
+            : "top-full mt-2";
+
     return (
         <div className="relative w-full" ref={calendarRef}>
             <button
@@ -50,7 +59,7 @@ const DateRangeSelector = ({
                 {showCalendar && (
                     <motion.div
                         key="calendar-popup"
-                        className="absolute mt-2 z-20 rounded-lg overflow-hidden shadow-lg"
+                        className={`absolute z-30 rounded-lg overflow-hidden shadow-lg bg-white ${popupClasses} border border-gray-300`}
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
@@ -63,7 +72,9 @@ const DateRangeSelector = ({
                                     key: "selection",
                                 },
                             ]}
-                            minDate={new Date()}
+                            minDate={minDate}
+                            maxDate={maxDate}
+                            disabledDates={disabledDates}
                             onChange={(ranges) => {
                                 const start = ranges.selection.startDate;
                                 const end = ranges.selection.endDate;

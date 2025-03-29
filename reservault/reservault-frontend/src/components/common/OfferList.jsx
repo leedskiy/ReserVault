@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FaStar, FaBed, FaUserFriends } from "react-icons/fa";
+import { FaStar, FaBed, FaUserFriends, FaCheckCircle } from "react-icons/fa";
 import ItemCardList from "./ItemCardList";
 import FacilityIcons from "./FacilityIcons";
 import api from "../../api/axios";
 import OfferDetailsModal from "./OfferDetailsModal";
 import HotelDetailsModal from "./HotelDetailsModal";
+import PopupModal from "../common/PopupModal";
 
 const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) => {
     const [selectedOfferDetails, setSelectedOfferDetails] = useState(null);
     const [selectedHotel, setSelectedHotel] = useState(null);
     const [hotelError, setHotelError] = useState(null);
     const [hotelLoading, setHotelLoading] = useState(false);
+    const [showReminder, setShowReminder] = useState(false);
 
     const fetchHotelDetails = async (hotelIdentifier) => {
         try {
@@ -127,6 +129,7 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
                     offerId={selectedOfferDetails.id}
                     onClose={() => setSelectedOfferDetails(null)}
                     onHotelClick={(identifier) => fetchHotelDetails(identifier)}
+                    onBookingSuccess={() => setShowReminder(true)}
                 />
             )}
 
@@ -134,6 +137,15 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
                 <HotelDetailsModal
                     hotelIdentifier={selectedHotel.identifier}
                     onClose={() => setSelectedHotel(null)}
+                />
+            )}
+
+            {showReminder && (
+                <PopupModal
+                    title="Booking Confirmed"
+                    icon={<FaCheckCircle className="text-[#32492D] mx-auto text-5xl mb-3" />}
+                    message="To complete your booking, go to the Bookings page and proceed with payment. You have 60 minutes before it expires."
+                    onClose={() => setShowReminder(false)}
                 />
             )}
         </>

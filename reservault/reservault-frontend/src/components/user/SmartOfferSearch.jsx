@@ -198,7 +198,7 @@ const SmartOfferSearch = () => {
                                 {showRoomDropdown && (
                                     <motion.div
                                         key="room-people-dropdown"
-                                        className="text-gray-600 absolute mt-2 w-full bg-white shadow-lg border border-gray-200 rounded-md z-10 p-4"
+                                        className="text-gray-600 absolute mt-2 w-full bg-white shadow-lg border border-gray-300 rounded-md z-10 p-4"
                                         initial={{ opacity: 0, y: -10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
@@ -210,7 +210,8 @@ const SmartOfferSearch = () => {
                                                 min={1}
                                                 value={rooms}
                                                 onChange={(e) => setRooms(Number(e.target.value))}
-                                                className="w-16 border rounded-md px-2 py-1 text-right"
+                                                className="w-16 border rounded-md px-2 py-1 text-right focus:outline-none transition-all duration-100 ease-in-out transform
+                                                rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                             />
                                         </div>
                                         <div className="flex justify-between items-center">
@@ -220,7 +221,8 @@ const SmartOfferSearch = () => {
                                                 min={1}
                                                 value={people}
                                                 onChange={(e) => setPeople(Number(e.target.value))}
-                                                className="w-16 border rounded-md px-2 py-1 text-right"
+                                                className="w-16 border rounded-md px-2 py-1 text-right focus:outline-none transition-all duration-100 ease-in-out transform
+                                                rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                             />
                                         </div>
                                     </motion.div>

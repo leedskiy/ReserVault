@@ -64,25 +64,38 @@ public class BookingService {
         booking.setCreatedAt(Instant.now());
         booking.setExpiresAt(booking.getCreatedAt().plusSeconds(3600)); // 1h
 
-        LocalDate newStart = LocalDate.parse(booking.getDateFrom(), DateTimeFormatter.ofPattern("MM.dd.yyyy"));
-        LocalDate newEnd = LocalDate.parse(booking.getDateUntil(), DateTimeFormatter.ofPattern("MM.dd.yyyy"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
+
+        LocalDate newStart = LocalDate.parse(booking.getDateFrom(), formatter);
+        LocalDate newEnd = LocalDate.parse(booking.getDateUntil(), formatter);
 
         if (!newStart.isBefore(newEnd) && !newStart.equals(newEnd)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid booking dates");
         }
 
-        BigDecimal totalPrice = calculateTotalPrice(newStart, newEnd, offer.getPricePerNight());
-        booking.setPrice(totalPrice);
+        LocalDate offerStart = LocalDate.parse(offer.getDateFrom(), formatter);
+        LocalDate offerEnd = LocalDate.parse(offer.getDateUntil(), formatter);
+
+        if (newStart.isBefore(offerStart) || newEnd.isAfter(offerEnd)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Booking must be within offer's availability range (" + offer.getDateFrom() + " to " + offer.getDateUntil() + ")");
+        }
 
         List<BookedDates> existingBookings = bookedDatesRepository.findByOfferId(booking.getOfferId());
         for (BookedDates existing : existingBookings) {
-            LocalDate existingStart = LocalDate.parse(existing.getDateFrom(), DateTimeFormatter.ofPattern("MM.dd.yyyy"));
-            LocalDate existingEnd = LocalDate.parse(existing.getDateUntil(), DateTimeFormatter.ofPattern("MM.dd.yyyy"));
+            if (existing.getDateFrom() == null || existing.getDateUntil() == null) continue;
 
+            LocalDate existingStart = LocalDate.parse(existing.getDateFrom(), formatter);
+            LocalDate existingEnd = LocalDate.parse(existing.getDateUntil(), formatter);
+
+            // Check for overlap
             if (!(newEnd.isBefore(existingStart) || newStart.isAfter(existingEnd))) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected dates are already booked");
             }
         }
+
+        BigDecimal totalPrice = calculateTotalPrice(newStart, newEnd, offer.getPricePerNight());
+        booking.setPrice(totalPrice);
 
         bookingRepository.save(booking);
 
