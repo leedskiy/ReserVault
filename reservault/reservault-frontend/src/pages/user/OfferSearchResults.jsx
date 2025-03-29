@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
 import SmartOfferSearch from "../../components/user/SmartOfferSearch";
-import OfferList from "../../components/manager/OfferList";
+import OfferList from "../../components/common/OfferList";
 import Header from "../../components/common/Header";
 import OfferSearchSidebar from "../../components/user/OfferSearchSidebar";
 

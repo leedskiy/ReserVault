@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FaStar, FaBed, FaUserFriends } from "react-icons/fa";
-import ItemCardList from "../common/ItemCardList";
-import FacilityIcons from "../common/FacilityIcons";
+import ItemCardList from "./ItemCardList";
+import FacilityIcons from "./FacilityIcons";
 import api from "../../api/axios";
-import OfferDetailsModal from "../../components/common/OfferDetailsModal";
-import HotelDetailsModal from "../common/HotelDetailsModal";
+import OfferDetailsModal from "./OfferDetailsModal";
+import HotelDetailsModal from "./HotelDetailsModal";
 
 const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) => {
     const [selectedOfferDetails, setSelectedOfferDetails] = useState(null);
@@ -124,7 +124,7 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
 
             {selectedOfferDetails && (
                 <OfferDetailsModal
-                    offer={selectedOfferDetails}
+                    offerId={selectedOfferDetails.id}
                     onClose={() => setSelectedOfferDetails(null)}
                     onHotelClick={(identifier) => fetchHotelDetails(identifier)}
                 />
@@ -132,7 +132,7 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
 
             {selectedHotel && (
                 <HotelDetailsModal
-                    hotel={selectedHotel}
+                    hotelIdentifier={selectedHotel.identifier}
                     onClose={() => setSelectedHotel(null)}
                 />
             )}

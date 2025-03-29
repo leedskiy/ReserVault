@@ -1,13 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
-import { FaUser, FaUsers, FaHotel, FaSignOutAlt } from "react-icons/fa";
+import { FaUser, FaUsers, FaHotel, FaSignOutAlt, FaCalendarAlt } from "react-icons/fa";
 import { RiHotelFill } from "react-icons/ri";
 import DropdownMenu from "./DropdownMenu";
 import logo from "../../assets/logo.png";
 
 const Header = () => {
-    const { user, logout, isAdmin, isManager } = useAuth();
+    const { user, logout, isAdmin, isManager, isUser } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const buttonRef = useRef(null);
@@ -39,6 +39,7 @@ const Header = () => {
 
     const menuItems = [
         { label: "Profile", icon: FaUser, onClick: () => navigate("/profile") },
+        isUser && { label: "Bookings", icon: FaCalendarAlt, onClick: () => navigate("/user/bookings") },
         isAdmin && { label: "Hotels", icon: FaHotel, onClick: () => navigate("/admin/hotels/list") },
         isAdmin && { label: "Users", icon: FaUsers, onClick: () => navigate("/admin/users") },
         isManager && { label: "Offers", icon: RiHotelFill, onClick: () => navigate("/manager/offers/list") },

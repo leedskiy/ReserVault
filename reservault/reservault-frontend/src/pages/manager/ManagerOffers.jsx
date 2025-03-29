@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import api from "../../api/axios";
 import Header from "../../components/common/Header";
 import Sidebar from "../../components/common/Sidebar";
-import OfferList from "../../components/manager/OfferList";
+import OfferList from "../../components/common/OfferList";
 import OfferAddForm from "../../components/manager/OfferAddForm";
 import OfferModifyModal from "../../components/manager/OfferModifyModal";
 

@@ -8,6 +8,7 @@ import AdminHotels from "./pages/admin/AdminHotels";
 import AdminUsers from "./pages/admin/AdminUsers";
 import ManagerOffers from "./pages/manager/ManagerOffers";
 import OfferSearchResults from "./pages/user/OfferSearchResults";
+import UserBookings from "./pages/user/UserBookings";
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
           <Route path="/manager/offers" element={<ManagerOffers />} />
           <Route path="/manager/offers/:view" element={<ManagerOffers />} />
           <Route path="/offers/search" element={<OfferSearchResults />} />
+          <Route path="/user/bookings" element={<UserBookings />} />
         </Routes>
       </Router>
     </AuthProvider>
