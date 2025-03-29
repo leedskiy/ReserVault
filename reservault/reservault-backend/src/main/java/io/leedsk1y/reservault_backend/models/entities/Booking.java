@@ -1,7 +1,6 @@
 package io.leedsk1y.reservault_backend.models.entities;
 
 import io.leedsk1y.reservault_backend.models.enums.EBookingStatus;
-import io.leedsk1y.reservault_backend.models.enums.EPaymentStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
