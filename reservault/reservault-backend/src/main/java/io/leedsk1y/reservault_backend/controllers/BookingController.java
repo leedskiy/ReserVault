@@ -1,5 +1,6 @@
 package io.leedsk1y.reservault_backend.controllers;
 
+import io.leedsk1y.reservault_backend.dto.BookingResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.Booking;
 import io.leedsk1y.reservault_backend.services.BookingService;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Booking>> getUserBookings() {
+    public ResponseEntity<List<BookingResponseDTO>> getUserBookings() {
         return ResponseEntity.ok(bookingService.getUserBookings());
     }
 
