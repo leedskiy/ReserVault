@@ -17,16 +17,24 @@ import java.util.UUID;
 public class BookingResponseDTO {
     private UUID id;
 
+    private UUID offerId;
+
     private String offerTitle;
+
     private BigDecimal price;
 
     private String hotelName;
+
+    private String hotelIdentifier;
+
     private Location hotelLocation;
 
     private String dateFrom;
+
     private String dateUntil;
 
     private EBookingStatus status;
+
     private EPaymentStatus paymentStatus;
 
     private Instant expiresAt;

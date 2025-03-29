@@ -41,5 +41,5 @@ public class Booking {
 
     private BigDecimal price;
 
-    private Payment payment;
+    private UUID paymentId;
 }

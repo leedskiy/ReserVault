@@ -14,6 +14,7 @@ import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
 import io.leedsk1y.reservault_backend.repositories.BookingRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
+import io.leedsk1y.reservault_backend.repositories.PaymentRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,17 +36,20 @@ public class BookingService {
     private final UserRepository userRepository;
     private final BookedDatesRepository bookedDatesRepository;
     private final HotelRepository hotelRepository;
+    private final PaymentRepository paymentRepository;
 
     public BookingService(BookingRepository bookingRepository,
                           OfferRepository offerRepository,
                           UserRepository userRepository,
                           BookedDatesRepository bookedDatesRepository,
-                          HotelRepository hotelRepository) {
+                          HotelRepository hotelRepository,
+                          PaymentRepository paymentRepository) {
         this.bookingRepository = bookingRepository;
         this.offerRepository = offerRepository;
         this.userRepository = userRepository;
         this.bookedDatesRepository = bookedDatesRepository;
         this.hotelRepository = hotelRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     public Booking createBooking(Booking booking) {
@@ -60,22 +64,17 @@ public class BookingService {
         booking.setCreatedAt(Instant.now());
         booking.setExpiresAt(booking.getCreatedAt().plusSeconds(3600)); // 1h
 
-        if (booking.getPayment() == null) {
-            booking.setPayment(new Payment());
-        }
-
         LocalDate newStart = LocalDate.parse(booking.getDateFrom(), DateTimeFormatter.ofPattern("MM.dd.yyyy"));
         LocalDate newEnd = LocalDate.parse(booking.getDateUntil(), DateTimeFormatter.ofPattern("MM.dd.yyyy"));
 
         if (!newStart.isBefore(newEnd) && !newStart.equals(newEnd)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid booking dates: 'dateFrom' must be before 'dateUntil'");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid booking dates");
         }
 
         BigDecimal totalPrice = calculateTotalPrice(newStart, newEnd, offer.getPricePerNight());
         booking.setPrice(totalPrice);
 
         List<BookedDates> existingBookings = bookedDatesRepository.findByOfferId(booking.getOfferId());
-
         for (BookedDates existing : existingBookings) {
             LocalDate existingStart = LocalDate.parse(existing.getDateFrom(), DateTimeFormatter.ofPattern("MM.dd.yyyy"));
             LocalDate existingEnd = LocalDate.parse(existing.getDateUntil(), DateTimeFormatter.ofPattern("MM.dd.yyyy"));
@@ -86,6 +85,15 @@ public class BookingService {
         }
 
         bookingRepository.save(booking);
+
+        Payment payment = new Payment();
+        payment.setId(UUID.randomUUID());
+        payment.setBookingId(booking.getId());
+        paymentRepository.save(payment);
+
+        booking.setPaymentId(payment.getId());
+        bookingRepository.save(booking);
+
         bookedDatesRepository.save(new BookedDates(booking.getOfferId(), booking.getDateFrom(), booking.getDateUntil()));
 
         return booking;
@@ -109,29 +117,26 @@ public class BookingService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found"));
 
             String offerTitle = offer.getTitle();
-            BigDecimal pricePerNight = offer.getPricePerNight();
             String hotelIdentifier = offer.getHotelIdentifier();
 
             Optional<Hotel> hotelOptional = hotelRepository.findByIdentifier(hotelIdentifier);
-            String hotelName = "Unknown";
-            Location location = null;
+            String hotelName = hotelOptional.map(Hotel::getName).orElse("Unknown");
+            Location location = hotelOptional.map(Hotel::getLocation).orElse(null);
 
-            if (hotelOptional.isPresent()) {
-                Hotel hotel = hotelOptional.get();
-                hotelName = hotel.getName();
-                location = hotel.getLocation();
-            }
+            Payment payment = getPaymentOrThrow(booking.getPaymentId());
 
             return new BookingResponseDTO(
                     booking.getId(),
+                    offerId,
                     offerTitle,
                     booking.getPrice(),
                     hotelName,
+                    hotelIdentifier,
                     location,
                     booking.getDateFrom(),
                     booking.getDateUntil(),
                     booking.getStatus(),
-                    booking.getPayment().getStatus(),
+                    payment.getStatus(),
                     booking.getExpiresAt()
             );
         }).toList();
@@ -150,19 +155,23 @@ public class BookingService {
     }
 
     public boolean cancelBooking(UUID bookingId) {
-        User user = getAuthenticatedUser();
+        Booking booking = getBookingIfOwnedByUser(bookingId);
 
-        Booking booking = bookingRepository.findById(bookingId)
-                .filter(b -> b.getUserId().equals(user.getId()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
-
-        if (booking.getStatus() != EBookingStatus.PENDING || booking.getPayment().getStatus() != EPaymentStatus.PENDING) {
+        if (booking.getStatus() != EBookingStatus.PENDING) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending bookings can be cancelled");
         }
 
-        List<BookedDates> bookedDates = bookedDatesRepository.findByOfferId(booking.getOfferId());
-        bookedDates.stream()
-                .filter(bd -> bd.getDateFrom().equals(booking.getDateFrom()) && bd.getDateUntil().equals(booking.getDateUntil()))
+        Payment payment = getPaymentOrThrow(booking.getPaymentId());
+        if (payment.getStatus() != EPaymentStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only unpaid bookings can be cancelled");
+        }
+
+        payment.setStatus(EPaymentStatus.FAILED);
+        paymentRepository.save(payment);
+
+        bookedDatesRepository.findByOfferId(booking.getOfferId()).stream()
+                .filter(bd -> bd.getDateFrom().equals(booking.getDateFrom()) &&
+                        bd.getDateUntil().equals(booking.getDateUntil()))
                 .forEach(bd -> bookedDatesRepository.deleteById(bd.getId()));
 
         bookingRepository.deleteById(bookingId);
@@ -172,35 +181,45 @@ public class BookingService {
     public Booking simulatePayment(UUID bookingId) {
         Booking booking = checkAndFetchBooking(bookingId);
 
-        if (booking.getPayment().getStatus() != EPaymentStatus.PENDING) {
+        Payment payment = getPaymentOrThrow(booking.getPaymentId());
+
+        if (payment.getStatus() != EPaymentStatus.PENDING) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking already paid or failed.");
         }
 
-        booking.getPayment().setStatus(EPaymentStatus.PAID);
-        booking.setStatus(EBookingStatus.CONFIRMED);
+        payment.setStatus(EPaymentStatus.PAID);
+        paymentRepository.save(payment);
 
+        booking.setStatus(EBookingStatus.CONFIRMED);
         return bookingRepository.save(booking);
     }
 
     public EPaymentStatus getPaymentStatus(UUID bookingId) {
         Booking booking = checkAndFetchBooking(bookingId);
-        return booking.getPayment().getStatus();
+        Payment payment = getPaymentOrThrow(booking.getPaymentId());
+        return payment.getStatus();
     }
 
     private Booking checkAndFetchBooking(UUID bookingId) {
-        User user = getAuthenticatedUser();
+        Booking booking = getBookingIfOwnedByUser(bookingId);
 
-        Booking booking = bookingRepository.findById(bookingId)
-                .filter(b -> b.getUserId().equals(user.getId()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
-
-        if (booking.getPayment().getStatus() == EPaymentStatus.PENDING &&
-                booking.getExpiresAt().isBefore(Instant.now())) {
-
+        if (booking.getExpiresAt().isBefore(Instant.now())) {
             cancelBooking(bookingId);
             throw new ResponseStatusException(HttpStatus.GONE, "Booking expired and was removed.");
         }
 
         return booking;
+    }
+
+    private Payment getPaymentOrThrow(UUID paymentId) {
+        return paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
+    }
+
+    private Booking getBookingIfOwnedByUser(UUID bookingId) {
+        User user = getAuthenticatedUser();
+        return bookingRepository.findById(bookingId)
+                .filter(b -> b.getUserId().equals(user.getId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found or access denied"));
     }
 }
