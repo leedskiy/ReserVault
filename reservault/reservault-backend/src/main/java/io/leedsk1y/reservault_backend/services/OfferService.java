@@ -1,9 +1,11 @@
 package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
+import io.leedsk1y.reservault_backend.models.entities.BookedDates;
 import io.leedsk1y.reservault_backend.models.entities.Facilities;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
+import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -22,10 +25,14 @@ import java.util.stream.Collectors;
 public class OfferService {
     private final OfferRepository offerRepository;
     private final HotelRepository hotelRepository;
+    private final BookedDatesRepository bookedDatesRepository;
 
-    public OfferService(OfferRepository offerRepository, HotelRepository hotelRepository) {
+    public OfferService(OfferRepository offerRepository,
+                        HotelRepository hotelRepository,
+                        BookedDatesRepository bookedDatesRepository) {
         this.offerRepository = offerRepository;
         this.hotelRepository = hotelRepository;
+        this.bookedDatesRepository = bookedDatesRepository;
     }
 
     public List<OfferWithLocationDTO> getAllOffers() {
@@ -171,5 +178,24 @@ public class OfferService {
                 hotel != null ? hotel.getName() : "Unknown Hotel",
                 hotel != null ? hotel.getStars() : 0
         );
+    }
+
+    public List<LocalDate> getBookedDatesForOffer(UUID offerId) {
+        List<BookedDates> ranges = bookedDatesRepository.findByOfferId(offerId);
+
+        List<LocalDate> allBookedDates = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
+
+        for (BookedDates range : ranges) {
+            LocalDate start = LocalDate.parse(range.getDateFrom(), formatter);
+            LocalDate end = LocalDate.parse(range.getDateUntil(), formatter);
+
+            while (!start.isAfter(end)) {
+                allBookedDates.add(start);
+                start = start.plusDays(1);
+            }
+        }
+
+        return allBookedDates;
     }
 }

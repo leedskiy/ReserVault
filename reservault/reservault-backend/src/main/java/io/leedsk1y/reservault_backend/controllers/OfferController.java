@@ -58,4 +58,9 @@ public class OfferController {
                         breakfast, rating, hotelStars, sortBy, sortOrder)
         );
     }
+
+    @GetMapping("/{offerId}/booked-dates")
+    public ResponseEntity<?> getBookedDatesForOffer(@PathVariable UUID offerId) {
+        return ResponseEntity.ok(offerService.getBookedDatesForOffer(offerId));
+    }
 }
