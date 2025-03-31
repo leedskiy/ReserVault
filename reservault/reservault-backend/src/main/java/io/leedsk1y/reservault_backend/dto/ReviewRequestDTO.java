@@ -12,5 +12,5 @@ import lombok.Setter;
 public class ReviewRequestDTO {
     private String title;
     private String comment;
-    private int rating;
+    private double rating;
 }

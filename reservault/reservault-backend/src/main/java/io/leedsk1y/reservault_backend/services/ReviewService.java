@@ -59,8 +59,44 @@ public class ReviewService {
                 dto.getTitle(), dto.getComment(), dto.getRating());
 
         offer.getReviews().add(review);
+        offer.setRating(calculateAverageRating(offer.getReviews()));
         offerRepository.save(offer);
 
         return ReviewDetailedDTO.fromReview(review, user.getName());
+    }
+
+    public void deleteReviewFromOffer(UUID offerId, UUID reviewId) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        Offer offer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found"));
+
+        Review review = offer.getReviews().stream()
+                .filter(r -> r.getId().equals(reviewId))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        if (!review.getUserId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own review");
+        }
+
+        offer.getReviews().remove(review);
+        offer.setRating(calculateAverageRating(offer.getReviews()));
+        offerRepository.save(offer);
+    }
+
+    private double calculateAverageRating(List<Review> reviews) {
+        if (reviews.isEmpty()) {
+            return 0.0;
+        }
+
+        double total = reviews.stream()
+                .mapToDouble(Review::getRating)
+                .sum();
+
+        return total / reviews.size();
     }
 }

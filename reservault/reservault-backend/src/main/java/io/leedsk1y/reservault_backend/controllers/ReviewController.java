@@ -5,6 +5,7 @@ import io.leedsk1y.reservault_backend.dto.ReviewRequestDTO;
 import io.leedsk1y.reservault_backend.models.entities.Review;
 import io.leedsk1y.reservault_backend.services.ReviewService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,5 +36,14 @@ public class ReviewController {
             @PathVariable UUID offerId,
             @RequestBody ReviewRequestDTO dto) {
         return ResponseEntity.ok(reviewService.addReviewToOffer(offerId, dto));
+    }
+
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<Void> deleteReview(
+            @PathVariable UUID offerId,
+            @PathVariable UUID reviewId
+    ) {
+        reviewService.deleteReviewFromOffer(offerId, reviewId);
+        return ResponseEntity.noContent().build();
     }
 }

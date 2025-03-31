@@ -2,6 +2,7 @@ package io.leedsk1y.reservault_backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
+import io.leedsk1y.reservault_backend.dto.ReviewResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.services.ManagerService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -97,5 +99,19 @@ public class ManagerController {
         return removed
                 ? ResponseEntity.ok("Image removed successfully")
                 : ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/reviews/{reviewId}/response")
+    public ResponseEntity<?> respondToReview(
+            @PathVariable UUID reviewId,
+            @RequestBody ReviewResponseDTO dto) {
+        managerService.respondToReview(reviewId, dto);
+        return ResponseEntity.ok("Response added successfully");
+    }
+
+    @DeleteMapping("/reviews/{reviewId}/response")
+    public ResponseEntity<?> deleteResponseToReview(@PathVariable UUID reviewId) {
+        managerService.deleteReviewResponse(reviewId);
+        return ResponseEntity.ok("Response deleted successfully");
     }
 }

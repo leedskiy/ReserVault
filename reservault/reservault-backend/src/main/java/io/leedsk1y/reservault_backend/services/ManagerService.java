@@ -1,9 +1,12 @@
 package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
+import io.leedsk1y.reservault_backend.dto.ReviewResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
+import io.leedsk1y.reservault_backend.models.entities.Review;
+import io.leedsk1y.reservault_backend.models.entities.ReviewResponse;
 import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
@@ -218,5 +221,55 @@ public class ManagerService {
         offerRepository.save(offer);
 
         return true;
+    }
+
+    public void respondToReview(UUID reviewId, ReviewResponseDTO dto) {
+        User manager = validateAndGetManager();
+
+        Offer offer = offerRepository.findAll().stream()
+                .filter(o -> o.getReviews().stream().anyMatch(r -> r.getId().equals(reviewId)))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        if (!offer.getManagerId().equals(manager.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to respond to this review");
+        }
+
+        Review review = offer.getReviews().stream()
+                .filter(r -> r.getId().equals(reviewId))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        if (review.getResponse() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This review already has a response");
+        }
+
+        review.setResponse(new ReviewResponse(manager.getId(), dto.getComment()));
+        offerRepository.save(offer);
+    }
+
+    public void deleteReviewResponse(UUID reviewId) {
+        User manager = validateAndGetManager();
+
+        Offer offer = offerRepository.findAll().stream()
+                .filter(o -> o.getReviews().stream().anyMatch(r -> r.getId().equals(reviewId)))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        if (!offer.getManagerId().equals(manager.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to modify this review");
+        }
+
+        Review review = offer.getReviews().stream()
+                .filter(r -> r.getId().equals(reviewId))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        if (review.getResponse() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This review has no response to delete");
+        }
+
+        review.setResponse(null);
+        offerRepository.save(offer);
     }
 }
