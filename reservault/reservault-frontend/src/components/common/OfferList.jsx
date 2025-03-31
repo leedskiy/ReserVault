@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FaStar, FaBed, FaUserFriends, FaCheckCircle } from "react-icons/fa";
+import { FaStar, FaBed, FaUserFriends, FaCheckCircle, FaCommentAlt } from "react-icons/fa";
 import ItemCardList from "./ItemCardList";
 import FacilityIcons from "./FacilityIcons";
 import api from "../../api/axios";
@@ -53,8 +53,14 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
                             {offer.title}
                         </h2>
                         {variant === "manager" && (
-                            <div className="flex items-center justify-center text-l bg-[#32492D] text-white rounded-lg px-4">
-                                {offer.rating}
+                            <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-1 text-[#32492D]" title={`${offer.reviews.length} review(s)`}>
+                                    <FaCommentAlt size={15} />
+                                    <span>{offer.reviews.length}</span>
+                                </div>
+                                <div className="flex items-center justify-center text-l bg-[#32492D] text-white rounded-lg max-w-16 py-1 w-10">
+                                    {offer.rating}
+                                </div>
                             </div>
                         )}
                     </div>

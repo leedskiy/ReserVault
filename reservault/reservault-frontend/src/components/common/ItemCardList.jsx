@@ -88,7 +88,7 @@ const ItemCardList = ({
                                             <FaCommentAlt size={15} />
                                             <span>{item.reviews.length}</span>
                                         </div>
-                                        <div className="flex items-center justify-center text-l bg-[#32492D] text-white rounded-lg px-2 max-w-16 py-1">
+                                        <div className="flex items-center justify-center text-l bg-[#32492D] text-white rounded-lg px-3 max-w-16 py-1 w-10">
                                             {item.rating}
                                         </div>
                                     </div>

@@ -10,6 +10,7 @@ import { parse, eachDayOfInterval, isBefore, isAfter } from "date-fns";
 import { useAuth } from "../../context/AuthContext";
 import DateRangeSelector from "./DateRangeSelector";
 import api from "../../api/axios";
+import ReviewSection from "./ReviewSection";
 
 const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess }) => {
     const { isUser } = useAuth();
@@ -97,24 +98,26 @@ const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess })
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <motion.div
-                className="flex flex-col justify-between bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl relative"
+                className="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl relative max-h-[90vh] flex flex-col"
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
             >
-                <button
-                    className="duration-200 ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-[#32492D] hover:text-[#273823] hover:bg-gray-200"
-                    onClick={onClose}
-                >
-                    <FaTimes size={20} />
-                </button>
+                <div>
+                    <button
+                        className="duration-200 ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-[#32492D] hover:text-[#273823] hover:bg-gray-200"
+                        onClick={onClose}
+                    >
+                        <FaTimes size={20} />
+                    </button>
+                </div>
 
                 {isLoading ? (
                     <div className="text-center text-gray-600 my-8">Loading offer...</div>
                 ) : error ? (
                     <div className="text-center text-red-500 my-8">Failed to load offer details.</div>
                 ) : (
-                    <>
+                    <div className="flex-1 overflow-y-auto">
                         <h2
                             className="text-2xl font-semibold text-[#32492D] text-center mb-2 hover:text-[#273823] transition-all cursor-pointer"
                             onClick={() => {
@@ -156,7 +159,7 @@ const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess })
                                     <h3 className="text-xl font-semibold text-gray-900">
                                         {offer.title}
                                     </h3>
-                                    <div className="flex items-center bg-[#32492D] text-white rounded-lg px-4">
+                                    <div className="flex items-center bg-[#32492D] text-white rounded-lg px-4 py-1">
                                         {offer.rating}
                                     </div>
                                 </div>
@@ -218,7 +221,6 @@ const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess })
                                                     disabledDates={disabledDates}
                                                     minDate={offerStartDate}
                                                     maxDate={offerEndDate}
-                                                    popupPosition="right"
                                                 />
                                             </div>
                                         </div>
@@ -246,7 +248,7 @@ const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess })
 
                                     <div className="flex items-center justify-center">
                                         <button
-                                            className="mt-2 px-6 py-2 bg-[#32492D] text-white rounded-lg hover:bg-[#273823] transition-all w-1/2"
+                                            className="mt-2 px-6 py-2 bg-[#32492D] text-white rounded-lg hover:bg-[#273823] transition-all w-60"
                                             onClick={async () => {
                                                 if (!bookingRange.startDate || !bookingRange.endDate) {
                                                     setBookingError("Please select valid booking dates.");
@@ -277,7 +279,9 @@ const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess })
                                 </div>
                             </div>
                         )}
-                    </>
+
+                        <ReviewSection offerId={offer.id} />
+                    </div>
                 )}
             </motion.div>
         </div>
