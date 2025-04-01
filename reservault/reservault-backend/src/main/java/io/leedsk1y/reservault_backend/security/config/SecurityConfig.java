@@ -1,5 +1,8 @@
 package io.leedsk1y.reservault_backend.security.config;
 
+import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +29,7 @@ import io.leedsk1y.reservault_backend.security.jwt.AuthTokenFilter;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     private final AuthEntryPointJwt unauthorizedHandler;
     private final UserRepository userRepository;
 
@@ -53,7 +57,10 @@ public class SecurityConfig {
     @Bean
     UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> {
+                    logger.warn("UserDetailsService: No user found for email '{}'", username);
+                    return new UsernameNotFoundException("User not found");
+                });
     }
 
     @Bean
