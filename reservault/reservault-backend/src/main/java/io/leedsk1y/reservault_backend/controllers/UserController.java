@@ -4,6 +4,7 @@ import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +40,12 @@ public class UserController {
 
     @DeleteMapping("/me")
     public ResponseEntity<Map<String, Object>> deleteUser(HttpServletRequest request, HttpServletResponse response) {
+        UserDetailedResponseDTO user = userService.getAuthenticatedUser(request, response);
+        if (user.getRoles().contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Admin accounts cannot be deleted", "status", false));
+        }
+
         userService.deleteAuthenticatedUser(request, response);
         return ResponseEntity.ok(Map.of("message", "User deleted successfully", "status", true));
     }

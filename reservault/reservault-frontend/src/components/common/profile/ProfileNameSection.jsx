@@ -56,12 +56,12 @@ const ProfileNameSection = () => {
 
     return (
         <motion.div
-            className="bg-white shadow-md rounded-lg border border-gray-200 p-10 w-full relative items-center justify-center flex flex-col"
+            className="bg-white shadow-md rounded-lg border border-gray-200 p-10 w-full relative items-center justify-center flex flex-col space-y-6"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.4, ease: "easeOut" }}
         >
-            <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="flex items-center justify-center gap-4 mb-2">
                 <div className="relative flex items-center justify-center h-16 w-16">
                     <div className={`absolute inset-0 rounded-full border-2 ${roleBorder}`}></div>
                     {proxiedImageUrl ? (
@@ -79,8 +79,8 @@ const ProfileNameSection = () => {
                 </div>
             </div>
 
-            <div className="mb-4 items-center justify-center flex flex-col w-full">
-                <label className="block text-gray-700 font-medium mb-1">Name</label>
+            <div className="items-center justify-center flex flex-col w-full">
+                <label className="block text-gray-600 font-medium mb-1">Name</label>
                 <input
                     type="text"
                     className="w-1/2 border border-gray-300 rounded-md px-3 py-2

@@ -1,14 +1,22 @@
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
 import Sidebar from "../../components/common/Sidebar";
 import { FaUser, FaLock, FaHotel } from "react-icons/fa";
 import ProfileNameSection from "../../components/common/profile/ProfileNameSection";
+import ProfileSecuritySection from "../../components/common/profile/ProfileSecuritySection";
 import { useAuth } from "../../context/AuthContext";
 
 const ProfilePage = () => {
-    const { isManager } = useAuth();
+    const { isManager, isAuthenticated, loading } = useAuth();
     const navigate = useNavigate();
     const { view = "name" } = useParams();
+
+    useEffect(() => {
+        if (!loading && !isAuthenticated) {
+            navigate("/login");
+        }
+    }, [loading, isAuthenticated, navigate]);
 
     const sidebarOptions = [
         { label: "Name", value: "name", icon: FaUser },
@@ -32,7 +40,7 @@ const ProfilePage = () => {
                     <div className="flex flex-col items-center w-full">
                         {view === "name" && <ProfileNameSection />}
                         {view === "hotels" && <ProfileNameSection />}
-                        {view === "security" && <ProfileNameSection />}
+                        {view === "security" && <ProfileSecuritySection />}
                     </div>
                 </div>
             </div>

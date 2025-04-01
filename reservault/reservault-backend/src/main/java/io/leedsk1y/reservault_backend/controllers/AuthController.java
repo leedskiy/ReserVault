@@ -2,6 +2,7 @@ package io.leedsk1y.reservault_backend.controllers;
 
 import java.util.Map;
 
+import io.leedsk1y.reservault_backend.dto.UpdatePasswordDTO;
 import io.leedsk1y.reservault_backend.security.jwt.CookieUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -68,5 +70,17 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         authService.logoutUser(request, response);
         return ResponseEntity.ok(Map.of("message", "User logged out successfully", "status", true));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordDTO passwordDTO,
+                                            HttpServletRequest request, HttpServletResponse response) {
+        try {
+            authService.updateUserPassword(passwordDTO, request, response);
+            return ResponseEntity.ok(Map.of("message", "Password updated successfully", "status", true));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage(), "status", false));
+        }
     }
 }

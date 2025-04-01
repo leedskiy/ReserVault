@@ -1,6 +1,7 @@
 package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.RegisterRequestDTO;
+import io.leedsk1y.reservault_backend.dto.UpdatePasswordDTO;
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
@@ -172,5 +173,29 @@ public class AuthService {
         }
 
         CookieUtils.clearJwtCookie(response);
+    }
+
+    public void updateUserPassword(UpdatePasswordDTO passwordDTO, HttpServletRequest request, HttpServletResponse response) {
+        String token = jwtUtils.getJwtFromCookies(request);
+
+        if (token == null || !jwtUtils.validateJwtToken(token, response)) {
+            CookieUtils.clearJwtCookie(response);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
+        }
+
+        String email = jwtUtils.getUserNameFromJwtToken(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (user.getPassword() == null) {
+            throw new RuntimeException("OAuth2 users cannot change password via this method.");
+        }
+
+        if (!passwordEncoder.matches(passwordDTO.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(passwordDTO.getNewPassword()));
+        userRepository.save(user);
     }
 }
