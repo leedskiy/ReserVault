@@ -116,7 +116,9 @@ const ReviewSection = ({ offerId }) => {
                                     type="text"
                                     placeholder="Review title"
                                     {...register("title", { required: "Title is required" })}
-                                    className="w-full border px-3 py-2 rounded-md mb-1 focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D] text-gray-600"
+                                    className="w-full border px-3 py-2 rounded-md mb-1 
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 />
                                 {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
 
@@ -131,7 +133,9 @@ const ReviewSection = ({ offerId }) => {
                                         min: { value: 1, message: "Minimum rating is 1" },
                                         max: { value: 10, message: "Maximum rating is 10" },
                                     })}
-                                    className="w-full border px-3 py-2 rounded-md mb-1 focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D] text-gray-600"
+                                    className="w-full border px-3 py-2 rounded-md mb-1
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 />
                                 {errors.rating && <p className="text-red-500 text-sm">{errors.rating.message}</p>}
 
@@ -139,7 +143,9 @@ const ReviewSection = ({ offerId }) => {
                                     placeholder="Write your review..."
                                     {...register("comment", { required: "Comment is required" })}
                                     rows={3}
-                                    className="w-full border px-3 py-2 rounded-md mb-1 focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D] text-gray-600"
+                                    className="w-full border px-3 py-2 rounded-md mb-1 focus:outline-none
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 />
                                 {errors.comment && <p className="text-red-500 text-sm">{errors.comment.message}</p>}
 
@@ -277,7 +283,9 @@ const ReviewSection = ({ offerId }) => {
                                         >
                                             <textarea
                                                 {...registerResponse("comment", { required: "Response is required" })}
-                                                className="w-full border px-3 py-2 rounded-md focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D] text-gray-600"
+                                                className="w-full border px-3 py-2 rounded-md
+                                                    focus:outline-none transition-all duration-100 ease-in-out transform
+                                                    rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                                 rows={3}
                                                 placeholder="Write a response..."
                                             />

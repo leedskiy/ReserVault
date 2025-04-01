@@ -9,6 +9,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import ManagerOffers from "./pages/manager/ManagerOffers";
 import OfferSearchResults from "./pages/user/OfferSearchResults";
 import UserBookings from "./pages/user/UserBookings";
+import ProfilePage from './pages/common/ProfilePage';
 
 const App = () => {
   return (
@@ -19,7 +20,6 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<div>Profile Page (to be implemented)</div>} />
           <Route path="/admin/hotels/:view" element={<AdminHotels />} />
           <Route path="/admin/hotels" element={<AdminHotels />} />
           <Route path="/admin/users" element={<AdminUsers />} />
@@ -27,6 +27,8 @@ const App = () => {
           <Route path="/manager/offers/:view" element={<ManagerOffers />} />
           <Route path="/offers/search" element={<OfferSearchResults />} />
           <Route path="/user/bookings" element={<UserBookings />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:view" element={<ProfilePage />} />
         </Routes>
       </Router>
     </AuthProvider>
