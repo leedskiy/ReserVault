@@ -1,0 +1,45 @@
+package io.leedsk1y.reservault_backend.controllers;
+
+import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
+import io.leedsk1y.reservault_backend.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDetailedResponseDTO> getUser(HttpServletRequest request, HttpServletResponse response) {
+        return ResponseEntity.ok(userService.getAuthenticatedUser(request, response));
+    }
+
+    @PutMapping("/me/name")
+    public ResponseEntity<Map<String, Object>> updateName(@RequestParam String name,
+                                                          HttpServletRequest request,
+                                                          HttpServletResponse response) {
+        userService.updateUserName(name, request, response);
+        return ResponseEntity.ok(Map.of("message", "Name updated successfully", "status", true));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Map<String, Object>> deleteUser(HttpServletRequest request, HttpServletResponse response) {
+        userService.deleteAuthenticatedUser(request, response);
+        return ResponseEntity.ok(Map.of("message", "User deleted successfully", "status", true));
+    }
+}
