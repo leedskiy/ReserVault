@@ -30,152 +30,42 @@ import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
+    private final HotelService hotelService;
     private final HotelRepository hotelRepository;
-    private final CloudinaryService cloudinaryService;
     private final UserRepository userRepository;
     private final HotelManagerRepository hotelManagerRepository;
-    private final OfferRepository offerRepository;
-    private final BookingRepository bookingRepository;
-    private final BookedDatesRepository bookedDatesRepository;
-    private final PaymentRepository paymentRepository;
     private final UserDeletionService userDeletionService;
 
-    public AdminService(HotelRepository hotelRepository,
-                        CloudinaryService cloudinaryService,
+    public AdminService(HotelService hotelService,
+                        HotelRepository hotelRepository,
                         UserRepository userRepository,
                         HotelManagerRepository hotelManagerRepository,
-                        OfferRepository offerRepository,
-                        BookingRepository bookingRepository,
-                        BookedDatesRepository bookedDatesRepository,
-                        PaymentRepository paymentRepository,
                         UserDeletionService userDeletionService) {
+        this.hotelService = hotelService;
         this.hotelRepository = hotelRepository;
-        this.cloudinaryService = cloudinaryService;
         this.userRepository = userRepository;
         this.hotelManagerRepository = hotelManagerRepository;
-        this.offerRepository = offerRepository;
-        this.bookingRepository = bookingRepository;
-        this.bookedDatesRepository = bookedDatesRepository;
-        this.paymentRepository = paymentRepository;
         this.userDeletionService = userDeletionService;
     }
 
     public List<Hotel> getAllHotels() {
-        return hotelRepository.findAll();
+        return hotelService.getAllHotels();
     }
 
     public Hotel createHotel(Hotel hotel, List<MultipartFile> images) throws IOException {
-        if (hotelRepository.findByIdentifier(hotel.getIdentifier()).isPresent()) {
-            throw new IllegalArgumentException("Hotel identifier already exists: " + hotel.getIdentifier());
-        }
-
-        if (images == null || images.isEmpty()) {
-            throw new IllegalArgumentException("At least one image is required to create a hotel.");
-        }
-
-        for (MultipartFile image : images) {
-            String imageUrl = cloudinaryService.uploadImage(image, "hotels_images");
-            hotel.getImagesUrls().add(imageUrl);
-        }
-
-        hotel.setId(UUID.randomUUID());
-        hotel.setCreatedAt(Instant.now());
-        return hotelRepository.save(hotel);
+        return hotelService.createHotel(hotel, images);
     }
 
     public Optional<Hotel> updateHotel(UUID id, Hotel updatedHotel, List<MultipartFile> newImages) throws IOException {
-        return hotelRepository.findById(id).map(existingHotel -> {
-            try {
-                if (updatedHotel.getImagesUrls() != null && !updatedHotel.getImagesUrls().isEmpty()) {
-                    existingHotel.setImagesUrls(updatedHotel.getImagesUrls());
-                }
-
-                if (newImages != null && !newImages.isEmpty()) {
-                    for (MultipartFile image : newImages) {
-                        String imageUrl = cloudinaryService.uploadImage(image, "hotels_images");
-                        existingHotel.getImagesUrls().add(imageUrl);
-                    }
-                }
-
-                existingHotel.setName(updatedHotel.getName());
-                existingHotel.setDescription(updatedHotel.getDescription());
-                existingHotel.setStars(updatedHotel.getStars());
-                existingHotel.setLocation(updatedHotel.getLocation());
-
-                return hotelRepository.save(existingHotel);
-            } catch (IOException e) {
-                throw new RuntimeException("Error uploading images: " + e.getMessage());
-            }
-        });
+        return hotelService.updateHotel(id, updatedHotel, newImages);
     }
 
     public boolean deleteHotel(UUID id) {
-        Optional<Hotel> hotelOptional = hotelRepository.findById(id);
-        if (hotelOptional.isEmpty()) {
-            return false;
-        }
-
-        Hotel hotel = hotelOptional.get();
-        String hotelIdentifier = hotel.getIdentifier();
-
-        // 1. delete hotelmanager
-        hotelManagerRepository.deleteByHotelIdentifier(hotelIdentifier);
-
-        // 2. delete offers, payments, booked dates, bookings, offer images
-        List<Offer> offers = offerRepository.findByHotelIdentifier(hotelIdentifier);
-        for (Offer offer : offers) {
-            List<Booking> bookings = bookingRepository.findByOfferId(offer.getId());
-            for (Booking booking : bookings) {
-                // delete payments
-                if (booking.getPaymentId() != null) {
-                    paymentRepository.deleteById(booking.getPaymentId());
-                }
-
-                // delete booked dates
-                bookedDatesRepository.findByOfferId(offer.getId()).stream()
-                        .filter(bd -> bd.getDateFrom().equals(booking.getDateFrom()) &&
-                                bd.getDateUntil().equals(booking.getDateUntil()))
-                        .map(BookedDates::getId)
-                        .forEach(bookedDatesRepository::deleteById);
-
-                // delete booking
-                bookingRepository.deleteById(booking.getId());
-            }
-
-            // delete offer images
-            for (String imageUrl : offer.getImagesUrls()) {
-                cloudinaryService.deleteImage(imageUrl, "offers_images");
-            }
-
-            offerRepository.deleteById(offer.getId());
-        }
-
-        // 3. delete hotel images
-        for (String imageUrl : hotel.getImagesUrls()) {
-            cloudinaryService.deleteImage(imageUrl, "hotels_images");
-        }
-
-        // 4. delete hotel
-        hotelRepository.deleteById(id);
-
-        return true;
+        return hotelService.deleteHotel(id);
     }
 
     public boolean removeHotelImage(UUID hotelId, String imageUrl) {
-        Optional<Hotel> hotelOptional = hotelRepository.findById(hotelId);
-
-        if (hotelOptional.isPresent()) {
-            Hotel hotel = hotelOptional.get();
-
-            if (hotel.getImagesUrls().contains(imageUrl)) {
-                cloudinaryService.deleteImage(imageUrl, "hotels_images");
-
-                hotel.getImagesUrls().remove(imageUrl);
-                hotelRepository.save(hotel);
-                return true;
-            }
-        }
-        return false;
+        return hotelService.removeHotelImage(hotelId, imageUrl);
     }
 
     public List<UserDetailedResponseDTO> getAllUsers() {
