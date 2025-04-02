@@ -53,6 +53,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } catch (UsernameNotFoundException ex) {
                     logger.warn("JWT valid but user '{}' not found in DB. Possibly deleted.", username);
+                    jwtUtils.blacklistToken(jwt);
+                    CookieUtils.clearJwtCookie(response);
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("{\"error\":\"Unauthorized - User not found\"}");
                     response.setContentType("application/json");
