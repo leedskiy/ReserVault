@@ -1,16 +1,24 @@
 package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
+import io.leedsk1y.reservault_backend.dto.ReviewResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.BookedDates;
+import io.leedsk1y.reservault_backend.models.entities.Booking;
 import io.leedsk1y.reservault_backend.models.entities.Facilities;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
+import io.leedsk1y.reservault_backend.models.entities.Review;
+import io.leedsk1y.reservault_backend.models.entities.ReviewResponse;
 import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
+import io.leedsk1y.reservault_backend.repositories.BookingRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -26,13 +34,22 @@ public class OfferService {
     private final OfferRepository offerRepository;
     private final HotelRepository hotelRepository;
     private final BookedDatesRepository bookedDatesRepository;
+    private final CloudinaryService cloudinaryService;
+    private final BookingRepository bookingRepository;
+    private final BookingService bookingService;
 
     public OfferService(OfferRepository offerRepository,
                         HotelRepository hotelRepository,
-                        BookedDatesRepository bookedDatesRepository) {
+                        BookedDatesRepository bookedDatesRepository,
+                        CloudinaryService cloudinaryService,
+                        BookingRepository bookingRepository,
+                        BookingService bookingService) {
         this.offerRepository = offerRepository;
         this.hotelRepository = hotelRepository;
         this.bookedDatesRepository = bookedDatesRepository;
+        this.cloudinaryService = cloudinaryService;
+        this.bookingRepository = bookingRepository;
+        this.bookingService = bookingService;
     }
 
     public List<OfferWithLocationDTO> getAllOffers() {
@@ -197,5 +214,170 @@ public class OfferService {
         }
 
         return allBookedDates;
+    }
+
+    public List<OfferWithLocationDTO> getOffersByManager(UUID managerId) {
+        return offerRepository.findByManagerId(managerId).stream()
+                .map(this::toOfferWithLocationDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Offer createOffer(Offer offer, List<MultipartFile> images, UUID managerId) throws IOException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
+        LocalDate fromDate;
+        LocalDate untilDate;
+        try {
+            fromDate = LocalDate.parse(offer.getDateFrom(), formatter);
+            untilDate = LocalDate.parse(offer.getDateUntil(), formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Dates must be in MM.dd.yyyy format.");
+        }
+
+        if (!fromDate.isBefore(untilDate) && !fromDate.equals(untilDate)) {
+            throw new IllegalArgumentException("date from must be before date until.");
+        }
+
+        offer.setId(UUID.randomUUID());
+        offer.setManagerId(managerId);
+        offer.setRating(10);
+        offer.setCreatedAt(Instant.now());
+
+        for (MultipartFile image : images) {
+            String imageUrl = cloudinaryService.uploadImage(image, "offers_images");
+            offer.getImagesUrls().add(imageUrl);
+        }
+
+        return offerRepository.save(offer);
+    }
+
+    public Offer updateOffer(UUID offerId, Offer updatedOffer, List<MultipartFile> newImages, UUID managerId) throws IOException {
+        Offer existingOffer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new IllegalArgumentException("Offer not found"));
+
+        if (!existingOffer.getManagerId().equals(managerId)) {
+            throw new IllegalArgumentException("You are not authorized to update this offer");
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
+        LocalDate fromDate, untilDate;
+        try {
+            fromDate = LocalDate.parse(updatedOffer.getDateFrom(), formatter);
+            untilDate = LocalDate.parse(updatedOffer.getDateUntil(), formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Dates must be in MM.dd.yyyy format.");
+        }
+
+        if (!fromDate.isBefore(untilDate) && !fromDate.equals(untilDate)) {
+            throw new IllegalArgumentException("date from must be before date until.");
+        }
+
+        existingOffer.setTitle(updatedOffer.getTitle());
+        existingOffer.setDescription(updatedOffer.getDescription());
+        existingOffer.setDateFrom(updatedOffer.getDateFrom());
+        existingOffer.setDateUntil(updatedOffer.getDateUntil());
+        existingOffer.setFacilities(updatedOffer.getFacilities());
+        existingOffer.setRoomCount(updatedOffer.getRoomCount());
+        existingOffer.setPeopleCount(updatedOffer.getPeopleCount());
+        existingOffer.setPricePerNight(updatedOffer.getPricePerNight());
+
+        if (updatedOffer.getImagesUrls() != null && !updatedOffer.getImagesUrls().isEmpty()) {
+            existingOffer.setImagesUrls(updatedOffer.getImagesUrls());
+        }
+
+        if (newImages != null && !newImages.isEmpty()) {
+            for (MultipartFile image : newImages) {
+                String imageUrl = cloudinaryService.uploadImage(image, "offers_images");
+                existingOffer.getImagesUrls().add(imageUrl);
+            }
+        }
+
+        return offerRepository.save(existingOffer);
+    }
+
+    public boolean deleteOffer(UUID offerId, UUID managerId) {
+        Offer offer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new IllegalArgumentException("Offer not found"));
+
+        if (managerId != null && !offer.getManagerId().equals(managerId)) {
+            throw new IllegalArgumentException("You are not authorized to delete this offer");
+        }
+
+        List<Booking> relatedBookings = bookingRepository.findByOfferId(offerId);
+        for (Booking booking : relatedBookings) {
+            bookingService.deleteBooking(booking.getId());
+        }
+
+        for (String imageUrl : offer.getImagesUrls()) {
+            cloudinaryService.deleteImage(imageUrl, "offers_images");
+        }
+
+        offerRepository.deleteById(offerId);
+
+        return true;
+    }
+
+    public boolean removeOfferImage(UUID offerId, String imageUrl, UUID managerId) {
+        Offer offer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new IllegalArgumentException("Offer not found"));
+
+        if (!offer.getManagerId().equals(managerId)) {
+            throw new IllegalArgumentException("You are not authorized to modify this offer");
+        }
+
+        if (!offer.getImagesUrls().contains(imageUrl)) {
+            throw new IllegalArgumentException("Image URL not found in this offer");
+        }
+
+        cloudinaryService.deleteImage(imageUrl, "offers_images");
+
+        offer.getImagesUrls().remove(imageUrl);
+        offerRepository.save(offer);
+        return true;
+    }
+
+    public void respondToReview(UUID reviewId, ReviewResponseDTO dto, UUID managerId) {
+        Offer offer = offerRepository.findAll().stream()
+                .filter(o -> o.getReviews().stream().anyMatch(r -> r.getId().equals(reviewId)))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+
+        if (!offer.getManagerId().equals(managerId)) {
+            throw new IllegalArgumentException("You are not allowed to respond to this review");
+        }
+
+        Review review = offer.getReviews().stream()
+                .filter(r -> r.getId().equals(reviewId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+
+        if (review.getResponse() != null) {
+            throw new IllegalArgumentException("This review already has a response");
+        }
+
+        review.setResponse(new ReviewResponse(managerId, dto.getComment()));
+        offerRepository.save(offer);
+    }
+
+    public void deleteReviewResponse(UUID reviewId, UUID managerId) {
+        Offer offer = offerRepository.findAll().stream()
+                .filter(o -> o.getReviews().stream().anyMatch(r -> r.getId().equals(reviewId)))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+
+        if (!offer.getManagerId().equals(managerId)) {
+            throw new IllegalArgumentException("You are not authorized to modify this review");
+        }
+
+        Review review = offer.getReviews().stream()
+                .filter(r -> r.getId().equals(reviewId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+
+        if (review.getResponse() == null) {
+            throw new IllegalArgumentException("This review has no response to delete");
+        }
+
+        review.setResponse(null);
+        offerRepository.save(offer);
     }
 }
