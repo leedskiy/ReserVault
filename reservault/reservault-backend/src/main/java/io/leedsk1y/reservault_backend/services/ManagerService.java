@@ -2,6 +2,8 @@ package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
 import io.leedsk1y.reservault_backend.dto.ReviewResponseDTO;
+import io.leedsk1y.reservault_backend.models.entities.BookedDates;
+import io.leedsk1y.reservault_backend.models.entities.Booking;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
@@ -9,9 +11,12 @@ import io.leedsk1y.reservault_backend.models.entities.Review;
 import io.leedsk1y.reservault_backend.models.entities.ReviewResponse;
 import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.models.enums.EHotelManagerStatus;
+import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
+import io.leedsk1y.reservault_backend.repositories.BookingRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
+import io.leedsk1y.reservault_backend.repositories.PaymentRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,15 +42,26 @@ public class ManagerService {
     private final CloudinaryService cloudinaryService;
     private final HotelManagerRepository hotelManagerRepository;
     private final HotelRepository hotelRepository;
+    private final BookingRepository bookingRepository;
+    private final BookedDatesRepository bookedDatesRepository;
+    private final PaymentRepository paymentRepository;
 
-    public ManagerService(UserRepository userRepository, OfferRepository offerRepository,
-                          CloudinaryService cloudinaryService, HotelManagerRepository hotelManagerRepository,
-                          HotelRepository hotelRepository) {
+    public ManagerService(UserRepository userRepository,
+                          OfferRepository offerRepository,
+                          CloudinaryService cloudinaryService,
+                          HotelManagerRepository hotelManagerRepository,
+                          HotelRepository hotelRepository,
+                          BookingRepository bookingRepository,
+                          BookedDatesRepository bookedDatesRepository,
+                          PaymentRepository paymentRepository) {
         this.userRepository = userRepository;
         this.offerRepository = offerRepository;
         this.cloudinaryService = cloudinaryService;
         this.hotelManagerRepository = hotelManagerRepository;
         this.hotelRepository = hotelRepository;
+        this.bookingRepository = bookingRepository;
+        this.bookedDatesRepository = bookedDatesRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     public List<OfferWithLocationDTO> getManagerOffers() {
@@ -254,6 +270,25 @@ public class ManagerService {
 
         assertApprovedHotelManager(user.getId(), offer.getHotelIdentifier());
 
+        List<Booking> relatedBookings = bookingRepository.findByOfferId(offerId);
+        for (Booking booking : relatedBookings) {
+            // delete payments
+            if (booking.getPaymentId() != null) {
+                paymentRepository.deleteById(booking.getPaymentId());
+            }
+
+            // delete booked dates
+            bookedDatesRepository.findByOfferId(offerId).stream()
+                    .filter(bd -> bd.getDateFrom().equals(booking.getDateFrom()) &&
+                            bd.getDateUntil().equals(booking.getDateUntil()))
+                    .map(BookedDates::getId)
+                    .forEach(bookedDatesRepository::deleteById);
+
+            // delete booking
+            bookingRepository.deleteById(booking.getId());
+        }
+
+        // delete offer images
         for (String imageUrl : offer.getImagesUrls()) {
             cloudinaryService.deleteImage(imageUrl, "offers_images");
         }

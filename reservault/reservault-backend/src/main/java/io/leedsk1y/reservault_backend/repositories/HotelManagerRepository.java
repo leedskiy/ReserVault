@@ -11,4 +11,5 @@ public interface HotelManagerRepository extends MongoRepository<HotelManager, UU
     void deleteByManagerId(UUID managerId);
     void deleteByManagerIdAndHotelIdentifierIn(UUID managerId, List<String> hotelIdentifiers);
     Optional<HotelManager> findByManagerIdAndHotelIdentifier(UUID managerId, String hotelIdentifier);
+    void deleteByHotelIdentifier(String hotelIdentifier);
 }

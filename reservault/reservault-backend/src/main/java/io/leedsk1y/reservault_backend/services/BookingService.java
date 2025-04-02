@@ -235,4 +235,26 @@ public class BookingService {
                 .filter(b -> b.getUserId().equals(user.getId()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found or access denied"));
     }
+
+    public boolean deleteBooking(UUID bookingId) {
+        Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
+        if (bookingOpt.isEmpty()) {
+            return false;
+        }
+
+        Booking booking = bookingOpt.get();
+
+        if (booking.getPaymentId() != null) {
+            paymentRepository.deleteById(booking.getPaymentId());
+        }
+
+        bookedDatesRepository.findByOfferId(booking.getOfferId()).stream()
+                .filter(bd -> bd.getDateFrom().equals(booking.getDateFrom()) && bd.getDateUntil().equals(booking.getDateUntil()))
+                .map(BookedDates::getId)
+                .forEach(bookedDatesRepository::deleteById);
+        
+        bookingRepository.deleteById(bookingId);
+
+        return true;
+    }
 }

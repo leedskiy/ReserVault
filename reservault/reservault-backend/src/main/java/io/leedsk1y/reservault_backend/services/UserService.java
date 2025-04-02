@@ -1,7 +1,12 @@
 package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
+import io.leedsk1y.reservault_backend.models.entities.BookedDates;
+import io.leedsk1y.reservault_backend.models.entities.Booking;
 import io.leedsk1y.reservault_backend.models.entities.User;
+import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
+import io.leedsk1y.reservault_backend.repositories.BookingRepository;
+import io.leedsk1y.reservault_backend.repositories.PaymentRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import io.leedsk1y.reservault_backend.security.jwt.CookieUtils;
 import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
@@ -11,15 +16,29 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
+    private final BookingRepository bookingRepository;
+    private final BookedDatesRepository bookedDatesRepository;
+    private final PaymentRepository paymentRepository;
+    private final UserDeletionService userDeletionService;
 
-    public UserService(UserRepository userRepository, JwtUtils jwtUtils) {
+    public UserService(UserRepository userRepository,
+                       JwtUtils jwtUtils,
+                       BookingRepository bookingRepository,
+                       BookedDatesRepository bookedDatesRepository,
+                       PaymentRepository paymentRepository,
+                       UserDeletionService userDeletionService) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
+        this.bookingRepository = bookingRepository;
+        this.bookedDatesRepository = bookedDatesRepository;
+        this.paymentRepository = paymentRepository;
+        this.userDeletionService = userDeletionService;
     }
 
     public UserDetailedResponseDTO getAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
@@ -35,7 +54,17 @@ public class UserService {
 
     public void deleteAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
         User user = extractUserFromToken(request, response);
-        userRepository.deleteById(user.getId());
+
+        if (user.getRoles().contains("ROLE_ADMIN")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin accounts cannot be deleted");
+        }
+
+        if (user.getRoles().contains("ROLE_MANAGER")) {
+            userDeletionService.deleteManager(user.getId());
+        } else {
+            userDeletionService.deleteUser(user.getId());
+        }
+
         CookieUtils.clearJwtCookie(response);
     }
 

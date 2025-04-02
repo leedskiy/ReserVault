@@ -1,15 +1,25 @@
 package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
+import io.leedsk1y.reservault_backend.models.entities.BookedDates;
+import io.leedsk1y.reservault_backend.models.entities.Booking;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
+import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.models.enums.EHotelManagerStatus;
+import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
+import io.leedsk1y.reservault_backend.repositories.BookingRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
+import io.leedsk1y.reservault_backend.repositories.OfferRepository;
+import io.leedsk1y.reservault_backend.repositories.PaymentRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -20,17 +30,34 @@ import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
-    private HotelRepository hotelRepository;
-    private CloudinaryService cloudinaryService;
+    private final HotelRepository hotelRepository;
+    private final CloudinaryService cloudinaryService;
     private final UserRepository userRepository;
     private final HotelManagerRepository hotelManagerRepository;
+    private final OfferRepository offerRepository;
+    private final BookingRepository bookingRepository;
+    private final BookedDatesRepository bookedDatesRepository;
+    private final PaymentRepository paymentRepository;
+    private final UserDeletionService userDeletionService;
 
-    public AdminService(HotelRepository hotelRepository, CloudinaryService cloudinaryService,
-                        UserRepository userRepository, HotelManagerRepository hotelManagerRepository) {
+    public AdminService(HotelRepository hotelRepository,
+                        CloudinaryService cloudinaryService,
+                        UserRepository userRepository,
+                        HotelManagerRepository hotelManagerRepository,
+                        OfferRepository offerRepository,
+                        BookingRepository bookingRepository,
+                        BookedDatesRepository bookedDatesRepository,
+                        PaymentRepository paymentRepository,
+                        UserDeletionService userDeletionService) {
         this.hotelRepository = hotelRepository;
         this.cloudinaryService = cloudinaryService;
         this.userRepository = userRepository;
         this.hotelManagerRepository = hotelManagerRepository;
+        this.offerRepository = offerRepository;
+        this.bookingRepository = bookingRepository;
+        this.bookedDatesRepository = bookedDatesRepository;
+        this.paymentRepository = paymentRepository;
+        this.userDeletionService = userDeletionService;
     }
 
     public List<Hotel> getAllHotels() {
@@ -83,18 +110,55 @@ public class AdminService {
     }
 
     public boolean deleteHotel(UUID id) {
-        Optional<Hotel> hotel = hotelRepository.findById(id);
-        if (hotel.isPresent()) {
-            Hotel h = hotel.get();
+        Optional<Hotel> hotelOptional = hotelRepository.findById(id);
+        if (hotelOptional.isEmpty()) {
+            return false;
+        }
 
-            for (String imageUrl : h.getImagesUrls()) {
-                cloudinaryService.deleteImage(imageUrl, "hotels_images");
+        Hotel hotel = hotelOptional.get();
+        String hotelIdentifier = hotel.getIdentifier();
+
+        // 1. delete hotelmanager
+        hotelManagerRepository.deleteByHotelIdentifier(hotelIdentifier);
+
+        // 2. delete offers, payments, booked dates, bookings, offer images
+        List<Offer> offers = offerRepository.findByHotelIdentifier(hotelIdentifier);
+        for (Offer offer : offers) {
+            List<Booking> bookings = bookingRepository.findByOfferId(offer.getId());
+            for (Booking booking : bookings) {
+                // delete payments
+                if (booking.getPaymentId() != null) {
+                    paymentRepository.deleteById(booking.getPaymentId());
+                }
+
+                // delete booked dates
+                bookedDatesRepository.findByOfferId(offer.getId()).stream()
+                        .filter(bd -> bd.getDateFrom().equals(booking.getDateFrom()) &&
+                                bd.getDateUntil().equals(booking.getDateUntil()))
+                        .map(BookedDates::getId)
+                        .forEach(bookedDatesRepository::deleteById);
+
+                // delete booking
+                bookingRepository.deleteById(booking.getId());
             }
 
-            hotelRepository.deleteById(id);
-            return true;
+            // delete offer images
+            for (String imageUrl : offer.getImagesUrls()) {
+                cloudinaryService.deleteImage(imageUrl, "offers_images");
+            }
+
+            offerRepository.deleteById(offer.getId());
         }
-        return false;
+
+        // 3. delete hotel images
+        for (String imageUrl : hotel.getImagesUrls()) {
+            cloudinaryService.deleteImage(imageUrl, "hotels_images");
+        }
+
+        // 4. delete hotel
+        hotelRepository.deleteById(id);
+
+        return true;
     }
 
     public boolean removeHotelImage(UUID hotelId, String imageUrl) {
@@ -127,23 +191,22 @@ public class AdminService {
                 .map(UserDetailedResponseDTO::new);
     }
 
-    public boolean deleteUser(UUID id) {
-        Optional<User> userOptional = userRepository.findById(id);
-
-        if (userOptional.isEmpty()) {
-            return false;
+    public void deleteUser(UUID userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
 
-        User user = userOptional.get();
+        User user = userOpt.get();
 
-        if (user.getRoles().contains("ROLE_ADMIN")) {
-            throw new RuntimeException("Cannot delete an admin user.");
+        if (user.getRoles().contains("ROLE_MANAGER")) {
+            userDeletionService.deleteManager(userId);
+        } else if (user.getRoles().contains("ROLE_USER")) {
+            userDeletionService.deleteUser(userId);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user role for deletion");
         }
-
-        userRepository.deleteById(id);
-        return true;
     }
-
 
     public boolean approveManagerRequest(UUID managerId) {
         Optional<User> userOptional = userRepository.findById(managerId);
