@@ -50,9 +50,11 @@ const AdminUsers = () => {
     };
 
     const getDropdownItems = (user) => {
-        if (user.roles?.includes("ROLE_ADMIN")) {
-            return [];
-        }
+        if (user.roles?.includes("ROLE_ADMIN")) return [];
+
+        const verificationStatus = getVerificationStatus(user.id, user.verified);
+        const showVerify = user.roles.includes("ROLE_MANAGER") &&
+            (verificationStatus === "unverified" || verificationStatus === "partially_verified");
 
         const commonItems = [
             {
@@ -69,14 +71,12 @@ const AdminUsers = () => {
                     icon: FaList,
                     onClick: () => handleShowManagerHotels(user.id),
                 },
-                ...(!user.verified
-                    ? [
-                        {
-                            label: "Verify Manager",
-                            icon: MdVerified,
-                            onClick: () => handleVerifyManager(user.id),
-                        },
-                    ]
+                ...(showVerify
+                    ? [{
+                        label: "Verify Manager",
+                        icon: MdVerified,
+                        onClick: () => handleVerifyManager(user.id),
+                    }]
                     : []),
                 ...commonItems,
             ];
@@ -85,11 +85,42 @@ const AdminUsers = () => {
         return commonItems;
     };
 
+    const { data: hotelManagerStatusMap = {} } = useQuery({
+        queryKey: ["admin", "managerHotelStatuses"],
+        queryFn: async () => {
+            const { data: users } = await api.get("/admin/users");
+            const map = {};
+
+            await Promise.all(
+                users
+                    .filter((user) => user.roles.includes("ROLE_MANAGER"))
+                    .map(async (user) => {
+                        const { data } = await api.get(`/admin/managers/${user.id}/hotels`);
+                        map[user.id] = data;
+                    })
+            );
+
+            return map;
+        },
+        enabled: !!usersData,
+    });
+
+    const getVerificationStatus = (userId, isVerified) => {
+        const relations = hotelManagerStatusMap[userId];
+        if (!relations || relations.length === 0) return "unknown";
+
+        const allApproved = relations.every((hm) => hm.status === "APPROVED");
+
+        if (!isVerified) return "unverified";
+        if (allApproved) return "fully_verified";
+        return "partially_verified";
+    };
+
     const handleShowManagerHotels = async (managerId) => {
         try {
             const { data } = await api.get(`/admin/managers/${managerId}/hotels`);
             setManagerId(managerId);
-            setCurrentHotelIdentifiers(data.map((hotel) => hotel.hotelIdentifier));
+            setCurrentHotelIdentifiers(data);
             setShowEditModal(true);
         } catch (error) {
             console.error("Failed to load manager's hotels:", error);
@@ -174,10 +205,31 @@ const AdminUsers = () => {
                                             <div className="text-lg font-semibold text-gray-900" title={user.email}>
                                                 {limitText(user.email, 17)}
                                             </div>
-                                            {user.verified ? (
-                                                <MdVerified size={18} className="text-[#32492D]" />
+
+                                            {user.roles?.includes("ROLE_MANAGER") ? (
+                                                <MdVerified
+                                                    size={18}
+                                                    title={
+                                                        getVerificationStatus(user.id, user.verified) === "fully_verified"
+                                                            ? "Manager is fully verified"
+                                                            : getVerificationStatus(user.id, user.verified) === "partially_verified"
+                                                                ? "Manager is verified, some hotels pending approval"
+                                                                : "Manager is not verified"
+                                                    }
+                                                    className={
+                                                        getVerificationStatus(user.id, user.verified) === "fully_verified"
+                                                            ? "text-[#32492D]"
+                                                            : getVerificationStatus(user.id, user.verified) === "partially_verified"
+                                                                ? "text-yellow-500"
+                                                                : "text-gray-400"
+                                                    }
+                                                />
                                             ) : (
-                                                <MdVerified size={18} className="text-gray-400" />
+                                                user.verified ? (
+                                                    <MdVerified size={18} className="text-[#32492D]" title="Verified" />
+                                                ) : (
+                                                    <MdVerified size={18} className="text-gray-400" title="Not Verified" />
+                                                )
                                             )}
                                         </div>
                                         <div className={`text-sm ${roleLabels[user?.roles?.[0]]?.color || "text-gray-500"}`}>

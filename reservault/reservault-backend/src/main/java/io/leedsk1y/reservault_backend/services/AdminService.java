@@ -153,20 +153,32 @@ public class AdminService {
         }
 
         User user = userOptional.get();
-        if (user.getRoles().contains("ROLE_MANAGER") && !user.isVerified()) {
-            user.setVerified(true);
-            userRepository.save(user);
 
-            hotelManagerRepository.findByManagerId(managerId)
-                    .forEach(hotelManager -> {
-                        hotelManager.setStatus(EHotelManagerStatus.APPROVED);
-                        hotelManagerRepository.save(hotelManager);
-                    });
-
-            return true;
+        if (!user.getRoles().contains("ROLE_MANAGER")) {
+            return false;
         }
 
-        return false;
+        boolean isUpdated = false;
+
+        if (!user.isVerified()) {
+            user.setVerified(true);
+            userRepository.save(user);
+            isUpdated = true;
+        }
+
+        List<HotelManager> pendingRelations = hotelManagerRepository.findByManagerId(managerId).stream()
+                .filter(hm -> hm.getStatus() == EHotelManagerStatus.PENDING)
+                .collect(Collectors.toList());
+
+        if (!pendingRelations.isEmpty()) {
+            pendingRelations.forEach(hm -> {
+                hm.setStatus(EHotelManagerStatus.APPROVED);
+                hotelManagerRepository.save(hm);
+            });
+            isUpdated = true;
+        }
+
+        return isUpdated;
     }
 
     public boolean rejectManagerRequest(UUID managerId) {

@@ -3,25 +3,31 @@ import { FaTimes } from "react-icons/fa";
 import { motion } from "framer-motion";
 import api from "../../api/axios";
 
-const EditManagerHotelsModal = ({ managerId, currentHotelIdentifiers, onClose }) => {
-    const [hotelIdentifiers, setHotelIdentifiers] = useState(currentHotelIdentifiers || []);
+const EditManagerHotelsModal = ({ managerId, currentHotelIdentifiers = [], onClose }) => {
+    const [hotelManagers, setHotelManagers] = useState(currentHotelIdentifiers);
     const [hotelIdentifier, setHotelIdentifier] = useState("");
     const [error, setError] = useState("");
 
     const addHotelIdentifier = () => {
-        if (hotelIdentifier && !hotelIdentifiers.includes(hotelIdentifier)) {
-            setHotelIdentifiers([...hotelIdentifiers, hotelIdentifier]);
+        if (
+            hotelIdentifier &&
+            !hotelManagers.some((hm) => hm.hotelIdentifier === hotelIdentifier)
+        ) {
+            setHotelManagers([
+                ...hotelManagers,
+                { hotelIdentifier, status: "PENDING" }
+            ]);
             setHotelIdentifier("");
         }
     };
 
     const removeHotelIdentifier = (identifier) => {
-        setHotelIdentifiers(hotelIdentifiers.filter(id => id !== identifier));
+        setHotelManagers(hotelManagers.filter(hm => hm.hotelIdentifier !== identifier));
     };
 
     const handleSave = async () => {
         try {
-            await api.put(`/admin/managers/${managerId}/hotels`, hotelIdentifiers);
+            await api.put(`/admin/managers/${managerId}/hotels`, hotelManagers.map(hm => hm.hotelIdentifier));
             onClose();
         } catch (error) {
             if (error.response && error.response.data) {
@@ -74,14 +80,19 @@ const EditManagerHotelsModal = ({ managerId, currentHotelIdentifiers, onClose })
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2">
-                        {hotelIdentifiers.map((identifier, index) => (
-                            <div key={index} className="flex items-center gap-1 bg-gray-200 px-2 py-1 rounded">
-                                <span>{identifier}</span>
-                                {hotelIdentifiers.length > 1 && (
+                        {hotelManagers.map((hm, index) => (
+                            <div
+                                key={index}
+                                title={hm.status === "APPROVED" ? "Approved" : "Pending approval"}
+                                className={`flex items-center gap-1 px-2 py-1 rounded bg-gray-200
+                                                ${hm.status === "APPROVED" ? "text-[#32492D]" : "text-yellow-600"}`}
+                            >
+                                <span>{hm.hotelIdentifier}</span>
+                                {hotelManagers.length > 1 && (
                                     <button
                                         type="button"
                                         className="bg-red-600 text-white p-1 rounded-full"
-                                        onClick={() => removeHotelIdentifier(identifier)}
+                                        onClick={() => removeHotelIdentifier(hm.hotelIdentifier)}
                                     >
                                         <FaTimes size={10} />
                                     </button>
