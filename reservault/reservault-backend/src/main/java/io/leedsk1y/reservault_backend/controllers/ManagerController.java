@@ -49,6 +49,18 @@ public class ManagerController {
         }
     }
 
+    @PutMapping("/hotels")
+    public ResponseEntity<?> updateManagerHotelList(@RequestBody List<String> updatedHotelIdentifiers) {
+        try {
+            List<HotelManager> updated = managerService.updateManagerHotelList(updatedHotelIdentifiers);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
     @PostMapping(value="/offers", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createOffer(
             @RequestPart("offer") String offerJson,

@@ -5,6 +5,7 @@ import Sidebar from "../../components/common/Sidebar";
 import { FaUser, FaLock, FaHotel } from "react-icons/fa";
 import ProfileNameSection from "../../components/common/profile/ProfileNameSection";
 import ProfileSecuritySection from "../../components/common/profile/ProfileSecuritySection";
+import ProfileHotelsSection from "../../components/common/profile/ProfileHotelsSection";
 import { useAuth } from "../../context/AuthContext";
 
 const ProfilePage = () => {
@@ -21,7 +22,7 @@ const ProfilePage = () => {
     const sidebarOptions = [
         { label: "Name", value: "name", icon: FaUser },
         { label: "Security", value: "security", icon: FaLock },
-        isManager && { label: "Hotels", value: "hotels", icon: FaHotel },
+        isManager && { label: "Hotels List", value: "hotelslist", icon: FaHotel },
     ].filter(Boolean);
 
     return (
@@ -39,7 +40,7 @@ const ProfilePage = () => {
 
                     <div className="flex flex-col items-center w-full">
                         {view === "name" && <ProfileNameSection />}
-                        {view === "hotels" && <ProfileNameSection />}
+                        {isManager && view === "hotelslist" && <ProfileHotelsSection />}
                         {view === "security" && <ProfileSecuritySection />}
                     </div>
                 </div>

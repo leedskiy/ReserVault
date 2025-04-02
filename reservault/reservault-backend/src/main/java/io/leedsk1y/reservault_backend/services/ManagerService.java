@@ -8,6 +8,7 @@ import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.models.entities.Review;
 import io.leedsk1y.reservault_backend.models.entities.ReviewResponse;
 import io.leedsk1y.reservault_backend.models.entities.User;
+import io.leedsk1y.reservault_backend.models.enums.EHotelManagerStatus;
 import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
@@ -25,7 +26,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ManagerService {
@@ -81,6 +84,49 @@ public class ManagerService {
         return hotelManagerRepository.findByManagerId(user.getId());
     }
 
+    public List<HotelManager> updateManagerHotelList(List<String> updatedHotelIdentifiers) {
+        User manager = validateAndGetManager();
+
+        Set<String> validHotelIdentifiers = hotelRepository.findAll()
+                .stream()
+                .map(Hotel::getIdentifier)
+                .collect(Collectors.toSet());
+
+        List<String> invalidIdentifiers = updatedHotelIdentifiers.stream()
+                .filter(id -> !validHotelIdentifiers.contains(id))
+                .collect(Collectors.toList());
+
+        if (!invalidIdentifiers.isEmpty()) {
+            throw new IllegalArgumentException("Invalid hotel identifiers: " + invalidIdentifiers);
+        }
+
+        List<HotelManager> currentHotelManagers = hotelManagerRepository.findByManagerId(manager.getId());
+        Set<String> currentIdentifiers = currentHotelManagers.stream()
+                .map(HotelManager::getHotelIdentifier)
+                .collect(Collectors.toSet());
+
+        List<String> toRemove = currentIdentifiers.stream()
+                .filter(id -> !updatedHotelIdentifiers.contains(id))
+                .collect(Collectors.toList());
+
+        List<String> toAdd = updatedHotelIdentifiers.stream()
+                .filter(id -> !currentIdentifiers.contains(id))
+                .collect(Collectors.toList());
+
+        if (currentHotelManagers.size() - toRemove.size() + toAdd.size() < 1) {
+            throw new IllegalArgumentException("You must be assigned to at least one hotel.");
+        }
+
+        hotelManagerRepository.deleteByManagerIdAndHotelIdentifierIn(manager.getId(), toRemove);
+
+        for (String identifier : toAdd) {
+            HotelManager newHotelManager = new HotelManager(identifier, manager.getId(), EHotelManagerStatus.PENDING);
+            hotelManagerRepository.save(newHotelManager);
+        }
+
+        return hotelManagerRepository.findByManagerId(manager.getId());
+    }
+
     public Offer createOffer(Offer offer, List<MultipartFile> images) throws IOException {
         User user = validateAndGetManager();
 
@@ -102,9 +148,11 @@ public class ManagerService {
             throw new IllegalArgumentException("date from must be before date until.");
         }
 
+        assertApprovedHotelManager(user.getId(), offer.getHotelIdentifier());
+
         HotelManager hotelManager = hotelManagerRepository
                 .findByManagerIdAndHotelIdentifier(user.getId(), offer.getHotelIdentifier())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not a manager for this hotel."));
+                .get();
 
         offer.setId(UUID.randomUUID());
         offer.setManagerId(user.getId());
@@ -129,6 +177,8 @@ public class ManagerService {
         if (!existingOffer.getManagerId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this offer");
         }
+
+        assertApprovedHotelManager(user.getId(), existingOffer.getHotelIdentifier());
 
         hotelManagerRepository.findByManagerIdAndHotelIdentifier(user.getId(), existingOffer.getHotelIdentifier())
                 .orElseThrow(() -> new IllegalArgumentException("You are not a manager for the specified hotel."));
@@ -182,6 +232,16 @@ public class ManagerService {
         return user;
     }
 
+    private void assertApprovedHotelManager(UUID managerId, String hotelIdentifier) {
+        HotelManager hotelManager = hotelManagerRepository
+                .findByManagerIdAndHotelIdentifier(managerId, hotelIdentifier)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not a manager for this hotel."));
+
+        if (hotelManager.getStatus() != EHotelManagerStatus.APPROVED) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Your manager status for this hotel is pending approval.");
+        }
+    }
+
     public boolean deleteOffer(UUID offerId) {
         User user = validateAndGetManager();
 
@@ -191,6 +251,8 @@ public class ManagerService {
         if (!offer.getManagerId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to delete this offer");
         }
+
+        assertApprovedHotelManager(user.getId(), offer.getHotelIdentifier());
 
         for (String imageUrl : offer.getImagesUrls()) {
             cloudinaryService.deleteImage(imageUrl, "offers_images");
@@ -210,6 +272,8 @@ public class ManagerService {
         if (!offer.getManagerId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to modify this offer");
         }
+
+        assertApprovedHotelManager(user.getId(), offer.getHotelIdentifier());
 
         if (!offer.getImagesUrls().contains(imageUrl)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image URL not found in this offer");
@@ -234,6 +298,8 @@ public class ManagerService {
         if (!offer.getManagerId().equals(manager.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to respond to this review");
         }
+
+        assertApprovedHotelManager(manager.getId(), offer.getHotelIdentifier());
 
         Review review = offer.getReviews().stream()
                 .filter(r -> r.getId().equals(reviewId))
@@ -260,6 +326,8 @@ public class ManagerService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to modify this review");
         }
 
+        assertApprovedHotelManager(manager.getId(), offer.getHotelIdentifier());
+
         Review review = offer.getReviews().stream()
                 .filter(r -> r.getId().equals(reviewId))
                 .findFirst()
@@ -272,4 +340,5 @@ public class ManagerService {
         review.setResponse(null);
         offerRepository.save(offer);
     }
+
 }
