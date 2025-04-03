@@ -63,7 +63,7 @@ const ProfileSecuritySection = () => {
                     onSubmit={handleSubmit(onSubmit)}
                     className="w-full flex flex-col relative items-center justify-center space-y-6"
                 >
-                    <h3 className="text-xl font-semibold text-gray-900 text-center">Password Change</h3>
+                    <h2 className="text-2xl font-semibold text-gray-900 text-center">Password Change</h2>
 
                     <div className="items-center justify-center flex flex-col w-full">
                         <label className="block text-gray-600 font-medium mb-1">Current Password</label>
@@ -133,7 +133,7 @@ const ProfileSecuritySection = () => {
 
             {!user?.roles?.includes("ROLE_ADMIN") && (
                 <div className="w-full flex flex-col gap-4 relative items-center justify-center space-y-6">
-                    <h3 className="text-xl font-semibold text-gray-900 text-center">Delete Account</h3>
+                    <h2 className="text-2xl font-semibold text-gray-900 text-center">Delete Account</h2>
 
                     <p className="text-sm text-gray-600">
                         Deleting your account is permanent and cannot be undone.

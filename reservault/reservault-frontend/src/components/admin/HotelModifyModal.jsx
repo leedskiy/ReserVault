@@ -159,7 +159,7 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                 <div className="flex flex-col w-1/2 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-gray-600">Identifier</label>
+                            <label className="block text-gray-600 font-medium mb-1">Identifier</label>
                             <input
                                 type="text"
                                 name="identifier"
@@ -169,11 +169,13 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-600">Hotel Name</label>
+                            <label className="block text-gray-600 font-medium mb-1">Hotel Name</label>
                             <input
                                 type="text"
                                 name="name"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 onChange={handleChange}
                                 value={hotelData.name}
                                 required
@@ -182,10 +184,12 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
                     </div>
 
                     <div>
-                        <label className="block text-gray-600">Description</label>
+                        <label className="block text-gray-600 font-medium mb-1">Description</label>
                         <textarea
                             name="description"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                            className="w-full border border-gray-300 rounded-md px-3 py-2
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                             onChange={handleChange}
                             value={hotelData.description}
                             required
@@ -194,44 +198,52 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-gray-600">Country</label>
+                            <label className="block text-gray-600 font-medium mb-1">Country</label>
                             <input
                                 type="text"
                                 name="country"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 onChange={handleChange}
                                 value={hotelData.location.country}
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-600">City</label>
+                            <label className="block text-gray-600 font-medium mb-1">City</label>
                             <input
                                 type="text"
                                 name="city"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 onChange={handleChange}
                                 value={hotelData.location.city}
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-600">Street</label>
+                            <label className="block text-gray-600 font-medium mb-1">Street</label>
                             <input
                                 type="text"
                                 name="street"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 onChange={handleChange}
                                 value={hotelData.location.street}
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-600">Postal Code</label>
+                            <label className="block text-gray-600 font-medium mb-1">Postal Code</label>
                             <input
                                 type="text"
                                 name="postalCode"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 onChange={handleChange}
                                 value={hotelData.location.postalCode}
                                 required
@@ -242,7 +254,7 @@ const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
             )}
             rightContent={(
                 <div className="h-auto flex flex-col">
-                    <label className="block text-gray-600 mb-4">Stars</label>
+                    <label className="block text-gray-600 font-medium mb-1">Stars</label>
                     <HotelStars
                         hotelData={hotelData}
                         setHotelData={setHotelData}

@@ -99,18 +99,20 @@ const HotelAddForm = ({ onSubmit }) => {
             />
 
             <div>
-                <label className="block text-gray-600">Description</label>
+                <label className="block text-gray-600 font-medium mb-1">Description</label>
                 <textarea
                     name="description"
                     value={hotelData.description}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2
+                        focus:outline-none transition-all duration-100 ease-in-out transform
+                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                     required
                 />
             </div>
 
             <div>
-                <label className="block text-gray-600">Stars</label>
+                <label className="block text-gray-600 font-medium mb-1">Stars</label>
                 <HotelStars
                     hotelData={hotelData}
                     setHotelData={setHotelData}

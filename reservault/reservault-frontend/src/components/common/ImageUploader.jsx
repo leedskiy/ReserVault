@@ -56,10 +56,10 @@ const ImageUploader = ({ images = [], setImages, isDragging, setIsDragging, item
 
     return (
         <div>
-            <label className="block text-gray-600">Add Images</label>
+            <label className="block text-gray-600 font-medium mb-1">Add Images</label>
             <div
                 className={`cursor-pointer border-dashed border-2 p-2 flex items-center overflow-x-auto rounded-lg gap-x-4 relative min-h-[120px]
-                    ${isDragging ? "border-blue-500 bg-blue-100" : "border-gray-300 bg-gray-100"}`}
+                    ${isDragging ? "border-[#32492D] bg-[#c3cfc0]" : "border-gray-300 bg-gray-100"}`}
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -77,7 +77,7 @@ const ImageUploader = ({ images = [], setImages, isDragging, setIsDragging, item
                 />
 
                 {images.length === 0 && (
-                    <p className="text-gray-700 font-semibold text-center mx-auto">
+                    <p className="text-gray-600 font-medium text-center mx-auto">
                         Upload {itemsName} Images
                     </p>
                 )}

@@ -187,7 +187,7 @@ const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
                 <div className="flex flex-col w-1/2 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-gray-600">Hotel identifier</label>
+                            <label className="block text-gray-600 font-medium mb-1">Hotel identifier</label>
                             <input
                                 type="text"
                                 className="w-full px-4 py-2 bg-gray-200 border rounded-lg"
@@ -196,11 +196,13 @@ const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-600">Offer title</label>
+                            <label className="block text-gray-600 font-medium mb-1">Offer title</label>
                             <input
                                 type="text"
                                 name="title"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2
+                                            focus:outline-none transition-all duration-100 ease-in-out transform
+                                            rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 onChange={handleChange}
                                 value={offerData.title}
                                 required
@@ -209,10 +211,12 @@ const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
                     </div>
 
                     <div>
-                        <label className="block text-gray-600">Description</label>
+                        <label className="block text-gray-600 font-medium mb-1">Description</label>
                         <textarea
                             name="description"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                            className="w-full border border-gray-300 rounded-md px-3 py-2
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                             onChange={handleChange}
                             value={offerData.description}
                             required
@@ -220,7 +224,7 @@ const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
                     </div>
 
                     <div>
-                        <label className="block text-gray-600">Date Range</label>
+                        <label className="block text-gray-600 font-medium mb-1">Date Range</label>
 
                         <DateRangeSelector
                             startDate={offerData.dateFrom}
@@ -239,7 +243,7 @@ const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
 
                     <div className="grid grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-gray-600 mb-1">Room Count</label>
+                            <label className="block text-gray-600 font-medium mb-1">Room Count</label>
                             <div className="flex items-center gap-4">
                                 <button
                                     type="button"
@@ -270,7 +274,7 @@ const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
                         </div>
 
                         <div>
-                            <label className="block text-gray-600 mb-1">People Count</label>
+                            <label className="block text-gray-600 font-medium mb-1">People Count</label>
                             <div className="flex items-center gap-4">
                                 <button
                                     type="button"
@@ -301,13 +305,15 @@ const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
                         </div>
 
                         <div>
-                            <label className="block text-gray-600">Price Per Night (€)</label>
+                            <label className="block text-gray-600 font-medium mb-1">Price Per Night (€)</label>
                             <input
                                 type="number"
                                 name="pricePerNight"
                                 value={offerData.pricePerNight}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 border rounded-lg"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2
+                                            focus:outline-none transition-all duration-100 ease-in-out transform
+                                            rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                                 step="0.01"
                                 min="0"
                                 required
@@ -318,7 +324,7 @@ const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
             )}
             rightContent={(
                 <div className="h-auto flex flex-col">
-                    <label className="block text-gray-600">Facilities</label>
+                    <label className="block text-gray-600 font-medium mb-1">Facilities</label>
 
                     <FacilitiesSelector
                         facilities={offerData.facilities}

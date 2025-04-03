@@ -82,7 +82,7 @@ const Register = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.4, ease: "easeOut" }}
             >
-                <h3 className="text-xl font-semibold text-gray-900 text-center">Create an Account</h3>
+                <h2 className="text-2xl font-semibold text-gray-900 text-center">Create an Account</h2>
 
                 {serverError && <p className="text-red-500 text-center mb-3">{serverError}</p>}
 

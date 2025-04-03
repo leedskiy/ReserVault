@@ -57,9 +57,7 @@ const ModifyFormContainer = ({
                     <FaTimes size={20} />
                 </button>
 
-                <h2 className="text-2xl font-semibold text-gray-900 text-center mb-4">
-                    {title}
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-900 text-center">{title}</h2>
 
                 {errorMessage && (
                     <div className="text-red-500 text-center mb-4">
@@ -72,7 +70,7 @@ const ModifyFormContainer = ({
 
                     <div className="flex flex-col flex-grow max-w-[40%] space-y-6">
                         <div>
-                            <label className="block text-gray-600">Manage Images</label>
+                            <label className="block text-gray-600 font-medium mb-1">Manage Images</label>
                             <div className="flex gap-x-4 overflow-x-auto p-2 border rounded-lg whitespace-nowrap">
                                 {images?.map((img, index) => (
                                     <div
@@ -91,7 +89,7 @@ const ModifyFormContainer = ({
                                                 <FaTimes size={14} />
                                             </button>
                                         )}
-                                        <span className="text-sm font-bold mb-1 block text-center">
+                                        <span className="text-sm text-gray-600 font-bold mb-1 block text-center">
                                             #{index + 1}
                                         </span>
                                         <img

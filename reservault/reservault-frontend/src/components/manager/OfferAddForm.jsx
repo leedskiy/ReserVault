@@ -132,12 +132,14 @@ const OfferAddForm = ({ onSubmit }) => {
     return (
         <AddFormContainer title="Add Offer" errorMessage={errorMessage} onSubmit={handleSubmit}>
             <div>
-                <label className="block text-gray-600">Select Hotel</label>
+                <label className="block text-gray-600 font-medium mb-1">Select Hotel</label>
                 <select
                     name="hotelIdentifier"
                     value={offerData.hotelIdentifier}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2
+                                focus:outline-none transition-all duration-100 ease-in-out transform
+                                rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                     required
                 >
                     <option value="">Select a hotel</option>
@@ -155,18 +157,20 @@ const OfferAddForm = ({ onSubmit }) => {
             />
 
             <div>
-                <label className="block text-gray-600">Description</label>
+                <label className="block text-gray-600 font-medium mb-1">Description</label>
                 <textarea
                     name="description"
                     value={offerData.description}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2
+                                focus:outline-none transition-all duration-100 ease-in-out transform
+                                rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                     required
                 />
             </div>
 
             <div>
-                <label className="block text-gray-600 mb-1">Date Range</label>
+                <label className="block text-gray-600 font-medium mb-1">Date Range</label>
 
                 <DateRangeSelector
                     startDate={offerData.dateFrom}
@@ -184,7 +188,7 @@ const OfferAddForm = ({ onSubmit }) => {
             </div>
 
             <div>
-                <label className="block text-gray-600">Facilities</label>
+                <label className="block text-gray-600 font-medium mb-1">Facilities</label>
                 <FacilitiesSelector
                     facilities={offerData.facilities}
                     onToggle={handleFacilityToggle}
