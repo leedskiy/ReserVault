@@ -18,9 +18,10 @@ public class BookedDates {
         this.createdAt = Instant.now();
     }
 
-    public BookedDates(UUID offerId, String dateFrom, String dateUntil) {
+    public BookedDates(UUID offerId, UUID bookingId, String dateFrom, String dateUntil) {
         this.id = UUID.randomUUID();
         this.offerId = offerId;
+        this.bookingId = bookingId;
         this.dateFrom = dateFrom;
         this.dateUntil = dateUntil;
         this.createdAt = Instant.now();
@@ -30,6 +31,8 @@ public class BookedDates {
     private UUID id;
 
     private UUID offerId;
+
+    private UUID bookingId;
 
     private String dateFrom;
 

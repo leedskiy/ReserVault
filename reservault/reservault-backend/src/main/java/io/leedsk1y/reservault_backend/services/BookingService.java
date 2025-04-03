@@ -69,6 +69,11 @@ public class BookingService {
         LocalDate newStart = LocalDate.parse(booking.getDateFrom(), formatter);
         LocalDate newEnd = LocalDate.parse(booking.getDateUntil(), formatter);
 
+        LocalDate today = LocalDate.now();
+        if (newStart.isBefore(today) || newEnd.isBefore(today)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking dates cannot be in the past");
+        }
+
         if (!newStart.isBefore(newEnd) && !newStart.equals(newEnd)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid booking dates");
         }
@@ -88,7 +93,6 @@ public class BookingService {
             LocalDate existingStart = LocalDate.parse(existing.getDateFrom(), formatter);
             LocalDate existingEnd = LocalDate.parse(existing.getDateUntil(), formatter);
 
-            // Check for overlap
             if (!(newEnd.isBefore(existingStart) || newStart.isAfter(existingEnd))) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected dates are already booked");
             }
@@ -107,7 +111,7 @@ public class BookingService {
         booking.setPaymentId(payment.getId());
         bookingRepository.save(booking);
 
-        bookedDatesRepository.save(new BookedDates(booking.getOfferId(), booking.getDateFrom(), booking.getDateUntil()));
+        bookedDatesRepository.save(new BookedDates(booking.getOfferId(), booking.getId(), booking.getDateFrom(), booking.getDateUntil()));
 
         return booking;
     }

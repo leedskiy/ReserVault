@@ -16,6 +16,7 @@ const DateRangeSelector = ({
     minDate = new Date(),
     maxDate = undefined,
     popupPosition = "bottom",
+    offerStartDate,
 }) => {
     const [showCalendar, setShowCalendar] = useState(false);
     const calendarRef = useRef(null);
@@ -88,6 +89,7 @@ const DateRangeSelector = ({
                             }}
                             rangeColors={["#32492D"]}
                             showDateDisplay={false}
+                            shownDate={offerStartDate || undefined}
                         />
                     </motion.div>
                 )}

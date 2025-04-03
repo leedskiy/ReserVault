@@ -7,7 +7,7 @@ import ModifyFormContainer from "../common/ModifyFormContainer";
 import DateRangeSelector from "../common/DateRangeSelector";
 import { div } from "framer-motion/client";
 
-const OfferModifyModal = ({ offer, onSubmit, onClose }) => {
+const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
     const [isDirty, setIsDirty] = useState(false);
     const [offerData, setOfferData] = useState({ ...offer, images: offer.images || [] });
     const [draggingIndex, setDraggingIndex] = useState(null);
@@ -85,8 +85,20 @@ const OfferModifyModal = ({ offer, onSubmit, onClose }) => {
             }
         }
 
-        setIsDirty(false);
-        onSubmit(offerData.id, formData);
+        try {
+            setIsDirty(false);
+            await onSubmit(offerData.id, formData);
+        } catch (error) {
+            let message;
+
+            if (typeof error?.response?.data === "string") {
+                message = error.response.data;
+            } else {
+                message = error?.response?.data?.message || error?.message || "An error occurred.";
+            }
+
+            setErrorMessage(message);
+        }
     };
 
     const handleDragStart = (index) => {
@@ -170,12 +182,9 @@ const OfferModifyModal = ({ offer, onSubmit, onClose }) => {
             isDirty={isDirty}
             setImagesToDelete={setImagesToDelete}
             itemsName="Offer"
+            errorMessage={errorMessage || externalError}
             leftContent={(
                 <div className="flex flex-col w-1/2 space-y-4">
-                    {errorMessage && (
-                        <div className="text-red-500 text-center">{errorMessage}</div>
-                    )}
-
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-gray-600">Hotel identifier</label>

@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import FacilityIcons from "../common/FacilityIcons";
 import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { parse, eachDayOfInterval, isBefore, isAfter } from "date-fns";
+import { parse, eachDayOfInterval, isBefore, isAfter, startOfDay } from "date-fns";
 import { useAuth } from "../../context/AuthContext";
 import DateRangeSelector from "./DateRangeSelector";
 import api from "../../api/axios";
@@ -67,13 +67,16 @@ const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess })
     calendarSpanStart.setDate(calendarSpanStart.getDate() - 30);
     const calendarSpanEnd = new Date(offerEndDate);
     calendarSpanEnd.setDate(calendarSpanEnd.getDate() + 30);
+    const today = startOfDay(new Date());
+    const actualOfferStartDate = isBefore(offerStartDate, today) ? today : offerStartDate;
 
     for (let d = new Date(calendarSpanStart); d <= calendarSpanEnd; d.setDate(d.getDate() + 1)) {
         const date = new Date(d);
         const outOfRange = isBefore(date, offerStartDate) || isAfter(date, offerEndDate);
         const isBooked = bookedDates.some(b => b.getTime() === date.getTime());
+        const isBeforeToday = isBefore(date, today);
 
-        if (outOfRange || isBooked) {
+        if (outOfRange || isBooked || isBeforeToday) {
             disabledDates.push(new Date(date));
         }
     }
@@ -221,6 +224,7 @@ const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess })
                                                     disabledDates={disabledDates}
                                                     minDate={offerStartDate}
                                                     maxDate={offerEndDate}
+                                                    offerStartDate={actualOfferStartDate}
                                                 />
                                             </div>
                                         </div>

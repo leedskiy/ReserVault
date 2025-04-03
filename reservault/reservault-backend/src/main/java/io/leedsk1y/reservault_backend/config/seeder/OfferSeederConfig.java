@@ -73,8 +73,8 @@ public class OfferSeederConfig {
                             "unwind in our infinity pool, and explore vibrant city life just moments away. Whether you're " +
                             "traveling with friends or family, this escape blends coastal relaxation with cultural discovery.",
                     10,
-                    "04.10.2025",
-                    "04.15.2025",
+                    "04.07.2025",
+                    "04.14.2025",
                     3,
                     6,
                     new BigDecimal("179.99"),
@@ -92,8 +92,8 @@ public class OfferSeederConfig {
                             "cuisine, rejuvenating spa treatments, and breathtaking sea views. With luxurious amenities and " +
                             "direct beach access, it's the perfect way to recharge and celebrate the start of the season in style.",
                     7.5,
-                    "05.01.2025",
-                    "05.07.2025",
+                    "04.20.2025",
+                    "04.30.2025",
                     2,
                     4,
                     new BigDecimal("139.50"),

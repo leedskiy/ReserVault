@@ -21,6 +21,7 @@ const ModifyFormContainer = ({
     isDirty,
     setImagesToDelete,
     itemsName = "Item",
+    errorMessage,
 }) => {
     useEffect(() => {
         const handleBeforeUnload = (event) => {
@@ -59,6 +60,12 @@ const ModifyFormContainer = ({
                 <h2 className="text-2xl font-semibold text-gray-900 text-center mb-4">
                     {title}
                 </h2>
+
+                {errorMessage && (
+                    <div className="text-red-500 text-center mb-4">
+                        {errorMessage}
+                    </div>
+                )}
 
                 <div className="flex gap-10 h-full p-4">
                     {leftContent}

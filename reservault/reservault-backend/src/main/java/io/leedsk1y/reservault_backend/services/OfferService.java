@@ -271,6 +271,16 @@ public class OfferService {
             throw new IllegalArgumentException("date from must be before date until.");
         }
 
+        List<BookedDates> bookedDates = bookedDatesRepository.findByOfferId(offerId);
+        for (BookedDates booked : bookedDates) {
+            LocalDate bookedStart = LocalDate.parse(booked.getDateFrom(), formatter);
+            LocalDate bookedEnd = LocalDate.parse(booked.getDateUntil(), formatter);
+            if (!(fromDate.isBefore(bookedStart) || fromDate.equals(bookedStart)) || !(untilDate.isAfter(bookedEnd) || untilDate.equals(bookedEnd))) {
+                throw new IllegalArgumentException("The updated offer dates must include the already booked dates: " +
+                        "From " + booked.getDateFrom() + " to " + booked.getDateUntil());
+            }
+        }
+
         existingOffer.setTitle(updatedOffer.getTitle());
         existingOffer.setDescription(updatedOffer.getDescription());
         existingOffer.setDateFrom(updatedOffer.getDateFrom());

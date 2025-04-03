@@ -17,6 +17,7 @@ const ManagerOffers = () => {
     const queryClient = useQueryClient();
     const { view } = useParams();
     const [selectedOffer, setSelectedOffer] = useState(null);
+    const [updateError, setUpdateError] = useState("");
 
     useEffect(() => {
         if (!loading && (!isAuthenticated || !isManager)) {
@@ -54,7 +55,8 @@ const ManagerOffers = () => {
         onSuccess: () => {
             queryClient.invalidateQueries(["manager", "offers"]);
             setSelectedOffer(null);
-        },
+            setUpdateError("");
+        }
     });
 
     return (
@@ -96,8 +98,9 @@ const ManagerOffers = () => {
             {selectedOffer && (
                 <OfferModifyModal
                     offer={selectedOffer}
-                    onSubmit={(id, formData) => updateOfferMutation.mutate({ id, formData })}
+                    onSubmit={(id, formData) => updateOfferMutation.mutateAsync({ id, formData })}
                     onClose={() => setSelectedOffer(null)}
+                    externalError={updateError}
                 />
             )}
         </>
