@@ -1,5 +1,6 @@
 package io.leedsk1y.reservault_backend.controllers;
 
+import io.leedsk1y.reservault_backend.dto.AdminDashboardStatsDTO;
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
@@ -145,5 +146,10 @@ public class AdminController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<AdminDashboardStatsDTO> getDashboardStats() {
+        return ResponseEntity.ok(adminService.getAdminDashboardStats());
     }
 }

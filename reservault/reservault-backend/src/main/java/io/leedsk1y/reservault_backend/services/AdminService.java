@@ -1,5 +1,6 @@
 package io.leedsk1y.reservault_backend.services;
 
+import io.leedsk1y.reservault_backend.dto.AdminDashboardStatsDTO;
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.BookedDates;
 import io.leedsk1y.reservault_backend.models.entities.Booking;
@@ -35,17 +36,23 @@ public class AdminService {
     private final UserRepository userRepository;
     private final HotelManagerRepository hotelManagerRepository;
     private final UserDeletionService userDeletionService;
+    private final OfferRepository offerRepository;
+    private final BookingRepository bookingRepository;
 
     public AdminService(HotelService hotelService,
                         HotelRepository hotelRepository,
                         UserRepository userRepository,
                         HotelManagerRepository hotelManagerRepository,
-                        UserDeletionService userDeletionService) {
+                        UserDeletionService userDeletionService,
+                        OfferRepository offerRepository,
+                        BookingRepository bookingRepository) {
         this.hotelService = hotelService;
         this.hotelRepository = hotelRepository;
         this.userRepository = userRepository;
         this.hotelManagerRepository = hotelManagerRepository;
         this.userDeletionService = userDeletionService;
+        this.offerRepository = offerRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public List<Hotel> getAllHotels() {
@@ -223,4 +230,31 @@ public class AdminService {
         return hotelManagerRepository.findByManagerId(managerId);
     }
 
+
+    public AdminDashboardStatsDTO getAdminDashboardStats() {
+        long totalUsers = userRepository.count();
+
+        long verifiedManagers = userRepository
+                .findAll().stream()
+                .filter(user -> user.getRoles().contains("ROLE_MANAGER") && user.isVerified())
+                .count();
+
+        long totalManagers = userRepository
+                .findAll().stream()
+                .filter(user -> user.getRoles().contains("ROLE_MANAGER"))
+                .count();
+
+        long totalHotels = hotelRepository.count();
+        long totalOffers = offerRepository.count();
+        long totalBookings = bookingRepository.count();
+
+        return new AdminDashboardStatsDTO(
+                totalUsers,
+                verifiedManagers,
+                totalHotels,
+                totalOffers,
+                totalManagers,
+                totalBookings
+        );
+    }
 }
