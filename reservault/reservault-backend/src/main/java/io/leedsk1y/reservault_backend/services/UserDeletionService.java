@@ -46,7 +46,6 @@ public class UserDeletionService {
         List<Booking> bookings = bookingRepository.findByUserId(userId);
         for (Booking booking : bookings) {
             bookingService.deleteBooking(booking.getId());
-            reviewService.deleteReviewFromOffer(booking.getOfferId(), booking.getId());
         }
 
         // delete user

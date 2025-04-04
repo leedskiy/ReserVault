@@ -1,12 +1,7 @@
 package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
-import io.leedsk1y.reservault_backend.models.entities.BookedDates;
-import io.leedsk1y.reservault_backend.models.entities.Booking;
 import io.leedsk1y.reservault_backend.models.entities.User;
-import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
-import io.leedsk1y.reservault_backend.repositories.BookingRepository;
-import io.leedsk1y.reservault_backend.repositories.PaymentRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import io.leedsk1y.reservault_backend.security.jwt.CookieUtils;
 import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
@@ -16,28 +11,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
-    private final BookingRepository bookingRepository;
-    private final BookedDatesRepository bookedDatesRepository;
-    private final PaymentRepository paymentRepository;
     private final UserDeletionService userDeletionService;
 
     public UserService(UserRepository userRepository,
                        JwtUtils jwtUtils,
-                       BookingRepository bookingRepository,
-                       BookedDatesRepository bookedDatesRepository,
-                       PaymentRepository paymentRepository,
                        UserDeletionService userDeletionService) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
-        this.bookingRepository = bookingRepository;
-        this.bookedDatesRepository = bookedDatesRepository;
-        this.paymentRepository = paymentRepository;
         this.userDeletionService = userDeletionService;
     }
 
@@ -70,12 +55,14 @@ public class UserService {
 
     private User extractUserFromToken(HttpServletRequest request, HttpServletResponse response) {
         String token = jwtUtils.getJwtFromCookies(request);
+
         if (token == null || !jwtUtils.validateJwtToken(token, response)) {
             CookieUtils.clearJwtCookie(response);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
         }
 
         String email = jwtUtils.getUserNameFromJwtToken(token);
+
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
