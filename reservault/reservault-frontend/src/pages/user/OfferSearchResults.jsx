@@ -1,17 +1,22 @@
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { FaStar } from "react-icons/fa";
 import api from "../../api/axios";
 import SmartOfferSearch from "../../components/user/SmartOfferSearch";
 import OfferList from "../../components/common/OfferList";
 import Header from "../../components/common/Header";
 import OfferSearchSidebar from "../../components/user/OfferSearchSidebar";
+import HotelDetailsModal from "../../components/common/HotelDetailsModal";
 
 const OfferSearchResults = () => {
     const { isAuthenticated, isUser, loading } = useAuth();
     const navigate = useNavigate();
+    const [selectedHotelModal, setSelectedHotelModal] = useState(null);
+
     useEffect(() => {
         if (!loading && (!isAuthenticated || !isUser)) {
             navigate("/login");
@@ -31,6 +36,11 @@ const OfferSearchResults = () => {
             return data;
         },
     });
+
+    const hotelId = searchParams.get("hotelId");
+    const selectedHotel = hotelId
+        ? offers?.find((offer) => offer.hotelIdentifier === hotelId)
+        : null;
 
     const handleApplyFilters = useCallback((filterData) => {
         const {
@@ -90,20 +100,53 @@ const OfferSearchResults = () => {
             <div className="container mx-auto py-8 max-w-6xl flex flex-col gap-6">
                 <SmartOfferSearch />
 
-                <div className="flex gap-6">
-                    <OfferSearchSidebar onApplyFilters={handleApplyFilters} />
+                {selectedHotel && (
+                    <motion.div
+                        className="flex flex-col items-center justify-center border border-gray-200 shadow-md p-4 rounded-md bg-white text-gray-700 space-y-4"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                    >
+                        <h2
+                            className="text-2xl font-bold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer"
+                            title="Open hotel details"
+                            onClick={() => setSelectedHotelModal(selectedHotel.hotelIdentifier)}
+                        >
+                            {selectedHotel.hotelName}
+                        </h2>
+                        <div className="flex items-center space-x-1">
+                            {Array.from({ length: selectedHotel.stars }).map((_, i) => (
+                                <FaStar size={20} key={i} className="text-[#32492D]" />
+                            ))}
+                        </div>
+                        <div>
+                            {selectedHotel.location?.city}, {selectedHotel.location?.country}
+                        </div>
+                    </motion.div>
+                )}
 
-                    <div>
-                        <OfferList
-                            offers={offers}
-                            isLoading={isLoading}
-                            error={error}
-                            onModify={null}
-                            variant="user"
-                        />
-                    </div>
+                <div className="flex gap-6">
+                    <OfferSearchSidebar
+                        onApplyFilters={handleApplyFilters}
+                        setSearchParams={setSearchParams}
+                    />
+
+                    <OfferList
+                        offers={offers}
+                        isLoading={isLoading}
+                        error={error}
+                        onModify={null}
+                        variant="user"
+                    />
                 </div>
             </div>
+
+            {selectedHotelModal && (
+                <HotelDetailsModal
+                    hotelIdentifier={selectedHotelModal}
+                    onClose={() => setSelectedHotelModal(null)}
+                />
+            )}
         </>
     );
 };

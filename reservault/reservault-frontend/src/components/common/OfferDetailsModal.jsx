@@ -136,6 +136,7 @@ const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess })
                     <div className="flex-1 overflow-y-auto">
                         <h2
                             className="text-2xl font-semibold text-[#32492D] text-center mb-2 hover:text-[#273823] transition-all cursor-pointer"
+                            title="Open hotel details"
                             onClick={() => {
                                 onClose();
                                 onHotelClick?.(offer.hotelIdentifier);

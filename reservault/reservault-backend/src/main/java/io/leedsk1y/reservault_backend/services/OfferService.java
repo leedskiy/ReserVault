@@ -71,7 +71,7 @@ public class OfferService {
     public List<OfferWithLocationDTO> searchOffers(String location, Integer rooms, Integer people, String dateFrom, String dateUntil,
                                                    Double minPrice, Double maxPrice, Boolean wifi, Boolean parking, Boolean pool,
                                                    Boolean airConditioning, Boolean breakfast, Integer rating, Integer hotelStars,
-                                                   String sortBy, String sortOrder) {
+                                                   String sortBy, String sortOrder, String hotelId) {
         List<Offer> allOffers = offerRepository.findAll();
 
         final String inputCity;
@@ -92,6 +92,8 @@ public class OfferService {
                 .filter(offer -> {
                     Hotel hotel = hotelRepository.findByIdentifier(offer.getHotelIdentifier()).orElse(null);
                     if (hotel == null) return false;
+
+                    if (hotelId != null && !hotelId.equalsIgnoreCase(hotel.getIdentifier())) return false;
 
                     boolean matchesLocation = matchesLocation(hotel, inputCity, inputCountry);
                     boolean matchesRooms = rooms == null || offer.getRoomCount() >= rooms;

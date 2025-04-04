@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FaStar, FaBed, FaUserFriends, FaCheckCircle, FaCommentAlt } from "react-icons/fa";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ItemCardList from "./ItemCardList";
 import FacilityIcons from "./FacilityIcons";
 import api from "../../api/axios";
@@ -14,6 +15,9 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
     const [hotelError, setHotelError] = useState(null);
     const [hotelLoading, setHotelLoading] = useState(false);
     const [showReminder, setShowReminder] = useState(false);
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const hotelIdFilter = searchParams.get("hotelId");
 
     const fetchHotelDetails = async (hotelIdentifier) => {
         try {
@@ -49,7 +53,10 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
                 getImage={(offer) => offer.imagesUrls?.[0] || "https://via.placeholder.com/200"}
                 getTitle={(offer) => (
                     <div className="flex items-center space-x-4">
-                        <h2 className="text-lg font-semibold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer">
+                        <h2
+                            className="text-lg font-semibold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer"
+                            title="Show offer details"
+                        >
                             {offer.title}
                         </h2>
                         {variant === "manager" && (
@@ -66,28 +73,50 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
                     </div>
                 )}
 
-                getSubtitle={(offer) => (
-                    <div className="flex items-center space-x-4">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                fetchHotelDetails(offer.hotelIdentifier);
-                            }}
-                            className="text-base font-bold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer"
-                        >
-                            {offer.hotelName}
-                        </button>
-                        <div className="flex items-center space-x-1 text-[#32492D]">
-                            {Array.from({ length: offer.stars }).map((_, i) => (
-                                <FaStar key={i} />
-                            ))}
+                hotelFilter={hotelIdFilter ? true : false}
+
+                getSubtitle={(offer) => {
+                    if (hotelIdFilter) return null;
+
+                    const handleHotelClick = (e) => {
+                        e.stopPropagation();
+
+                        if (variant === "user") {
+                            const newParams = new URLSearchParams(searchParams);
+                            newParams.set("hotelId", offer.hotelIdentifier);
+                            navigate(`/offers/search?${newParams.toString()}`);
+                        } else if (variant === "manager") {
+                            fetchHotelDetails(offer.hotelIdentifier);
+                        }
+                    };
+
+
+                    const hotelTitleTooltip =
+                        variant === "user" ? "Filter by hotel name" : "Open hotel details";
+
+                    return (
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={handleHotelClick}
+                                title={hotelTitleTooltip}
+                                className="text-base font-bold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer"
+                            >
+                                {offer.hotelName}
+                            </button>
+                            <div className="flex items-center space-x-1 text-[#32492D]">
+                                {Array.from({ length: offer.stars }).map((_, i) => (
+                                    <FaStar key={i} />
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    );
+                }}
 
                 getDetails={(offer) => (
                     <>
-                        <p className="text-sm">{offer.location.city}, {offer.location.country}</p>
+                        {!hotelIdFilter && (
+                            <p className="text-sm">{offer.location.city}, {offer.location.country}</p>
+                        )}
                         {variant === "manager" && (
                             <p className="text-sm">{offer.dateFrom} → {offer.dateUntil}</p>
                         )}

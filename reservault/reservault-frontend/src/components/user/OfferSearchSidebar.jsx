@@ -5,7 +5,7 @@ import { Range } from "react-range";
 import FacilitiesSelector from "../common/FacilitiesSelector";
 import HotelStars from "../common/HotelStars";
 
-const OfferSearchSidebar = ({ onApplyFilters }) => {
+const OfferSearchSidebar = ({ onApplyFilters, setSearchParams }) => {
     // general
     const [searchParams] = useSearchParams();
 
@@ -348,6 +348,7 @@ const OfferSearchSidebar = ({ onApplyFilters }) => {
                                     preservedParams.set(key, value);
                                 }
                             });
+                            preservedParams.delete("hotelId");
 
                             onApplyFilters({
                                 sortingOption: null,
@@ -364,7 +365,7 @@ const OfferSearchSidebar = ({ onApplyFilters }) => {
                                 },
                             });
 
-                            window.history.replaceState(null, "", `/offers/search?${preservedParams.toString()}`);
+                            setSearchParams(preservedParams);
                         }}
                         className="text-gray-700 w-full px-4 py-2 border rounded-lg bg-white shadow-md hover:bg-gray-200 transition-all duration-300"
                     >

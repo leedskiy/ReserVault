@@ -19,7 +19,8 @@ const ItemCardList = ({
     contentWrapperClassName = "",
     descriptionLimit = 200,
     onCardClick,
-    variant = "manager"
+    variant = "manager",
+    hotelFilter = false,
 }) => {
     const limitText = (text, maxLength) =>
         text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
@@ -33,7 +34,7 @@ const ItemCardList = ({
                 {items?.map((item, index) => (
                     <motion.div
                         key={item.id}
-                        className="bg-white shadow-md rounded-lg flex border border-gray-200 p-4 w-full relative"
+                        className="bg-white shadow-md rounded-lg flex border border-gray-200 p-4 min-w-full relative"
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1, duration: 0.4, ease: "easeOut" }}
@@ -49,8 +50,8 @@ const ItemCardList = ({
 
                         <div className={`w-full px-6 flex flex-col ${contentWrapperClassName}`}>
                             {getTitle && <div>{getTitle(item)}</div>}
-                            {getSubtitle && <div className="text-sm text-gray-600">{getSubtitle(item)}</div>}
-                            {getDetails && <div className="text-sm text-gray-600 space-y-2">{getDetails(item)}</div>}
+                            {getSubtitle && !hotelFilter && <div className="text-sm text-gray-600">{getSubtitle(item)}</div>}
+                            {getDetails && !hotelFilter && <div className="text-sm text-gray-600 space-y-2">{getDetails(item)}</div>}
                             {variant !== "user" && getExtraIcons && (
                                 <div className="text-sm text-gray-600 flex flex-wrap gap-2">
                                     {getExtraIcons(item)}
