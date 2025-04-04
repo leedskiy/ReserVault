@@ -1,6 +1,7 @@
 package io.leedsk1y.reservault_backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.leedsk1y.reservault_backend.dto.ManagerDashboardStatsDTO;
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
 import io.leedsk1y.reservault_backend.dto.ReviewResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
@@ -125,5 +126,10 @@ public class ManagerController {
     public ResponseEntity<?> deleteResponseToReview(@PathVariable UUID reviewId) {
         managerService.deleteReviewResponse(reviewId);
         return ResponseEntity.ok("Response deleted successfully");
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<ManagerDashboardStatsDTO> getManagerStats() {
+        return ResponseEntity.ok(managerService.getManagerDashboardStats());
     }
 }

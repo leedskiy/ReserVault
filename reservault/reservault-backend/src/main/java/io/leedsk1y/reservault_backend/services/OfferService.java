@@ -390,4 +390,8 @@ public class OfferService {
         review.setResponse(null);
         offerRepository.save(offer);
     }
+
+    public List<Offer> getOffersByManagerEntities(UUID managerId) {
+        return offerRepository.findByManagerId(managerId);
+    }
 }

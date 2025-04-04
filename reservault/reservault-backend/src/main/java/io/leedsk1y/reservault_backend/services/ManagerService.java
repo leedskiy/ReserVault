@@ -1,5 +1,6 @@
 package io.leedsk1y.reservault_backend.services;
 
+import io.leedsk1y.reservault_backend.dto.ManagerDashboardStatsDTO;
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
 import io.leedsk1y.reservault_backend.dto.ReviewResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
@@ -146,5 +147,29 @@ public class ManagerService {
         }
 
         return user;
+    }
+
+    public ManagerDashboardStatsDTO getManagerDashboardStats() {
+        User manager = validateAndGetManager();
+
+        List<Offer> managerOffers = offerService.getOffersByManagerEntities(manager.getId());
+        long offersCount = managerOffers.size();
+
+        long bookingCount = 0;
+        long totalReviews = 0;
+        long respondedReviews = 0;
+
+        for (Offer offer : managerOffers) {
+            bookingCount += bookingRepository.countByOfferId(offer.getId());
+            
+            if (offer.getReviews() != null) {
+                totalReviews += offer.getReviews().size();
+                respondedReviews += offer.getReviews().stream().filter(r -> r.getResponse() != null).count();
+            }
+        }
+
+        double responseRate = totalReviews > 0 ? (respondedReviews * 100.0 / totalReviews) : 0.0;
+
+        return new ManagerDashboardStatsDTO(offersCount, bookingCount, totalReviews, responseRate);
     }
 }
