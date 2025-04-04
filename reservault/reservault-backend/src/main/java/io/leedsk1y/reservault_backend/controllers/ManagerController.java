@@ -100,8 +100,12 @@ public class ManagerController {
 
     @DeleteMapping(value="/offers/{id}")
     public ResponseEntity<?> deleteOffer(@PathVariable UUID id) {
-        managerService.deleteOffer(id);
-        return ResponseEntity.ok().body("Offer deleted successfully");
+        try {
+            managerService.deleteOffer(id);
+            return ResponseEntity.ok().body("Offer deleted successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/offers/{offerId}/images")

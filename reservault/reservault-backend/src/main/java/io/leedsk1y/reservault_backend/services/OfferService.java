@@ -6,6 +6,7 @@ import io.leedsk1y.reservault_backend.models.entities.BookedDates;
 import io.leedsk1y.reservault_backend.models.entities.Booking;
 import io.leedsk1y.reservault_backend.models.entities.Facilities;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
+import io.leedsk1y.reservault_backend.models.entities.HotelManager;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.models.entities.Review;
 import io.leedsk1y.reservault_backend.models.entities.ReviewResponse;
@@ -267,6 +268,10 @@ public class OfferService {
             throw new IllegalArgumentException("You are not authorized to update this offer");
         }
 
+        if(!existingOffer.getHotelIdentifier().equals(existingOffer.getHotelIdentifier())) {
+            throw new IllegalArgumentException("You can not change hotel identifiers");
+        }
+
         validateManagerHotelAssociation(updatedOffer.getHotelIdentifier(), managerId);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
@@ -321,6 +326,10 @@ public class OfferService {
 
         if (managerId != null && !offer.getManagerId().equals(managerId)) {
             throw new IllegalArgumentException("You are not authorized to delete this offer");
+        }
+
+        if (managerId != null) {
+            validateManagerHotelAssociation(offer.getHotelIdentifier(), managerId);
         }
 
         List<Booking> relatedBookings = bookingRepository.findByOfferId(offerId);
@@ -407,10 +416,11 @@ public class OfferService {
     }
 
     private void validateManagerHotelAssociation(String hotelIdentifier, UUID managerId) {
-        boolean isApproved = hotelManagerRepository
-                .findByManagerId(managerId).stream()
-                .anyMatch(hm -> hm.getHotelIdentifier().equals(hotelIdentifier)
-                        && hm.getStatus() == EHotelManagerStatus.APPROVED);
+        HotelManager hm = hotelManagerRepository
+                .findByManagerIdAndHotelIdentifier(managerId, hotelIdentifier)
+                .orElseThrow(() -> new IllegalArgumentException("Hotel manager not found"));
+
+        boolean isApproved = hm.getStatus() == EHotelManagerStatus.APPROVED;
 
         if (!isApproved) {
             throw new IllegalArgumentException("You are not approved to manage this hotel.");

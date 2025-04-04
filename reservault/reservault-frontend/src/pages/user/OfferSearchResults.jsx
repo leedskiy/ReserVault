@@ -131,13 +131,15 @@ const OfferSearchResults = () => {
                         setSearchParams={setSearchParams}
                     />
 
-                    <OfferList
-                        offers={offers}
-                        isLoading={isLoading}
-                        error={error}
-                        onModify={null}
-                        variant="user"
-                    />
+                    <div className="w-full">
+                        <OfferList
+                            offers={offers}
+                            isLoading={isLoading}
+                            error={error}
+                            onModify={null}
+                            variant="user"
+                        />
+                    </div>
                 </div>
             </div>
 

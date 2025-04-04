@@ -132,7 +132,7 @@ const ProfileSecuritySection = () => {
             )}
 
             {!user?.roles?.includes("ROLE_ADMIN") && (
-                <div className="w-full flex flex-col gap-4 relative items-center justify-center space-y-6">
+                <div className="w-full flex flex-col relative items-center justify-center space-y-8">
                     <h2 className="text-2xl font-semibold text-gray-900 text-center">Delete Account</h2>
 
                     <p className="text-sm text-gray-600">

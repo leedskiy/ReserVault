@@ -83,7 +83,7 @@ const ModifyFormContainer = ({
                 <h2 className="text-2xl font-semibold text-gray-900 text-center">{title}</h2>
 
                 {errorMessage && (
-                    <div className="text-red-500 text-center mb-4">
+                    <div className="text-red-500 text-center mt-2 mb-2">
                         {errorMessage}
                     </div>
                 )}

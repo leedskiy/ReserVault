@@ -38,6 +38,7 @@ const HotelList = ({ hotels, isLoading, error, onModify }) => {
             onModify={onModify}
             onDelete={(id) => deleteMutation.mutate(id)}
             descriptionLimit={500}
+            variant="admin"
         />
     );
 };

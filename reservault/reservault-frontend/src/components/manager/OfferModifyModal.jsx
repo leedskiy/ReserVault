@@ -69,7 +69,8 @@ const OfferModifyModal = ({ offer, onSubmit, onClose, externalError }) => {
                 peopleCount: offerData.peopleCount,
                 pricePerNight: offerData.pricePerNight,
                 facilities: offerData.facilities,
-                imagesUrls: offerData.images
+                imagesUrls: offerData.images,
+                hotelIdentifier: offerData.hotelIdentifier,
             })
         );
 
