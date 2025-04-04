@@ -9,8 +9,10 @@ import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.models.entities.Review;
 import io.leedsk1y.reservault_backend.models.entities.ReviewResponse;
+import io.leedsk1y.reservault_backend.models.enums.EHotelManagerStatus;
 import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
 import io.leedsk1y.reservault_backend.repositories.BookingRepository;
+import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import org.springframework.stereotype.Service;
@@ -37,19 +39,22 @@ public class OfferService {
     private final CloudinaryService cloudinaryService;
     private final BookingRepository bookingRepository;
     private final BookingService bookingService;
+    private final HotelManagerRepository hotelManagerRepository;
 
     public OfferService(OfferRepository offerRepository,
                         HotelRepository hotelRepository,
                         BookedDatesRepository bookedDatesRepository,
                         CloudinaryService cloudinaryService,
                         BookingRepository bookingRepository,
-                        BookingService bookingService) {
+                        BookingService bookingService,
+                        HotelManagerRepository hotelManagerRepository) {
         this.offerRepository = offerRepository;
         this.hotelRepository = hotelRepository;
         this.bookedDatesRepository = bookedDatesRepository;
         this.cloudinaryService = cloudinaryService;
         this.bookingRepository = bookingRepository;
         this.bookingService = bookingService;
+        this.hotelManagerRepository = hotelManagerRepository;
     }
 
     public List<OfferWithLocationDTO> getAllOffers() {
@@ -223,6 +228,8 @@ public class OfferService {
     }
 
     public Offer createOffer(Offer offer, List<MultipartFile> images, UUID managerId) throws IOException {
+        validateManagerHotelAssociation(offer.getHotelIdentifier(), managerId);
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
         LocalDate fromDate;
         LocalDate untilDate;
@@ -257,6 +264,8 @@ public class OfferService {
         if (!existingOffer.getManagerId().equals(managerId)) {
             throw new IllegalArgumentException("You are not authorized to update this offer");
         }
+
+        validateManagerHotelAssociation(updatedOffer.getHotelIdentifier(), managerId);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
         LocalDate fromDate, untilDate;
@@ -393,5 +402,16 @@ public class OfferService {
 
     public List<Offer> getOffersByManagerEntities(UUID managerId) {
         return offerRepository.findByManagerId(managerId);
+    }
+
+    private void validateManagerHotelAssociation(String hotelIdentifier, UUID managerId) {
+        boolean isApproved = hotelManagerRepository
+                .findByManagerId(managerId).stream()
+                .anyMatch(hm -> hm.getHotelIdentifier().equals(hotelIdentifier)
+                        && hm.getStatus() == EHotelManagerStatus.APPROVED);
+
+        if (!isApproved) {
+            throw new IllegalArgumentException("You are not approved to manage this hotel.");
+        }
     }
 }

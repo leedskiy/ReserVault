@@ -18,6 +18,7 @@ const ManagerOffers = () => {
     const { view } = useParams();
     const [selectedOffer, setSelectedOffer] = useState(null);
     const [updateError, setUpdateError] = useState("");
+    const [addError, setAddError] = useState("");
 
     useEffect(() => {
         if (!loading && (!isAuthenticated || !isManager)) {
@@ -42,9 +43,15 @@ const ManagerOffers = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries(["manager", "offers"]);
+            setAddError("");
             navigate("/manager/offers/list");
         },
+        onError: (error) => {
+            const message = error?.response?.data || "Failed to create offer.";
+            setAddError(message);
+        },
     });
+
 
     const updateOfferMutation = useMutation({
         mutationFn: async ({ id, formData }) => {
@@ -89,7 +96,11 @@ const ManagerOffers = () => {
                                 }
                             />
                         ) : (
-                            <OfferAddForm onSubmit={addOfferMutation.mutate} onCancel={() => setView("list")} />
+                            <OfferAddForm
+                                onSubmit={addOfferMutation.mutate}
+                                onCancel={() => setView("list")}
+                                externalError={addError}
+                            />
                         )}
                     </motion.div>
                 </div>

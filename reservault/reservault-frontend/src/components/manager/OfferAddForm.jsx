@@ -15,7 +15,7 @@ import TextInput from "../common/TextInput";
 import FacilitiesSelector from "../common/FacilitiesSelector";
 import DateRangeSelector from "../common/DateRangeSelector";
 
-const OfferAddForm = ({ onSubmit }) => {
+const OfferAddForm = ({ onSubmit, onCancel, externalError = "" }) => {
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -130,7 +130,11 @@ const OfferAddForm = ({ onSubmit }) => {
     };
 
     return (
-        <AddFormContainer title="Add Offer" errorMessage={errorMessage} onSubmit={handleSubmit}>
+        <AddFormContainer
+            title="Add Offer"
+            errorMessage={errorMessage || externalError}
+            onSubmit={handleSubmit}
+        >
             <div>
                 <label className="block text-gray-600 font-medium mb-1">Select Hotel</label>
                 <select
