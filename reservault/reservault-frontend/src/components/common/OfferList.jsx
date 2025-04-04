@@ -8,6 +8,7 @@ import api from "../../api/axios";
 import OfferDetailsModal from "./OfferDetailsModal";
 import HotelDetailsModal from "./HotelDetailsModal";
 import PopupModal from "../common/PopupModal";
+import ConfirmationPopup from "./ConfirmationPopup";
 
 const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) => {
     const [selectedOfferDetails, setSelectedOfferDetails] = useState(null);
@@ -18,6 +19,7 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const hotelIdFilter = searchParams.get("hotelId");
+    const [offerToDelete, setOfferToDelete] = useState(null);
 
     const fetchHotelDetails = async (hotelIdentifier) => {
         try {
@@ -153,7 +155,7 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
                 getPrice={(offer) => `${offer.pricePerNight} €`}
                 getDescription={(offer) => offer.description}
                 onModify={onModify}
-                onDelete={(id) => deleteMutation.mutate(id)}
+                onDelete={(id) => setOfferToDelete(id)}
                 contentWrapperClassName="space-y-2"
                 descriptionLimit={(variant === "user" ? 520 : 200)}
                 onCardClick={(offer) => setSelectedOfferDetails(offer)}
@@ -178,9 +180,30 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
             {showReminder && (
                 <PopupModal
                     title="Booking Confirmed"
-                    icon={<FaCheckCircle className="text-[#32492D] mx-auto text-5xl mb-3" />}
+                    icon={<FaCheckCircle className="text-[#32492D] mx-auto text-5xl" />}
                     message="To complete your booking, go to the Bookings page and proceed with payment. You have 60 minutes before it expires."
                     onClose={() => setShowReminder(false)}
+                />
+            )}
+
+            {offerToDelete && (
+                <ConfirmationPopup
+                    isOpen={!!offerToDelete}
+                    title="Confirm Deletion"
+                    message={"Are you sure you want to delete this offer? This action cannot be undone. " +
+                        "It will delete associated hotemanagaers, bookings, payments etc."
+                    }
+                    onConfirm={() => {
+                        deleteMutation.mutate(offerToDelete, {
+                            onSuccess: () => {
+                                queryClient.invalidateQueries(["manager", "offers"]);
+                                setOfferToDelete(null);
+                            },
+                        });
+                    }}
+                    onCancel={() => setOfferToDelete(null)}
+                    confirmLabel="Delete"
+                    cancelLabel="Cancel"
                 />
             )}
         </>

@@ -9,6 +9,7 @@ import api from "../../api/axios";
 import Header from "../../components/common/Header";
 import ManagerHotelsModifyModal from "../../components/admin/ManagerHotelsModifyModal";
 import DropdownButton from "../../components/common/DropdownButton";
+import ConfirmationPopup from "../../components/common/ConfirmationPopup";
 
 const AdminUsers = () => {
     const { isAuthenticated, isAdmin, loading } = useAuth();
@@ -18,6 +19,7 @@ const AdminUsers = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [managerId, setManagerId] = useState(null);
     const [currentHotelIdentifiers, setCurrentHotelIdentifiers] = useState([]);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     useEffect(() => {
         if (!loading && (!isAuthenticated || !isAdmin)) {
@@ -158,7 +160,7 @@ const AdminUsers = () => {
     });
 
     const handleDeleteUser = (userId) => {
-        deleteUserMutation.mutate(userId);
+        setUserToDelete(userId);
     };
 
     const handleVerifyManager = (userId) => {
@@ -264,6 +266,27 @@ const AdminUsers = () => {
                     managerId={managerId}
                     currentHotelIdentifiers={currentHotelIdentifiers}
                     onClose={handleCloseModal}
+                />
+            )}
+
+            {userToDelete && (
+                <ConfirmationPopup
+                    isOpen={!!userToDelete}
+                    title="Delete User"
+                    message={"Are you sure you want to delete this user? Action cannot be undone, and all associated " +
+                        "data will be lost. It will delete associated offers, hotemanagaers, bookings, payments etc."
+                    }
+                    onConfirm={() => {
+                        deleteUserMutation.mutate(userToDelete, {
+                            onSuccess: () => {
+                                queryClient.invalidateQueries(["admin", "users"]);
+                                setUserToDelete(null);
+                            },
+                        });
+                    }}
+                    onCancel={() => setUserToDelete(null)}
+                    confirmLabel="Delete"
+                    cancelLabel="Cancel"
                 />
             )}
         </>

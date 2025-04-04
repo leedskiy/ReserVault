@@ -6,7 +6,7 @@ const PopupModal = ({
     message,
     onClose,
     title = "Check Your Email",
-    icon = <FaEnvelope className="text-[#32492D] mx-auto text-5xl mb-3" />,
+    icon = <FaEnvelope className="text-[#32492D] mx-auto text-5xl" />,
 }) => {
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -30,15 +30,17 @@ const PopupModal = ({
             transition={{ duration: 0.3, ease: "easeOut" }}
         >
             <motion.div
-                className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm text-center"
+                className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm text-center space-y-4"
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 50 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
             >
                 {icon}
+
                 <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-                <p className="text-gray-600 mt-2">{message}</p>
+
+                <p className="text-gray-600">{message}</p>
 
                 <button
                     onClick={onClose}

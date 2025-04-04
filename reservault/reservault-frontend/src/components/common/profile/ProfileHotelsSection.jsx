@@ -164,7 +164,7 @@ const ProfileHotelsSection = () => {
                 showPendingModal && (
                     <PopupModal
                         title="Awaiting Approval"
-                        icon={<FaExclamationTriangle heckCircle className="text-[#32492D] mx-auto text-5xl mb-3" />}
+                        icon={<FaExclamationTriangle heckCircle className="text-[#32492D] mx-auto text-5xl" />}
                         message={`You've added ${pendingAdded.length
                             } hotel${pendingAdded.length > 1 ? "s" : ""} that need to be verified by an admin before you can create offers for it.`}
                         onClose={() => {
