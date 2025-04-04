@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import Header from "../../components/common/Header";
 import SmartOfferSearch from "../../components/user/SmartOfferSearch";
+import UniversalDashboard from "../../components/common/UniversalDashboard";
 
 const Dashboard = () => {
-    const { user, isAuthenticated, loading, isUser } = useAuth();
+    const { user, isAuthenticated, loading, isAdmin, isManager, isUser } = useAuth();
     const navigate = useNavigate();
 
     const headerRef = useRef(null);
@@ -27,15 +28,12 @@ const Dashboard = () => {
         return <div className="flex justify-center items-center min-h-screen text-gray-600">Loading...</div>;
     }
 
-    if (!isUser) {
+
+    if (isAdmin || isManager) {
         return (
             <>
                 <Header />
-                <div className="container mx-auto flex items-center justify-center" style={{ minHeight: `calc(100vh - 88px)` }}>
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md text-center">
-                        <h2 className="text-2xl font-semibold text-gray-900">Welcome, {user?.name}!</h2>
-                    </div>
-                </div>
+                <UniversalDashboard role={isAdmin ? "Admin" : "Manager"} />
             </>
         );
     }
@@ -48,7 +46,7 @@ const Dashboard = () => {
                     Search for Accommodation
                 </h1>
                 <SmartOfferSearch />
-            </div>
+            </div >
         </>
     );
 };
