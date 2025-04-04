@@ -25,6 +25,19 @@ const OfferDetailsModal = ({ offerId, onClose, onHotelClick, onBookingSuccess })
         enabled: !!offerId,
     });
 
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") {
+                onClose();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [onClose]);
+
     const [bookingRange, setBookingRange] = useState({ startDate: null, endDate: null });
     const [bookedDateRanges, setBookedDateRanges] = useState([]);
     const [bookingError, setBookingError] = useState("");

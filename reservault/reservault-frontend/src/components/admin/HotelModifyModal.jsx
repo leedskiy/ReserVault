@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import HotelStars from "../common/HotelStars";
 import ModifyFormContainer from "../common/ModifyFormContainer";
-import { div } from "framer-motion/client";
 
 const HotelModifyModal = ({ hotel, onSubmit, onClose }) => {
     const [isDirty, setIsDirty] = useState(false);

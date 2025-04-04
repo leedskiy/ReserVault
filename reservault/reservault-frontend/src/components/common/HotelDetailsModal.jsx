@@ -18,6 +18,19 @@ const HotelDetailsModal = ({ hotelIdentifier, onClose }) => {
     });
 
     useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") {
+                onClose();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [onClose]);
+
+    useEffect(() => {
         Fancybox.bind("[data-fancybox='gallery']", {
             Thumbs: {
                 autoStart: true,

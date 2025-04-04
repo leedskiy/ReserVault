@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { FaEnvelope } from "react-icons/fa";
 import { motion } from "framer-motion";
 
@@ -7,6 +8,19 @@ const PopupModal = ({
     title = "Check Your Email",
     icon = <FaEnvelope className="text-[#32492D] mx-auto text-5xl mb-3" />,
 }) => {
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") {
+                onClose();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [onClose]);
+
     return (
         <motion.div
             className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"

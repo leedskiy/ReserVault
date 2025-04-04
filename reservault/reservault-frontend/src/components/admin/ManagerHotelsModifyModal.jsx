@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { motion } from "framer-motion";
 import api from "../../api/axios";
@@ -7,6 +7,19 @@ const EditManagerHotelsModal = ({ managerId, currentHotelIdentifiers = [], onClo
     const [hotelManagers, setHotelManagers] = useState(currentHotelIdentifiers);
     const [hotelIdentifier, setHotelIdentifier] = useState("");
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") {
+                onClose();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [onClose]);
 
     const addHotelIdentifier = () => {
         if (
