@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { FaUser, FaUsers, FaHotel, FaSignOutAlt, FaCalendarAlt } from "react-icons/fa";
 import { RiHotelFill } from "react-icons/ri";
 import DropdownMenu from "./DropdownMenu";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo.svg";
 
 const Header = () => {
     const { user, logout, isAdmin, isManager, isUser } = useAuth();
