@@ -113,7 +113,7 @@ const OfferSearchSidebar = ({ onApplyFilters, setSearchParams }) => {
 
     return (
         <motion.aside
-            className="w-72 bg-white shadow-lg h-full p-4 rounded-md flex-shrink-0"
+            className="w-72 bg-white shadow-lg h-full p-4 rounded-md flex-shrink-0 sticky top-6"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}

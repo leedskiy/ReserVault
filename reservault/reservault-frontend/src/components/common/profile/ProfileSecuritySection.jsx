@@ -44,13 +44,6 @@ const ProfileSecuritySection = () => {
         }
     };
 
-    const handleDeleteAccount = async () => {
-        try {
-            await api.delete("/users/me");
-            await logout(navigate);
-        } catch (err) { }
-    };
-
     return (
         <>
             <motion.div

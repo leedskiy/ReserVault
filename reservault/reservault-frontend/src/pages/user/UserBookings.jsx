@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { motion } from "framer-motion";
@@ -10,6 +10,7 @@ import DropdownButton from "../../components/common/DropdownButton";
 import OfferDetailsModal from "../../components/common/OfferDetailsModal";
 import HotelDetailsModal from "../../components/common/HotelDetailsModal";
 import PopupModal from "../../components/common/PopupModal";
+import Pagination from "../../components/common/Pagination";
 
 const UserBookings = () => {
     const { isAuthenticated, isUser, loading } = useAuth();
@@ -83,6 +84,22 @@ const UserBookings = () => {
         return `${minutes} min${minutes > 1 ? "s" : ""}`;
     };
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 9;
+    const listRef = useRef(null);
+
+    const totalPages = Math.ceil((bookings?.length || 0) / itemsPerPage);
+    const paginatedBookings = bookings?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    const handlePageChange = (pageNum) => {
+        if (pageNum >= 1 && pageNum <= totalPages) {
+            setCurrentPage(pageNum);
+            if (listRef.current) {
+                listRef.current.scrollIntoView({ behavior: "smooth" });
+            }
+        }
+    };
+
     return (
         <>
             <Header />
@@ -96,14 +113,14 @@ const UserBookings = () => {
                     <p className="text-center text-gray-600">You have no bookings yet.</p>
                 )}
 
-                <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {bookings?.map((booking, index) => (
+                <motion.div ref={listRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {paginatedBookings?.map((booking, index) => (
                         <motion.div
                             key={booking.id}
                             className="bg-white shadow-md rounded-lg p-4 w-full border border-gray-200 flex flex-col"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1, duration: 0.4, ease: "easeOut" }}
+                            transition={{ delay: index * 0.1, duration: 0.3, ease: "easeOut" }}
                         >
                             <div className="flex">
                                 <div className="flex flex-col w-full space-y-2">
@@ -176,6 +193,12 @@ const UserBookings = () => {
                     ))}
                 </motion.div>
             </div>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
 
             {selectedOfferId && (
                 <OfferDetailsModal

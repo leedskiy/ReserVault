@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FaStar, FaBed, FaUserFriends, FaCheckCircle, FaCommentAlt } from "react-icons/fa";
+import {
+    FaStar, FaBed, FaUserFriends,
+    FaCheckCircle, FaCommentAlt,
+} from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ItemCardList from "./ItemCardList";
 import FacilityIcons from "./FacilityIcons";
@@ -9,6 +12,7 @@ import OfferDetailsModal from "./OfferDetailsModal";
 import HotelDetailsModal from "./HotelDetailsModal";
 import PopupModal from "../common/PopupModal";
 import ConfirmationPopup from "./ConfirmationPopup";
+import Pagination from "../common/Pagination";
 
 const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) => {
     const [selectedOfferDetails, setSelectedOfferDetails] = useState(null);
@@ -45,121 +49,140 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
         },
     });
 
+    const listRef = useRef(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const totalPages = Math.ceil((offers?.length || 0) / itemsPerPage);
+    const paginatedOffers = offers?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    const handlePageChange = (pageNum) => {
+        if (pageNum >= 1 && pageNum <= totalPages) {
+            setCurrentPage(pageNum);
+
+            if (listRef.current) {
+                listRef.current.scrollIntoView({ behavior: "smooth" });
+            }
+        }
+    };
+
     return (
         <>
-            <ItemCardList
-                items={offers}
-                variant={variant}
-                isLoading={isLoading}
-                error={error}
-                getImage={(offer) => offer.imagesUrls?.[0] || "https://via.placeholder.com/200"}
-                getTitle={(offer) => (
-                    <div className="flex items-center space-x-4">
-                        <h2
-                            className="text-lg font-semibold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer"
-                            title="Show offer details"
-                        >
-                            {offer.title}
-                        </h2>
-                        {variant === "manager" && (
-                            <div className="flex items-center space-x-2">
-                                <div className="flex items-center space-x-1 text-[#32492D]" title={`${offer.reviews.length} review(s)`}>
-                                    <FaCommentAlt size={15} />
-                                    <span>{offer.reviews.length}</span>
-                                </div>
-                                <div className="flex items-center justify-center text-l bg-[#32492D] text-white rounded-lg max-w-16 py-1 w-10">
-                                    {offer.rating}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                hotelFilter={hotelIdFilter ? true : false}
-
-                getSubtitle={(offer) => {
-                    if (hotelIdFilter) return null;
-
-                    const handleHotelClick = (e) => {
-                        e.stopPropagation();
-
-                        if (variant === "user") {
-                            const newParams = new URLSearchParams(searchParams);
-                            newParams.set("hotelId", offer.hotelIdentifier);
-                            navigate(`/offers/search?${newParams.toString()}`);
-                        } else if (variant === "manager") {
-                            fetchHotelDetails(offer.hotelIdentifier);
-                        }
-                    };
-
-
-                    const hotelTitleTooltip =
-                        variant === "user" ? "Filter by hotel name" : "Open hotel details";
-
-                    return (
+            <div ref={listRef}>
+                <ItemCardList
+                    items={paginatedOffers}
+                    variant={variant}
+                    isLoading={isLoading}
+                    error={error}
+                    getImage={(offer) => offer.imagesUrls?.[0] || "https://via.placeholder.com/200"}
+                    getTitle={(offer) => (
                         <div className="flex items-center space-x-4">
-                            <button
-                                onClick={handleHotelClick}
-                                title={hotelTitleTooltip}
-                                className="text-base font-bold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer"
+                            <h2
+                                className="text-lg font-semibold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer"
+                                title="Show offer details"
                             >
-                                {offer.hotelName}
-                            </button>
-                            <div className="flex items-center space-x-1 text-[#32492D]">
-                                {Array.from({ length: offer.stars }).map((_, i) => (
-                                    <FaStar key={i} />
-                                ))}
-                            </div>
-                        </div>
-                    );
-                }}
-
-                getDetails={(offer) => (
-                    <>
-                        {!hotelIdFilter && (
-                            <p className="text-sm">{offer.location.city}, {offer.location.country}</p>
-                        )}
-                        {variant === "manager" && (
-                            <p className="text-sm">{offer.dateFrom} → {offer.dateUntil}</p>
-                        )}
-                    </>
-                )}
-                getExtraIcons={(offer) => {
-                    const isUser = variant === "user";
-
-                    return (
-                        <div
-                            className={`text-sm text-[#32492D] ${isUser ? "flex flex-col items-end gap-9" : "flex flex-wrap gap-2 items-center"
-                                }`}
-                        >
-                            <div className="flex gap-2 flex-grow">
-                                <div className="flex items-center space-x-1" title={`${offer.roomCount} room(s)`}>
-                                    <FaBed size={20} />
-                                    <span>{offer.roomCount}</span>
+                                {offer.title}
+                            </h2>
+                            {variant === "manager" && (
+                                <div className="flex items-center space-x-2">
+                                    <div className="flex items-center space-x-1 text-[#32492D]" title={`${offer.reviews.length} review(s)`}>
+                                        <FaCommentAlt size={15} />
+                                        <span>{offer.reviews.length}</span>
+                                    </div>
+                                    <div className="flex items-center justify-center text-l bg-[#32492D] text-white rounded-lg max-w-16 py-1 w-10">
+                                        {offer.rating}
+                                    </div>
                                 </div>
-                                <div className="flex items-center space-x-1" title={`${offer.peopleCount} people`}>
-                                    <FaUserFriends size={20} />
-                                    <span>{offer.peopleCount}</span>
+                            )}
+                        </div>
+                    )}
+
+                    hotelFilter={hotelIdFilter ? true : false}
+
+                    getSubtitle={(offer) => {
+                        if (hotelIdFilter) return null;
+
+                        const handleHotelClick = (e) => {
+                            e.stopPropagation();
+
+                            if (variant === "user") {
+                                const newParams = new URLSearchParams(searchParams);
+                                newParams.set("hotelId", offer.hotelIdentifier);
+                                navigate(`/offers/search?${newParams.toString()}`);
+                            } else if (variant === "manager") {
+                                fetchHotelDetails(offer.hotelIdentifier);
+                            }
+                        };
+
+
+                        const hotelTitleTooltip =
+                            variant === "user" ? "Filter by hotel name" : "Open hotel details";
+
+                        return (
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={handleHotelClick}
+                                    title={hotelTitleTooltip}
+                                    className="text-base font-bold text-[#32492D] hover:text-[#273823] transition-all duration-200 ease-in-out transform cursor-pointer"
+                                >
+                                    {offer.hotelName}
+                                </button>
+                                <div className="flex items-center space-x-1 text-[#32492D]">
+                                    {Array.from({ length: offer.stars }).map((_, i) => (
+                                        <FaStar key={i} />
+                                    ))}
                                 </div>
                             </div>
+                        );
+                    }}
 
-                            <div className="flex flex-col mt-auto justify-end">
-                                <FacilityIcons
-                                    facilities={offer.facilities}
-                                    direction={isUser ? "column" : "row"}
-                                />
+                    getDetails={(offer) => (
+                        <>
+                            {!hotelIdFilter && (
+                                <p className="text-sm">{offer.location.city}, {offer.location.country}</p>
+                            )}
+                            {variant === "manager" && (
+                                <p className="text-sm">{offer.dateFrom} → {offer.dateUntil}</p>
+                            )}
+                        </>
+                    )}
+                    getExtraIcons={(offer) => {
+                        const isUser = variant === "user";
+
+                        return (
+                            <div
+                                className={`text-sm text-[#32492D] ${isUser ? "flex flex-col items-end gap-9" : "flex flex-wrap gap-2 items-center"
+                                    }`}
+                            >
+                                <div className="flex gap-2 flex-grow">
+                                    <div className="flex items-center space-x-1" title={`${offer.roomCount} room(s)`}>
+                                        <FaBed size={20} />
+                                        <span>{offer.roomCount}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1" title={`${offer.peopleCount} people`}>
+                                        <FaUserFriends size={20} />
+                                        <span>{offer.peopleCount}</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col mt-auto justify-end">
+                                    <FacilityIcons
+                                        facilities={offer.facilities}
+                                        direction={isUser ? "column" : "row"}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    );
-                }}
-                getPrice={(offer) => `${offer.pricePerNight} €`}
-                getDescription={(offer) => offer.description}
-                onModify={onModify}
-                onDelete={(id) => setOfferToDelete(id)}
-                contentWrapperClassName="space-y-2"
-                descriptionLimit={(variant === "user" ? 520 : 200)}
-                onCardClick={(offer) => setSelectedOfferDetails(offer)}
-            />
+                        );
+                    }}
+                    getPrice={(offer) => `${offer.pricePerNight} €`}
+                    getDescription={(offer) => offer.description}
+                    onModify={onModify}
+                    onDelete={(id) => setOfferToDelete(id)}
+                    contentWrapperClassName="space-y-2"
+                    descriptionLimit={(variant === "user" ? 520 : 200)}
+                    onCardClick={(offer) => setSelectedOfferDetails(offer)}
+                />
+            </div>
 
             {selectedOfferDetails && (
                 <OfferDetailsModal
@@ -206,6 +229,12 @@ const OfferList = ({ offers, isLoading, error, onModify, variant = "manager" }) 
                     cancelLabel="Cancel"
                 />
             )}
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
         </>
     );
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { MdVerified } from "react-icons/md";
@@ -10,6 +10,7 @@ import Header from "../../components/common/Header";
 import ManagerHotelsModifyModal from "../../components/admin/ManagerHotelsModifyModal";
 import DropdownButton from "../../components/common/DropdownButton";
 import ConfirmationPopup from "../../components/common/ConfirmationPopup";
+import Pagination from "../../components/common/Pagination";
 
 const AdminUsers = () => {
     const { isAuthenticated, isAdmin, loading } = useAuth();
@@ -167,6 +168,23 @@ const AdminUsers = () => {
         verifyManagerMutation.mutate(userId);
     };
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 12;
+
+    const totalPages = Math.ceil((users?.length || 0) / usersPerPage);
+    const paginatedUsers = users?.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+
+    const listRef = useRef(null);
+
+    const handlePageChange = (pageNum) => {
+        if (pageNum >= 1 && pageNum <= totalPages) {
+            setCurrentPage(pageNum);
+            if (listRef.current) {
+                listRef.current.scrollIntoView({ behavior: "smooth" });
+            }
+        }
+    };
+
     return (
         <>
             <Header />
@@ -176,14 +194,14 @@ const AdminUsers = () => {
                 {isLoading && <div className="text-center mb-6 text-gray-600">Loading users...</div>}
                 {error && <div className="text-center mb-6 text-red-500">Failed to load users.</div>}
 
-                <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {users?.map((user, index) => (
+                <motion.div ref={listRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {paginatedUsers?.map((user, index) => (
                         <motion.div
                             key={user.id}
                             className="bg-white shadow-md rounded-lg p-4 w-full border border-gray-200 flex flex-col"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1, duration: 0.4, ease: "easeOut" }}
+                            transition={{ delay: index * 0.1, duration: 0.2, ease: "easeOut" }}
                         >
                             <div className="flex mb-2">
                                 <div className="flex space-x-4 w-full">
@@ -260,6 +278,12 @@ const AdminUsers = () => {
                     ))}
                 </motion.div>
             </div>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
 
             {showEditModal && (
                 <ManagerHotelsModifyModal
