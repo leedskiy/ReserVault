@@ -7,6 +7,8 @@ import io.leedsk1y.reservault_backend.dto.ReviewResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.services.ManagerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/manager")
 public class ManagerController {
+    private static final Logger logger = LoggerFactory.getLogger(ManagerController.class);
     private final ManagerService managerService;
 
     public ManagerController(ManagerService managerService) {
@@ -37,11 +40,13 @@ public class ManagerController {
 
     @GetMapping("/offers")
     public ResponseEntity<List<OfferWithLocationDTO>> getManagerOffers() {
+        logger.info("Fetching manager's offers");
         return ResponseEntity.ok(managerService.getManagerOffers());
     }
 
     @GetMapping("/hotels")
     public ResponseEntity<?> getHotelsByManagerList() {
+        logger.info("Fetching hotels assigned to current manager");
         try {
             List<HotelManager> hotelManagers = managerService.getHotelsByManagerList();
             return ResponseEntity.ok(hotelManagers);
@@ -52,6 +57,7 @@ public class ManagerController {
 
     @PutMapping("/hotels")
     public ResponseEntity<?> updateManagerHotelList(@RequestBody List<String> updatedHotelIdentifiers) {
+        logger.info("Updating manager's hotel list with {} identifiers", updatedHotelIdentifiers.size());
         try {
             List<HotelManager> updated = managerService.updateManagerHotelList(updatedHotelIdentifiers);
             return ResponseEntity.ok(updated);
@@ -66,6 +72,7 @@ public class ManagerController {
     public ResponseEntity<?> createOffer(
             @RequestPart("offer") String offerJson,
             @RequestPart(value = "images") List<MultipartFile> images) {
+        logger.info("Creating a new offer for manager");
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Offer offer = objectMapper.readValue(offerJson, Offer.class);
@@ -84,7 +91,7 @@ public class ManagerController {
             @PathVariable UUID id,
             @RequestPart("offer") String offerJson,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
-
+        logger.info("Updating offer with ID: {}", id);
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Offer updatedOffer = objectMapper.readValue(offerJson, Offer.class);
@@ -100,6 +107,7 @@ public class ManagerController {
 
     @DeleteMapping(value="/offers/{id}")
     public ResponseEntity<?> deleteOffer(@PathVariable UUID id) {
+        logger.info("Deleting offer with ID: {}", id);
         try {
             managerService.deleteOffer(id);
             return ResponseEntity.ok().body("Offer deleted successfully");
@@ -112,6 +120,7 @@ public class ManagerController {
     public ResponseEntity<String> removeOfferImage(
             @PathVariable UUID offerId,
             @RequestParam("imageUrl") String imageUrl) {
+        logger.info("Removing image from offer ID: {}, Image URL: {}", offerId, imageUrl);
         boolean removed = managerService.removeOfferImage(offerId, imageUrl);
         return removed
                 ? ResponseEntity.ok("Image removed successfully")
@@ -122,18 +131,21 @@ public class ManagerController {
     public ResponseEntity<?> respondToReview(
             @PathVariable UUID reviewId,
             @RequestBody ReviewResponseDTO dto) {
+        logger.info("Manager responding to review ID: {}", reviewId);
         managerService.respondToReview(reviewId, dto);
         return ResponseEntity.ok("Response added successfully");
     }
 
     @DeleteMapping("/reviews/{reviewId}/response")
     public ResponseEntity<?> deleteResponseToReview(@PathVariable UUID reviewId) {
+        logger.info("Deleting manager response to review ID: {}", reviewId);
         managerService.deleteReviewResponse(reviewId);
         return ResponseEntity.ok("Response deleted successfully");
     }
 
     @GetMapping("/statistics")
     public ResponseEntity<ManagerDashboardStatsDTO> getManagerStats() {
+        logger.info("Fetching dashboard statistics for manager");
         return ResponseEntity.ok(managerService.getManagerDashboardStats());
     }
 }

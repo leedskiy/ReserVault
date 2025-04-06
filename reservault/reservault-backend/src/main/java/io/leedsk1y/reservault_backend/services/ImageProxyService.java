@@ -1,5 +1,7 @@
 package io.leedsk1y.reservault_backend.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -13,7 +15,10 @@ import java.net.URI;
 
 @Service
 public class ImageProxyService {
+    private static final Logger logger = LoggerFactory.getLogger(ImageProxyService.class);
+
     public ResponseEntity<byte[]> fetchImage(String url) {
+        logger.info("Fetching image from external URL: {}", url);
         try {
             RestTemplate restTemplate = new RestTemplate();
 

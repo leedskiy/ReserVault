@@ -7,6 +7,8 @@ import io.leedsk1y.reservault_backend.models.entities.Review;
 import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.UUID;
 
 @Service
 public class ReviewService {
+    private static final Logger logger = LoggerFactory.getLogger(ReviewService.class);
     private final OfferRepository offerRepository;
     private final UserRepository userRepository;
 
@@ -26,6 +29,7 @@ public class ReviewService {
     }
 
     public List<ReviewDetailedDTO> getReviewsForOffer(UUID offerId) {
+        logger.info("Fetching reviews for offer ID: {}", offerId);
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found"));
 
@@ -41,6 +45,7 @@ public class ReviewService {
     }
 
     public ReviewDetailedDTO addReviewToOffer(UUID offerId, ReviewRequestDTO dto) {
+        logger.info("Adding review to offer ID: {} by user email from context", offerId);
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(userEmail)
@@ -66,6 +71,7 @@ public class ReviewService {
     }
 
     public void deleteReviewFromOffer(UUID offerId, UUID reviewId) {
+        logger.info("Deleting review ID: {} from offer ID: {} by user email from context", reviewId, offerId);
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(userEmail)
@@ -89,6 +95,7 @@ public class ReviewService {
     }
 
     private double calculateAverageRating(List<Review> reviews) {
+        logger.debug("Calculating average rating for {} review(s)", reviews.size());
         if (reviews.isEmpty()) {
             return 0.0;
         }

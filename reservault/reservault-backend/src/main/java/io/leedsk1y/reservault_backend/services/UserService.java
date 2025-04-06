@@ -7,6 +7,8 @@ import io.leedsk1y.reservault_backend.security.jwt.CookieUtils;
 import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
     private final UserDeletionService userDeletionService;
@@ -27,17 +30,20 @@ public class UserService {
     }
 
     public UserDetailedResponseDTO getAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
+        logger.info("Fetching authenticated user details from token");
         User user = extractUserFromToken(request, response);
         return new UserDetailedResponseDTO(user);
     }
 
     public void updateUserName(String newName, HttpServletRequest request, HttpServletResponse response) {
+        logger.info("Updating authenticated user's name");
         User user = extractUserFromToken(request, response);
         user.setName(newName);
         userRepository.save(user);
     }
 
     public void deleteAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
+        logger.info("Deleting authenticated user");
         User user = extractUserFromToken(request, response);
 
         if (user.getRoles().contains("ROLE_ADMIN")) {

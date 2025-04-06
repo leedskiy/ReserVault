@@ -2,27 +2,23 @@ package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.dto.AdminDashboardStatsDTO;
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
-import io.leedsk1y.reservault_backend.models.entities.BookedDates;
-import io.leedsk1y.reservault_backend.models.entities.Booking;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
-import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.models.enums.EHotelManagerStatus;
-import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
 import io.leedsk1y.reservault_backend.repositories.BookingRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
-import io.leedsk1y.reservault_backend.repositories.PaymentRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
+    private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
     private final HotelService hotelService;
     private final HotelRepository hotelRepository;
     private final UserRepository userRepository;
@@ -56,26 +53,32 @@ public class AdminService {
     }
 
     public List<Hotel> getAllHotels() {
+        logger.info("Fetching all hotels via AdminService");
         return hotelService.getAllHotels();
     }
 
     public Hotel createHotel(Hotel hotel, List<MultipartFile> images) throws IOException {
+        logger.info("Creating hotel: {}", hotel.getName());
         return hotelService.createHotel(hotel, images);
     }
 
     public Optional<Hotel> updateHotel(UUID id, Hotel updatedHotel, List<MultipartFile> newImages) throws IOException {
+        logger.info("Updating hotel with ID: {}", id);
         return hotelService.updateHotel(id, updatedHotel, newImages);
     }
 
     public boolean deleteHotel(UUID id) {
+        logger.info("Deleting hotel with ID: {}", id);
         return hotelService.deleteHotel(id);
     }
 
     public boolean removeHotelImage(UUID hotelId, String imageUrl) {
+        logger.info("Removing image from hotel ID: {}, Image URL: {}", hotelId, imageUrl);
         return hotelService.removeHotelImage(hotelId, imageUrl);
     }
 
     public List<UserDetailedResponseDTO> getAllUsers() {
+        logger.info("Fetching all users");
         return userRepository.findAll()
                 .stream()
                 .map(UserDetailedResponseDTO::new)
@@ -83,12 +86,13 @@ public class AdminService {
     }
 
     public Optional<UserDetailedResponseDTO> getUserById(UUID id) {
-
+        logger.info("Fetching user by ID: {}", id);
         return userRepository.findById(id)
                 .map(UserDetailedResponseDTO::new);
     }
 
     public void deleteUser(UUID userId) {
+        logger.info("Deleting user with ID: {}", userId);
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -106,6 +110,7 @@ public class AdminService {
     }
 
     public boolean approveManagerRequest(UUID managerId) {
+        logger.info("Approving manager request for ID: {}", managerId);
         Optional<User> userOptional = userRepository.findById(managerId);
 
         if (userOptional.isEmpty()) {
@@ -142,6 +147,7 @@ public class AdminService {
     }
 
     public boolean rejectManagerRequest(UUID managerId) {
+        logger.info("Rejecting and deleting manager with ID: {}", managerId);
         if (!userRepository.existsById(managerId)) {
             return false;
         }
@@ -154,6 +160,7 @@ public class AdminService {
     }
 
     public List<HotelManager> getHotelsByManagerList(UUID managerId) {
+        logger.info("Fetching hotels managed by manager ID: {}", managerId);
         Optional<User> userOptional = userRepository.findById(managerId);
 
         if (userOptional.isEmpty()) {
@@ -170,6 +177,7 @@ public class AdminService {
     }
 
     public List<HotelManager> updateHotelsByManagerList(UUID managerId, List<String> updatedHotelIdentifiers) {
+        logger.info("Updating hotel-manager relations for manager ID: {}", managerId);
         Optional<User> userOpt = userRepository.findById(managerId);
 
         if (userOpt.isEmpty()) {
@@ -232,6 +240,7 @@ public class AdminService {
 
 
     public AdminDashboardStatsDTO getAdminDashboardStats() {
+        logger.info("Generating admin dashboard statistics");
         long totalUsers = userRepository.count();
 
         long verifiedManagers = userRepository

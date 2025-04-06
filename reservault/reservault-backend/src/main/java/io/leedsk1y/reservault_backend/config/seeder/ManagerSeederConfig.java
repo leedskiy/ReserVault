@@ -6,10 +6,7 @@ import io.leedsk1y.reservault_backend.models.enums.EAuthProvider;
 import io.leedsk1y.reservault_backend.models.enums.ERole;
 import io.leedsk1y.reservault_backend.repositories.RoleRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;

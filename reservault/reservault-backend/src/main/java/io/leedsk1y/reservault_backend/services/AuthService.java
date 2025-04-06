@@ -17,6 +17,8 @@ import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
 import io.leedsk1y.reservault_backend.security.jwt.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final HotelRepository hotelRepository;
@@ -59,6 +62,7 @@ public class AuthService {
     }
 
     public UserDetailedResponseDTO registerUser(RegisterRequestDTO request) {
+        logger.info("Registering new user with email: {}, isManager: {}", request.getEmail(), request.getIsManager());
         if (userRepository.existsByEmail(request.getEmail().toLowerCase())) {
             throw new RuntimeException("Email is already in use");
         }
@@ -127,6 +131,7 @@ public class AuthService {
     }
 
     public String authenticateUser(String email, String password) {
+        logger.info("Authenticating user with email: {}", email);
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email.toLowerCase(), password)
@@ -148,6 +153,7 @@ public class AuthService {
     }
 
     public UserDetailedResponseDTO getAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
+        logger.info("Retrieving authenticated user from request");
         String token = jwtUtils.getJwtFromCookies(request);
 
         if (token == null || !jwtUtils.validateJwtToken(token, response)) {
@@ -166,6 +172,7 @@ public class AuthService {
     }
 
     public void logoutUser(HttpServletRequest request, HttpServletResponse response) {
+        logger.info("Logging out user from request");
         String token = jwtUtils.getJwtFromCookies(request);
 
         if (token != null) {
@@ -176,6 +183,7 @@ public class AuthService {
     }
 
     public void updateUserPassword(UpdatePasswordDTO passwordDTO, HttpServletRequest request, HttpServletResponse response) {
+        logger.info("Attempting to update password for authenticated user");
         String token = jwtUtils.getJwtFromCookies(request);
 
         if (token == null || !jwtUtils.validateJwtToken(token, response)) {

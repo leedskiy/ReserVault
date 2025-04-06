@@ -2,12 +2,13 @@ package io.leedsk1y.reservault_backend.services;
 
 import io.leedsk1y.reservault_backend.models.entities.BookedDates;
 import io.leedsk1y.reservault_backend.models.entities.Booking;
-import io.leedsk1y.reservault_backend.models.entities.Payment;
 import io.leedsk1y.reservault_backend.models.enums.EBookingStatus;
 import io.leedsk1y.reservault_backend.models.enums.EPaymentStatus;
 import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
 import io.leedsk1y.reservault_backend.repositories.BookingRepository;
 import io.leedsk1y.reservault_backend.repositories.PaymentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.util.UUID;
 
 @Service
 public class BookingCleanupService {
-
+    private static final Logger logger = LoggerFactory.getLogger(BookingCleanupService.class);
     private final BookingRepository bookingRepository;
     private final BookedDatesRepository bookedDatesRepository;
     private final PaymentRepository paymentRepository;
@@ -34,10 +35,14 @@ public class BookingCleanupService {
 
     @Scheduled(fixedRate = 10 * 60 * 1000) // 10min
     public void cleanExpiredBookings() {
+        logger.info("Running scheduled task: cleanExpiredBookings");
+
         List<Booking> expiredBookings = bookingRepository.findAll().stream()
                 .filter(b -> b.getStatus() == EBookingStatus.PENDING)
                 .filter(b -> b.getExpiresAt().isBefore(Instant.now()))
                 .toList();
+
+        logger.info("Found {} expired bookings to process", expiredBookings.size());
 
         for (Booking booking : expiredBookings) {
             UUID paymentId = booking.getPaymentId();

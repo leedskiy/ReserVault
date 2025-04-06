@@ -16,6 +16,8 @@ import io.leedsk1y.reservault_backend.repositories.BookingRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class OfferService {
+    private static final Logger logger = LoggerFactory.getLogger(OfferService.class);
     private final OfferRepository offerRepository;
     private final HotelRepository hotelRepository;
     private final BookedDatesRepository bookedDatesRepository;
@@ -59,12 +62,14 @@ public class OfferService {
     }
 
     public List<OfferWithLocationDTO> getAllOffers() {
+        logger.info("Fetching all offers");
         return offerRepository.findAll().stream()
                 .map(this::toOfferWithLocationDTO)
                 .toList();
     }
 
     public Optional<OfferWithLocationDTO> getOfferById(UUID id) {
+        logger.info("Fetching offer by ID: {}", id);
         return offerRepository.findById(id)
                 .map(this::toOfferWithLocationDTO);
     }
@@ -73,6 +78,7 @@ public class OfferService {
                                                    Double minPrice, Double maxPrice, Boolean wifi, Boolean parking, Boolean pool,
                                                    Boolean airConditioning, Boolean breakfast, Integer rating, Integer hotelStars,
                                                    String sortBy, String sortOrder, String hotelId) {
+        logger.info("Searching offers with filters - location: {}, dateFrom: {}, dateUntil: {}", location, dateFrom, dateUntil);
         List<Offer> allOffers = offerRepository.findAll();
 
         final String inputCity;
@@ -206,6 +212,7 @@ public class OfferService {
     }
 
     public List<LocalDate> getBookedDatesForOffer(UUID offerId) {
+        logger.info("Fetching booked dates for offer ID: {}", offerId);
         List<BookedDates> ranges = bookedDatesRepository.findByOfferId(offerId);
 
         List<LocalDate> allBookedDates = new ArrayList<>();
@@ -225,12 +232,14 @@ public class OfferService {
     }
 
     public List<OfferWithLocationDTO> getOffersByManager(UUID managerId) {
+        logger.info("Fetching offers for manager ID: {}", managerId);
         return offerRepository.findByManagerId(managerId).stream()
                 .map(this::toOfferWithLocationDTO)
                 .collect(Collectors.toList());
     }
 
     public Offer createOffer(Offer offer, List<MultipartFile> images, UUID managerId) throws IOException {
+        logger.info("Creating offer for hotelIdentifier: {}, managerId: {}", offer.getHotelIdentifier(), managerId);
         validateManagerHotelAssociation(offer.getHotelIdentifier(), managerId);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy");
@@ -261,6 +270,7 @@ public class OfferService {
     }
 
     public Offer updateOffer(UUID offerId, Offer updatedOffer, List<MultipartFile> newImages, UUID managerId) throws IOException {
+        logger.info("Updating offer ID: {} by manager ID: {}", offerId, managerId);
         Offer existingOffer = offerRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("Offer not found"));
 
@@ -321,6 +331,7 @@ public class OfferService {
     }
 
     public boolean deleteOffer(UUID offerId, UUID managerId) {
+        logger.info("Deleting offer ID: {} by manager ID: {}", offerId, managerId);
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("Offer not found"));
 
@@ -347,6 +358,7 @@ public class OfferService {
     }
 
     public boolean removeOfferImage(UUID offerId, String imageUrl, UUID managerId) {
+        logger.info("Removing image from offer ID: {}, image URL: {}", offerId, imageUrl);
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("Offer not found"));
 
@@ -366,6 +378,7 @@ public class OfferService {
     }
 
     public void respondToReview(UUID reviewId, ReviewResponseDTO dto, UUID managerId) {
+        logger.info("Manager ID: {} responding to review ID: {}", managerId, reviewId);
         Offer offer = offerRepository.findAll().stream()
                 .filter(o -> o.getReviews().stream().anyMatch(r -> r.getId().equals(reviewId)))
                 .findFirst()
@@ -389,6 +402,7 @@ public class OfferService {
     }
 
     public void deleteReviewResponse(UUID reviewId, UUID managerId) {
+        logger.info("Manager ID: {} deleting response to review ID: {}", managerId, reviewId);
         Offer offer = offerRepository.findAll().stream()
                 .filter(o -> o.getReviews().stream().anyMatch(r -> r.getId().equals(reviewId)))
                 .findFirst()
@@ -412,6 +426,7 @@ public class OfferService {
     }
 
     public List<Offer> getOffersByManagerEntities(UUID managerId) {
+        logger.info("Fetching offer entities for manager ID: {}", managerId);
         return offerRepository.findByManagerId(managerId);
     }
 

@@ -8,12 +8,12 @@ import io.leedsk1y.reservault_backend.models.entities.HotelManager;
 import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.models.enums.EHotelManagerStatus;
-import io.leedsk1y.reservault_backend.repositories.BookedDatesRepository;
 import io.leedsk1y.reservault_backend.repositories.BookingRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
-import io.leedsk1y.reservault_backend.repositories.PaymentRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,42 +28,39 @@ import java.util.stream.Collectors;
 
 @Service
 public class ManagerService {
+    private static final Logger logger = LoggerFactory.getLogger(ManagerService.class);
     private final UserRepository userRepository;
     private final HotelManagerRepository hotelManagerRepository;
     private final HotelRepository hotelRepository;
     private final BookingRepository bookingRepository;
-    private final BookedDatesRepository bookedDatesRepository;
-    private final PaymentRepository paymentRepository;
-    private final OfferService offerService; // Inject OfferService
+    private final OfferService offerService;
 
     public ManagerService(UserRepository userRepository,
                           HotelManagerRepository hotelManagerRepository,
                           HotelRepository hotelRepository,
                           BookingRepository bookingRepository,
-                          BookedDatesRepository bookedDatesRepository,
-                          PaymentRepository paymentRepository,
-                          OfferService offerService) { // Inject OfferService
+                          OfferService offerService) {
         this.userRepository = userRepository;
         this.hotelManagerRepository = hotelManagerRepository;
         this.hotelRepository = hotelRepository;
         this.bookingRepository = bookingRepository;
-        this.bookedDatesRepository = bookedDatesRepository;
-        this.paymentRepository = paymentRepository;
-        this.offerService = offerService; // Assign OfferService
+        this.offerService = offerService;
     }
 
     public List<OfferWithLocationDTO> getManagerOffers() {
+        logger.info("Fetching offers for authenticated manager");
         User user = validateAndGetManager();
         return offerService.getOffersByManager(user.getId());
     }
 
     public List<HotelManager> getHotelsByManagerList() {
+        logger.info("Fetching hotel assignments for authenticated manager");
         User user = validateAndGetManager();
-
         return hotelManagerRepository.findByManagerId(user.getId());
     }
 
     public List<HotelManager> updateManagerHotelList(List<String> updatedHotelIdentifiers) {
+        logger.info("Updating hotel list for manager with {} identifiers", updatedHotelIdentifiers.size());
         User manager = validateAndGetManager();
 
         Set<String> validHotelIdentifiers = hotelRepository.findAll()
@@ -107,31 +104,37 @@ public class ManagerService {
     }
 
     public Offer createOffer(Offer offer, List<MultipartFile> images) throws IOException {
+        logger.info("Creating new offer for manager");
         User user = validateAndGetManager();
         return offerService.createOffer(offer, images, user.getId());
     }
 
     public Offer updateOffer(UUID offerId, Offer updatedOffer, List<MultipartFile> newImages) throws IOException {
+        logger.info("Updating offer with ID: {}", offerId);
         User user = validateAndGetManager();
         return offerService.updateOffer(offerId, updatedOffer, newImages, user.getId());
     }
 
     public boolean deleteOffer(UUID offerId) {
+        logger.info("Deleting offer with ID: {}", offerId);
         User user = validateAndGetManager();
         return offerService.deleteOffer(offerId, user.getId());
     }
 
     public boolean removeOfferImage(UUID offerId, String imageUrl) {
+        logger.info("Removing image from offer ID: {}, image URL: {}", offerId, imageUrl);
         User user = validateAndGetManager();
         return offerService.removeOfferImage(offerId, imageUrl, user.getId());
     }
 
     public void respondToReview(UUID reviewId, ReviewResponseDTO dto) {
+        logger.info("Manager responding to review ID: {}", reviewId);
         User manager = validateAndGetManager();
         offerService.respondToReview(reviewId, dto, manager.getId());
     }
 
     public void deleteReviewResponse(UUID reviewId) {
+        logger.info("Deleting review response for review ID: {}", reviewId);
         User manager = validateAndGetManager();
         offerService.deleteReviewResponse(reviewId, manager.getId());
     }
@@ -150,6 +153,7 @@ public class ManagerService {
     }
 
     public ManagerDashboardStatsDTO getManagerDashboardStats() {
+        logger.info("Fetching dashboard statistics for manager");
         User manager = validateAndGetManager();
 
         List<Offer> managerOffers = offerService.getOffersByManagerEntities(manager.getId());

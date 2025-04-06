@@ -2,6 +2,8 @@ package io.leedsk1y.reservault_backend.controllers;
 
 import io.leedsk1y.reservault_backend.dto.OfferWithLocationDTO;
 import io.leedsk1y.reservault_backend.services.OfferService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/offers")
 public class OfferController {
+    private static final Logger logger = LoggerFactory.getLogger(OfferController.class);
     private final OfferService offerService;
 
     public OfferController(OfferService offerService) {
@@ -23,11 +26,13 @@ public class OfferController {
 
     @GetMapping
     public ResponseEntity<List<OfferWithLocationDTO>> getAllOffers() {
+        logger.info("Fetching all offers");
         return ResponseEntity.ok(offerService.getAllOffers());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getOfferById(@PathVariable UUID id) {
+        logger.info("Fetching offer by ID: {}", id);
         return offerService.getOfferById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -53,6 +58,7 @@ public class OfferController {
             @RequestParam(required = false) String sortOrder,
             @RequestParam(required = false) String hotelId
     ) {
+        logger.info("Searching offers for location: {}, from: {}, until: {}", location, dateFrom, dateUntil);
         return ResponseEntity.ok(
                 offerService.searchOffers(location, rooms, people, dateFrom, dateUntil,
                         minPrice, maxPrice, wifi, parking, pool, airConditioning,
@@ -62,6 +68,7 @@ public class OfferController {
 
     @GetMapping("/{offerId}/booked-dates")
     public ResponseEntity<?> getBookedDatesForOffer(@PathVariable UUID offerId) {
+        logger.info("Fetching booked dates for offer ID: {}", offerId);
         return ResponseEntity.ok(offerService.getBookedDatesForOffer(offerId));
     }
 }

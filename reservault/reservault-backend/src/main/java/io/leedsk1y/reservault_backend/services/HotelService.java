@@ -5,6 +5,8 @@ import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.repositories.HotelManagerRepository;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +18,7 @@ import java.util.UUID;
 
 @Service
 public class HotelService {
+    private static final Logger logger = LoggerFactory.getLogger(HotelService.class);
     private final HotelRepository hotelRepository;
     private final CloudinaryService cloudinaryService;
     private final OfferRepository offerRepository;
@@ -35,10 +38,12 @@ public class HotelService {
     }
 
     public List<Hotel> getAllHotels() {
+        logger.info("Fetching all hotels");
         return hotelRepository.findAll();
     }
 
     public Hotel createHotel(Hotel hotel, List<MultipartFile> images) throws IOException {
+        logger.info("Creating hotel with identifier: {}", hotel.getIdentifier());
         if (hotelRepository.findByIdentifier(hotel.getIdentifier()).isPresent()) {
             throw new IllegalArgumentException("Hotel identifier already exists: " + hotel.getIdentifier());
         }
@@ -57,7 +62,8 @@ public class HotelService {
         return hotelRepository.save(hotel);
     }
 
-    public Optional<Hotel> updateHotel(UUID id, Hotel updatedHotel, List<MultipartFile> newImages) throws IOException {
+    public Optional<Hotel> updateHotel(UUID id, Hotel updatedHotel, List<MultipartFile> newImages) {
+        logger.info("Updating hotel with ID: {}", id);
         return hotelRepository.findById(id).map(existingHotel -> {
             try {
                 if (updatedHotel.getImagesUrls() != null && !updatedHotel.getImagesUrls().isEmpty()) {
@@ -84,6 +90,7 @@ public class HotelService {
     }
 
     public boolean deleteHotel(UUID id) {
+        logger.info("Deleting hotel with ID: {}", id);
         Optional<Hotel> hotelOptional = hotelRepository.findById(id);
         if (hotelOptional.isEmpty()) {
             return false;
@@ -113,6 +120,7 @@ public class HotelService {
     }
 
     public boolean removeHotelImage(UUID hotelId, String imageUrl) {
+        logger.info("Removing image from hotel ID: {}, Image URL: {}", hotelId, imageUrl);
         Optional<Hotel> hotelOptional = hotelRepository.findById(hotelId);
 
         if (hotelOptional.isPresent()) {
@@ -130,6 +138,7 @@ public class HotelService {
     }
 
     public Optional<Hotel> getHotelByIdentifier(String identifier) {
+        logger.info("Fetching hotel by identifier: {}", identifier);
         return hotelRepository.findByIdentifier(identifier);
     }
 }

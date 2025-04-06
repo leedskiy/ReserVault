@@ -8,6 +8,8 @@ import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.repositories.RoleRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class OAuth2Service {
+    private static final Logger logger = LoggerFactory.getLogger(OAuth2Service.class);
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final JwtUtils jwtUtils;
@@ -33,6 +36,8 @@ public class OAuth2Service {
     }
 
     public String handleOAuth2Authentication(OAuth2AuthenticationToken auth2AuthenticationToken) {
+        logger.info("Handling OAuth2 authentication for user");
+
         OAuth2User oAuth2User = auth2AuthenticationToken.getPrincipal();
         String email = Optional.ofNullable((String) oAuth2User.getAttribute("email"))
                 .orElseThrow(() -> new RuntimeException("OAuth2 authentication failed: Email not found"));
@@ -50,6 +55,7 @@ public class OAuth2Service {
     }
 
     private User createNewUser(OAuth2User oAuth2User) {
+        logger.info("Creating new user via OAuth2");
         Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Error: Role not found"));
@@ -71,6 +77,7 @@ public class OAuth2Service {
     }
 
     public UserDetailedResponseDTO getAuthenticatedOAuth2User(Authentication authentication) {
+        logger.info("Fetching authenticated OAuth2 user from token");
         if (!(authentication instanceof OAuth2AuthenticationToken)) {
             throw new RuntimeException("Unauthorized: OAuth2 token is missing");
         }

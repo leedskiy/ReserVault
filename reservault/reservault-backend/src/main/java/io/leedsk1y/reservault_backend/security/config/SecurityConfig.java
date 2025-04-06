@@ -1,6 +1,5 @@
 package io.leedsk1y.reservault_backend.security.config;
 
-import io.leedsk1y.reservault_backend.security.jwt.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;

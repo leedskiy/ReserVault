@@ -1,8 +1,11 @@
 package io.leedsk1y.reservault_backend.services;
+
 import org.apache.tika.Tika;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,6 +15,7 @@ import java.util.Map;
 
 @Service
 public class CloudinaryService {
+    private static final Logger logger = LoggerFactory.getLogger(CloudinaryService.class);
     private Cloudinary cloudinary;
 
     public CloudinaryService(Cloudinary cloudinary) {
@@ -19,6 +23,7 @@ public class CloudinaryService {
     }
 
     private void validateFile(Object file) throws IOException {
+        logger.debug("Validating file size and format");
         long maxSize = 1_500_000; // 1.5mb
 
         long fileSize = (file instanceof MultipartFile) ? ((MultipartFile) file).getSize() : ((File) file).length();
@@ -37,18 +42,21 @@ public class CloudinaryService {
     }
 
     public String uploadImage(MultipartFile file, String folder) throws IOException {
+        logger.info("Uploading image from MultipartFile to folder: {}", folder);
         validateFile(file);
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", folder));
         return uploadResult.get("secure_url").toString();
     }
 
     public String uploadImage(File file, String folder) throws IOException {
+        logger.info("Uploading image from File to folder: {}", folder);
         validateFile(file);
         Map uploadResult = cloudinary.uploader().upload(file, ObjectUtils.asMap("folder", folder));
         return uploadResult.get("secure_url").toString();
     }
 
     public void deleteImage(String imageUrl, String folder) {
+        logger.info("Deleting image from Cloudinary with URL: {} in folder: {}", imageUrl, folder);
         try {
             String publicId = extractPublicId(imageUrl, folder);
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());

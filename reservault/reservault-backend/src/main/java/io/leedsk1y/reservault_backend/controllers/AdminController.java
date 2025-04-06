@@ -4,14 +4,24 @@ import io.leedsk1y.reservault_backend.dto.AdminDashboardStatsDTO;
 import io.leedsk1y.reservault_backend.dto.UserDetailedResponseDTO;
 import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.HotelManager;
-import io.leedsk1y.reservault_backend.models.entities.User;
 import io.leedsk1y.reservault_backend.services.AdminService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -25,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RequestMapping("admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
     private AdminService adminService;
 
     public AdminController(AdminService adminService) {
@@ -33,6 +44,7 @@ public class AdminController {
 
     @GetMapping("/hotels")
     public List<Hotel> getAllHotels() {
+        logger.info("Fetching all hotels");
         return adminService.getAllHotels();
     }
 
@@ -40,6 +52,7 @@ public class AdminController {
     public ResponseEntity<?> createHotel(
         @RequestPart("hotel") String hotelJson,
         @RequestPart(value = "images") List<MultipartFile> images) {
+        logger.info("Creating new hotel");
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Hotel hotel = objectMapper.readValue(hotelJson, Hotel.class);
@@ -59,6 +72,7 @@ public class AdminController {
         @PathVariable UUID id,
         @RequestPart("hotel") String hotelJson,
         @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+        logger.info("Updating hotel with ID: {}", id);
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Hotel updatedHotel = objectMapper.readValue(hotelJson, Hotel.class);
@@ -74,6 +88,7 @@ public class AdminController {
 
     @DeleteMapping("/hotels/{id}")
     public ResponseEntity<String> deleteHotel(@PathVariable UUID id) {
+        logger.info("Deleting hotel with ID: {}", id);
         boolean deleted = adminService.deleteHotel(id);
         return deleted ? ResponseEntity.ok("Hotel deleted") : ResponseEntity.notFound().build();
     }
@@ -82,7 +97,7 @@ public class AdminController {
     public ResponseEntity<String> removeHotelImage(
             @PathVariable UUID hotelId,
             @RequestParam("imageUrl") String imageUrl) {
-
+        logger.info("Removing image from hotel ID: {}, Image URL: {}", hotelId, imageUrl);
         boolean removed = adminService.removeHotelImage(hotelId, imageUrl);
         return removed
                 ? ResponseEntity.ok("Image removed successfully")
@@ -91,11 +106,13 @@ public class AdminController {
 
     @GetMapping("/users")
     public ResponseEntity<List<UserDetailedResponseDTO>> getAllUsers() {
+        logger.info("Fetching all users");
         return ResponseEntity.ok(adminService.getAllUsers());
     }
 
     @GetMapping("/users/{id}")
     public ResponseEntity<?> getUserById(@PathVariable UUID id) {
+        logger.info("Fetching user by ID: {}", id);
         Optional<UserDetailedResponseDTO> user = adminService.getUserById(id);
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -103,12 +120,14 @@ public class AdminController {
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
+        logger.info("Deleting user with ID: {}", id);
         adminService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/managers/{managerId}/approve")
     public ResponseEntity<?> approveManagerRequest(@PathVariable UUID managerId) {
+        logger.info("Approving manager request with ID: {}", managerId);
         boolean approved = adminService.approveManagerRequest(managerId);
         return approved
                 ? ResponseEntity.ok().build()
@@ -117,6 +136,7 @@ public class AdminController {
 
     @DeleteMapping("/managers/{managerId}/reject")
     public ResponseEntity<?> rejectManagerRequest(@PathVariable UUID managerId) {
+        logger.info("Rejecting manager request with ID: {}", managerId);
         boolean rejected = adminService.rejectManagerRequest(managerId);
         return rejected
                 ? ResponseEntity.ok().build()
@@ -125,6 +145,7 @@ public class AdminController {
 
     @GetMapping("/managers/{managerId}/hotels")
     public ResponseEntity<?> getHotelsByManagerList(@PathVariable UUID managerId) {
+        logger.info("Fetching hotels for manager ID: {}", managerId);
         try {
             List<HotelManager> hotelManagers = adminService.getHotelsByManagerList(managerId);
             return ResponseEntity.ok(hotelManagers);
@@ -137,7 +158,7 @@ public class AdminController {
     public ResponseEntity<?> updateHotelsByManagerList(
             @PathVariable UUID managerId,
             @RequestBody List<String> updatedHotelIdentifiers) {
-
+        logger.info("Updating hotel-manager relations for manager ID: {}", managerId);
         try {
             List<HotelManager> updatedHotelManagers = adminService.updateHotelsByManagerList(managerId, updatedHotelIdentifiers);
             return ResponseEntity.ok(updatedHotelManagers);
@@ -150,6 +171,7 @@ public class AdminController {
 
     @GetMapping("/statistics")
     public ResponseEntity<AdminDashboardStatsDTO> getDashboardStats() {
+        logger.info("Fetching admin dashboard statistics");
         return ResponseEntity.ok(adminService.getAdminDashboardStats());
     }
 }

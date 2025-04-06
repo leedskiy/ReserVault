@@ -16,6 +16,8 @@ import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import io.leedsk1y.reservault_backend.repositories.PaymentRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ import java.util.UUID;
 
 @Service
 public class BookingService {
+    private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
     private final BookingRepository bookingRepository;
     private final OfferRepository offerRepository;
     private final UserRepository userRepository;
@@ -53,6 +56,7 @@ public class BookingService {
     }
 
     public Booking createBooking(Booking booking) {
+        logger.info("Creating booking for offerId: {}", booking.getOfferId());
         User user = getAuthenticatedUser();
 
         Offer offer = offerRepository.findById(booking.getOfferId())
@@ -125,6 +129,7 @@ public class BookingService {
     }
 
     public List<BookingResponseDTO> getUserBookings() {
+        logger.info("Fetching bookings for authenticated user");
         User user = getAuthenticatedUser();
         List<Booking> bookings = bookingRepository.findByUserId(user.getId());
 
@@ -160,6 +165,7 @@ public class BookingService {
     }
 
     public Optional<Booking> getBookingById(UUID id) {
+        logger.info("Fetching booking by ID: {}", id);
         User user = getAuthenticatedUser();
         return bookingRepository.findById(id)
                 .filter(booking -> booking.getUserId().equals(user.getId()));
@@ -172,6 +178,7 @@ public class BookingService {
     }
 
     public boolean cancelBooking(UUID bookingId) {
+        logger.info("Cancelling booking with ID: {}", bookingId);
         Booking booking = getBookingIfOwnedByUser(bookingId);
 
         if (booking.getStatus() != EBookingStatus.PENDING) {
@@ -196,6 +203,7 @@ public class BookingService {
     }
 
     public Booking simulatePayment(UUID bookingId) {
+        logger.info("Simulating payment for booking ID: {}", bookingId);
         Booking booking = checkAndFetchBooking(bookingId);
 
         Payment payment = getPaymentOrThrow(booking.getPaymentId());
@@ -212,6 +220,7 @@ public class BookingService {
     }
 
     public EPaymentStatus getPaymentStatus(UUID bookingId) {
+        logger.info("Retrieving payment status for booking ID: {}", bookingId);
         Booking booking = checkAndFetchBooking(bookingId);
         Payment payment = getPaymentOrThrow(booking.getPaymentId());
         return payment.getStatus();
@@ -241,6 +250,7 @@ public class BookingService {
     }
 
     public boolean deleteBooking(UUID bookingId) {
+        logger.info("Deleting booking with ID: {}", bookingId);
         Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
         if (bookingOpt.isEmpty()) {
             return false;

@@ -5,7 +5,6 @@ import io.leedsk1y.reservault_backend.models.entities.Role;
 import io.leedsk1y.reservault_backend.repositories.RoleRepository;
 
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
