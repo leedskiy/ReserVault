@@ -53,7 +53,7 @@ public class UserDeletionService {
         List<HotelManager> hotelManagers = hotelManagerRepository.findByManagerId(managerId);
 
         for (HotelManager hotelManager : hotelManagers) {
-            List<Offer> offers = offerRepository.findByHotelIdentifier(hotelManager.getHotelIdentifier());
+            List<Offer> offers = offerRepository.findByHotelIdentifierAndManagerId(hotelManager.getHotelIdentifier(), managerId);
 
             for (Offer offer : offers) {
                 offerService.deleteOffer(offer.getId(), managerId);

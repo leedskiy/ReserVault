@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface OfferRepository extends MongoRepository<Offer, UUID> {
     List<Offer> findByHotelIdentifier(String hotelIdentifier);
     List<Offer> findByManagerId(UUID managerId);
+    List<Offer> findByHotelIdentifierAndManagerId(String hotelIdentifier, UUID managerId);
 }

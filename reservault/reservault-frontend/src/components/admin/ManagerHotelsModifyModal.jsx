@@ -73,7 +73,7 @@ const EditManagerHotelsModal = ({ managerId, currentHotelIdentifiers = [], onClo
                 </div>
 
                 <div className="flex flex-col h-full p-4">
-                    <label className="block text-gray-600">Hotel Identifiers</label>
+                    <label className="block text-gray-600 font-medium mb-1">Hotel Identifiers</label>
 
                     <div className="flex gap-2">
                         <input
@@ -81,7 +81,9 @@ const EditManagerHotelsModal = ({ managerId, currentHotelIdentifiers = [], onClo
                             value={hotelIdentifier}
                             onChange={(e) => setHotelIdentifier(e.target.value)}
                             placeholder="Enter hotel identifier"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300 transition-all duration-300"
+                            className="w-full border border-gray-300 rounded-md px-3 py-2
+                                        focus:outline-none transition-all duration-100 ease-in-out transform
+                                        rounded-lg focus:outline-none focus:border-[#32492D] focus:ring-1 focus:ring-[#32492D]"
                         />
                         <button
                             type="button"
