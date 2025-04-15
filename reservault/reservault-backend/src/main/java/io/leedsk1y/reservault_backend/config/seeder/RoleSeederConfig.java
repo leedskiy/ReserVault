@@ -21,6 +21,10 @@ public class RoleSeederConfig {
         this.roleRepository = roleRepository;
     }
 
+    /**
+     * Seeds all enum-defined roles ({@link ERole}) into the database if they are not already present.
+     * @return ApplicationRunner that seeds missing roles
+     */
     @Bean(name = "seedRoles")
     public ApplicationRunner seedRoles() {
         return args -> {

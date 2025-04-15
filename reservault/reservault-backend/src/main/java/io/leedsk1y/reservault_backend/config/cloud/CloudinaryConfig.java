@@ -18,6 +18,15 @@ public class CloudinaryConfig {
     @Value("${cloudinary.api-secret}")
     private String apiSecret;
 
+    /**
+     * Configures and provides a Cloudinary bean for image upload and management.
+     * The credentials are loaded from the application properties:
+     * - `cloudinary.cloud-name`
+     * - `cloudinary.api-key`
+     * - `cloudinary.api-secret`
+     *
+     * @return A fully configured Cloudinary instance.
+     */
     @Bean
     public Cloudinary cloudinary() {
         return new Cloudinary(ObjectUtils.asMap(

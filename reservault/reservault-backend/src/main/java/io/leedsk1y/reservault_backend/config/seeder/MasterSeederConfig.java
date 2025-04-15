@@ -48,6 +48,25 @@ public class MasterSeederConfig {
         this.offerSeederConfig = offerSeederConfig;
     }
 
+    /**
+     * Runs application seeders on startup based on configuration flags.
+     * Executes the following seeders conditionally:
+     * - Roles
+     * - Admin user
+     * - Manager user
+     * - Hotels
+     * - Offers
+     *
+     * Controlled by:
+     * - `reservault.seeders.enabled`
+     * - `reservault.seeders.roles`
+     * - `reservault.seeders.admin`
+     * - `reservault.seeders.manager`
+     * - `reservault.seeders.hotels`
+     * - `reservault.seeders.offers`
+     *
+     * @return ApplicationRunner that triggers seeders during application startup.
+     */
     @Bean
     public ApplicationRunner runAllSeeders() {
         return args -> {

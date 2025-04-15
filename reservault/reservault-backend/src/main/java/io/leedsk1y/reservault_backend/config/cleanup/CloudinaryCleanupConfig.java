@@ -30,6 +30,11 @@ public class CloudinaryCleanupConfig {
         this.cloudinaryService = cloudinaryService;
     }
 
+    /**
+     * Deletes all images from Cloudinary that are currently associated with hotels and offers.
+     * This operation is only executed if the `reservault.cleanup.enabled` flag is set to `true`.
+     * Used for development environment to reset state.
+     */
     public void cleanupCloudinaryImages() {
         if (!cleanupEnabled) return;
 

@@ -50,6 +50,10 @@ public class OfferSeederConfig {
         this.cloudinaryService = cloudinaryService;
     }
 
+    /**
+     * Seeds the database with predefined offers for the "Azure Palms Resort" hotel.
+     * @throws IOException If image upload fails during offer creation
+     */
     public void seedOffers() throws IOException {
             if (offerRepository.count() > 0) return;
 
@@ -98,7 +102,7 @@ public class OfferSeederConfig {
                             "direct beach access, it's the perfect way to recharge and celebrate the start of the season in style.",
                     10,
                     "02.20.2027",
-                    "02.30.2027",
+                    "02.28.2027",
                     2,
                     4,
                     new BigDecimal("139.50"),
@@ -107,6 +111,23 @@ public class OfferSeederConfig {
             );
     }
 
+    /**
+     * Creates and saves a single offer with specified metadata and images.
+     * @param manager The manager responsible for the offer
+     * @param hotel The hotel the offer belongs to
+     * @param hotelManager The existing or newly created hotel-manager relationship
+     * @param title The offer's title
+     * @param description The offer's description
+     * @param rating Initial average rating of the offer
+     * @param dateFrom Offer start date (MM.dd.yyyy)
+     * @param dateUntil Offer end date (MM.dd.yyyy)
+     * @param roomCount Number of rooms in the offer
+     * @param peopleCount Max number of people supported
+     * @param pricePerNight Price per night in BigDecimal
+     * @param facilities Facilities included in the offer
+     * @param imageFiles List of image filenames (resources)
+     * @throws IOException If image upload fails
+     */
     private void createOffer(User manager,
                              Hotel hotel,
                              HotelManager hotelManager,
@@ -145,6 +166,12 @@ public class OfferSeederConfig {
         offerRepository.save(offer);
     }
 
+    /**
+     * Uploads images from the classpath (resources/static/offers-images) to Cloudinary.
+     * @param imageFiles List of image file names to upload
+     * @return List of uploaded image URLs from Cloudinary
+     * @throws IOException If file reading or upload fails
+     */
     private List<String> uploadImages(List<String> imageFiles) throws IOException {
         return imageFiles.stream()
                 .map(fileName -> {

@@ -22,6 +22,13 @@ public class DatabaseCleanupConfig {
         this.cloudinaryCleanupConfig = cloudinaryCleanupConfig;
     }
 
+    /**
+     * Executes cleanup logic before application shutdown if `reservault.cleanup.enabled` is true.
+     * - Deletes all hotel and offer images from Cloudinary.
+     * - Drops all MongoDB collections in the database.
+     *
+     * Used for development environment to reset state.
+     */
     @PreDestroy
     public void clearDatabase() {
         if (!cleanupEnabled) return;

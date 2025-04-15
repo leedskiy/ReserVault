@@ -15,6 +15,11 @@ public class WebConfig {
     @Value("${spring.frontend.url}")
     private String frontendUrl;
 
+    /**
+     * Defines the CORS configuration for the application.
+     * Specifies allowed origins, methods, headers, and whether credentials (cookies) can be included in requests.
+     * @return CorsConfigurationSource configured for the entire application
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

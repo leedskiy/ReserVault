@@ -29,6 +29,9 @@ public class ManagerSeederConfig {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Seeds a default manager user into the database if one does not already exist.
+     */
     public void seedManager() {
         String managerEmail = "manager@example.moc";
 

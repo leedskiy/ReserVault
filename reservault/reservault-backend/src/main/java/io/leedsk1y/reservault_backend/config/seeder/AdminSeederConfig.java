@@ -34,6 +34,10 @@ public class AdminSeederConfig {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Seeds a default admin user at application startup if one does not already exist.
+     * @return ApplicationRunner that performs the admin seeding logic.
+     */
     @Bean
     public ApplicationRunner seedAdminUser() {
         return args -> {

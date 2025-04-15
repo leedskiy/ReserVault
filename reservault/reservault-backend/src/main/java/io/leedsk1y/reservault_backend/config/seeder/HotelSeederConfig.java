@@ -30,6 +30,12 @@ public class HotelSeederConfig {
         this.cloudinaryService = cloudinaryService;
     }
 
+    /**
+     * Seeds predefined hotels into the database if none exist.
+     * Each hotel is seeded with metadata and 3 associated image files,
+     * which are uploaded to Cloudinary under the "hotels_images" folder.
+     * @throws IOException If image files cannot be read or uploaded.
+     */
     public void seedHotels() throws IOException {
         if (hotelRepository.count() > 0) {
             return;
@@ -63,7 +69,21 @@ public class HotelSeederConfig {
         hotelRepository.saveAll(hotels);
     }
 
-    private Hotel createHotel(String identifier, String name, String description, int stars, Location location, List<String> imageFiles) throws IOException {
+    /**
+     * Creates a Hotel object with the specified properties and uploads associated images to Cloudinary.
+     *
+     * @param identifier Unique string identifier for the hotel.
+     * @param name Display name of the hotel.
+     * @param description Full hotel description.
+     * @param stars Star rating of the hotel (e.g., 5).
+     * @param location Location object including country, city, street, and zip.
+     * @param imageFiles List of image file names to upload.
+     * @return A fully constructed Hotel entity with uploaded image URLs.
+     * @throws IOException If image upload fails.
+     */
+    private Hotel createHotel(String identifier, String name,
+                              String description, int stars, Location location,
+                              List<String> imageFiles) throws IOException {
         List<String> imageUrls = uploadImages(imageFiles);
 
         Hotel hotel = new Hotel();
@@ -79,6 +99,12 @@ public class HotelSeederConfig {
         return hotel;
     }
 
+    /**
+     * Uploads a list of image files from the classpath to Cloudinary.
+     * @param imageFiles List of file names located in `static/hotels-images/`.
+     * @return List of secure image URLs returned from Cloudinary.
+     * @throws IOException If any image file cannot be read or uploaded.
+     */
     private List<String> uploadImages(List<String> imageFiles) throws IOException {
         return imageFiles.stream()
                 .map(fileName -> {
