@@ -5,15 +5,22 @@ import io.leedsk1y.reservault_backend.models.entities.Offer;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import io.leedsk1y.reservault_backend.services.CloudinaryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class CloudinaryCleanupConfig {
+    private static final Logger logger = LoggerFactory.getLogger(CloudinaryCleanupConfig.class);
     private final HotelRepository hotelRepository;
     private final OfferRepository offerRepository;
     private final CloudinaryService cloudinaryService;
+
+    @Value("${reservault.cleanup.enabled:false}")
+    private boolean cleanupEnabled;
 
     public CloudinaryCleanupConfig(HotelRepository hotelRepository,
                                    OfferRepository offerRepository,
@@ -24,6 +31,10 @@ public class CloudinaryCleanupConfig {
     }
 
     public void cleanupCloudinaryImages() {
+        if (!cleanupEnabled) return;
+
+        logger.info("Starting Cloudinary cleanup for hotel and offer images.");
+
         List<Hotel> hotels = hotelRepository.findAll();
         List<String> hotelsImageUrls = hotels.stream()
             .flatMap(hotel -> hotel.getImagesUrls().stream())
@@ -36,10 +47,12 @@ public class CloudinaryCleanupConfig {
 
         for (String imageUrl : hotelsImageUrls) {
             cloudinaryService.deleteImage(imageUrl, "hotels_images");
+            logger.info("Deleted hotel image: {}", imageUrl);
         }
 
         for (String imageUrl : offersImageUrls) {
             cloudinaryService.deleteImage(imageUrl, "offers_images");
+            logger.info("Deleted offer image: {}", imageUrl);
         }
     }
 }

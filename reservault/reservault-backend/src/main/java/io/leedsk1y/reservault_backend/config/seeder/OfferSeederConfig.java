@@ -12,6 +12,8 @@ import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.repositories.OfferRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 import io.leedsk1y.reservault_backend.services.CloudinaryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class OfferSeederConfig {
+    private static final Logger logger = LoggerFactory.getLogger(OfferSeederConfig.class);
     private final OfferRepository offerRepository;
     private final HotelRepository hotelRepository;
     private final UserRepository userRepository;
@@ -49,6 +52,8 @@ public class OfferSeederConfig {
 
     public void seedOffers() throws IOException {
             if (offerRepository.count() > 0) return;
+
+            logger.info("Seeding offers...");
 
             User manager = userRepository.findByEmail("manager@example.moc")
                     .orElseThrow(() -> new RuntimeException("Manager user not found"));
@@ -73,12 +78,12 @@ public class OfferSeederConfig {
                             "unwind in our infinity pool, and explore vibrant city life just moments away. Whether you're " +
                             "traveling with friends or family, this escape blends coastal relaxation with cultural discovery.",
                     10,
-                    "04.07.2025",
-                    "04.14.2025",
+                    "02.07.2027",
+                    "02.14.2027",
                     3,
                     6,
                     new BigDecimal("179.99"),
-                    new Facilities(true, true, true, true, true),
+                    new Facilities(true, false, true, false, true),
                     List.of("hotel2_offer1_img1.png", "hotel2_offer1_img2.png")
             );
 
@@ -91,9 +96,9 @@ public class OfferSeederConfig {
                             "Resort. Ideal for couples or small groups, this 6-night package invites you to indulge in gourmet " +
                             "cuisine, rejuvenating spa treatments, and breathtaking sea views. With luxurious amenities and " +
                             "direct beach access, it's the perfect way to recharge and celebrate the start of the season in style.",
-                    7.5,
-                    "04.20.2025",
-                    "04.30.2025",
+                    10,
+                    "02.20.2027",
+                    "02.30.2027",
                     2,
                     4,
                     new BigDecimal("139.50"),
@@ -115,6 +120,7 @@ public class OfferSeederConfig {
                              BigDecimal pricePerNight,
                              Facilities facilities,
                              List<String> imageFiles) throws IOException {
+        logger.info("Creating offer: {}", title);
 
         List<String> imageUrls = uploadImages(imageFiles);
 
@@ -153,6 +159,8 @@ public class OfferSeederConfig {
                         try (InputStream inputStream = resource.getInputStream()) {
                             Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         }
+
+                        logger.info("Uploaded offer image: {}", fileName);
 
                         return cloudinaryService.uploadImage(tempFile, "offers_images");
                     } catch (IOException e) {

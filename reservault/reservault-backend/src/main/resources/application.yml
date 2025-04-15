@@ -27,3 +27,14 @@ cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
+
+reservault: # development seeders, cleanups
+  seeders:
+    enabled: true # MasterSeederConfig (controls all seeders) (disable after first start if cleanup disabled)
+    roles: true # RoleSeederConfig (REQUIRED for any start)
+    admin: true # AdminSeederConfig (REQUIRED for admin account creation)
+    manager: false # ManagerSeederConfig (optional example data)
+    hotels: false # HotelSeederConfig (optional example data)
+    offers: false # OfferSeederConfig (optional example data)
+  cleanup:
+    enabled: false # CloudinaryCleanupConfig, DatabaseCleanupConfig (optional cleanup)

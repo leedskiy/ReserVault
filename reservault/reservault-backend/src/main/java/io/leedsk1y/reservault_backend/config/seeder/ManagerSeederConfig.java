@@ -6,6 +6,8 @@ import io.leedsk1y.reservault_backend.models.enums.EAuthProvider;
 import io.leedsk1y.reservault_backend.models.enums.ERole;
 import io.leedsk1y.reservault_backend.repositories.RoleRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -16,7 +18,7 @@ import java.util.UUID;
 
 @Configuration
 public class ManagerSeederConfig {
-
+    private static final Logger logger = LoggerFactory.getLogger(ManagerSeederConfig.class);
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -29,6 +31,8 @@ public class ManagerSeederConfig {
 
     public void seedManager() {
         String managerEmail = "manager@example.moc";
+
+        logger.info("Seeding manager user with email: {}", managerEmail);
 
         if (!userRepository.existsByEmail(managerEmail)) {
             Role adminRole = roleRepository.findByName(ERole.ROLE_MANAGER)
@@ -44,7 +48,7 @@ public class ManagerSeederConfig {
                     UUID.randomUUID(),
                     "Manager",
                     managerEmail,
-                    passwordEncoder.encode("pass"),
+                    passwordEncoder.encode("pass1234"),
                     null,
                     Instant.now(),
                     true,

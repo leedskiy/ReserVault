@@ -7,6 +7,8 @@ import io.leedsk1y.reservault_backend.models.enums.ERole;
 import io.leedsk1y.reservault_backend.repositories.RoleRepository;
 import io.leedsk1y.reservault_backend.repositories.UserRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +23,7 @@ import java.util.UUID;
 @Configuration
 @DependsOn("seedRoles")
 public class AdminSeederConfig {
-
+    private static final Logger logger = LoggerFactory.getLogger(AdminSeederConfig.class);
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -37,6 +39,8 @@ public class AdminSeederConfig {
         return args -> {
             String adminEmail = "admin@example.moc";
 
+            logger.info("Seeding admin user with email: {}", adminEmail);
+
             if (!userRepository.existsByEmail(adminEmail)) {
                 Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                     .orElseGet(() -> {
@@ -51,7 +55,7 @@ public class AdminSeederConfig {
                     UUID.randomUUID(),
                     "Admin",
                     adminEmail,
-                    passwordEncoder.encode("pass"),
+                    passwordEncoder.encode("pass1234"),
                     null,
                     Instant.now(),
                     true,

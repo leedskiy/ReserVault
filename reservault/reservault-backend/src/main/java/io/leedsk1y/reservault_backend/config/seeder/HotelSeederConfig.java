@@ -4,6 +4,8 @@ import io.leedsk1y.reservault_backend.models.entities.Hotel;
 import io.leedsk1y.reservault_backend.models.entities.Location;
 import io.leedsk1y.reservault_backend.repositories.HotelRepository;
 import io.leedsk1y.reservault_backend.services.CloudinaryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class HotelSeederConfig {
+    private static final Logger logger = LoggerFactory.getLogger(HotelSeederConfig.class);
     private final HotelRepository hotelRepository;
     private final CloudinaryService cloudinaryService;
 
@@ -32,6 +35,8 @@ public class HotelSeederConfig {
             return;
         }
 
+        logger.info("Seeding hotels...");
+
         List<Hotel> hotels = List.of(
                 createHotel("mnhttnroyale",
                         "The Manhattan Royale",
@@ -41,7 +46,7 @@ public class HotelSeederConfig {
                                 "views of the city that never sleeps. Whether indulging in gourmet dining, unwinding at the spa, or enjoying the " +
                                 "vibrant nightlife just steps away, guests are treated to an unforgettable five-star experience in the heart of New York City.",
                         5, new Location("USA", "New York", "5th Avenue", "10001"),
-                        List.of("hotel1_img1.png")),
+                        List.of("hotel1_img1.png", "hotel1_img2.png", "hotel1_img3.png")),
 
                 createHotel("azurepalms",
                         "Azure Palms Resort",
@@ -52,7 +57,7 @@ public class HotelSeederConfig {
                                 "and infinity pools that seem to blend seamlessly with the sparkling blue sea. Whether seeking a romantic " +
                                 "getaway or a serene retreat, Azure Palms Resort delivers a refined escape in one of Europe’s most captivating destinations.",
                         5, new Location("Spain", "Barcelona", "Beachfront Avenue", "08002"),
-                        List.of("hotel2_img1.png"))
+                        List.of("hotel2_img1.png", "hotel2_img2.png", "hotel2_img3.png"))
         );
 
         hotelRepository.saveAll(hotels);
@@ -88,6 +93,8 @@ public class HotelSeederConfig {
                         try (InputStream inputStream = resource.getInputStream()) {
                             Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         }
+
+                        logger.info("Uploaded hotel image: {}", fileName);
 
                         return cloudinaryService.uploadImage(tempFile, "hotels_images");
                     } catch (IOException e) {
