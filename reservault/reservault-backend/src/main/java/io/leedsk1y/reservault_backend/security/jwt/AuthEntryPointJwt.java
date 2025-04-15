@@ -20,6 +20,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
     private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
 
+    /**
+     * Handles unauthorized access attempts by sending a structured JSON error response.
+     * @param request The HTTP request that triggered the authentication failure.
+     * @param response The HTTP response to send the error to.
+     * @param authException The exception that caused the authentication failure.
+     * @throws IOException If an input or output exception occurs.
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException)

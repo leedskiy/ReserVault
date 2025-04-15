@@ -28,6 +28,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
+    /**
+     * Extracts the JWT from cookies, validates it, and sets authentication in the security context.
+     * Rejects the request if the token is invalid, expired, or the user does not exist.
+     * @param request HTTP servlet request.
+     * @param response HTTP servlet response.
+     * @param filterChain The filter chain to proceed with if authentication succeeds.
+     * @throws ServletException If a servlet-specific error occurs.
+     * @throws IOException If an input or output error occurs.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response, FilterChain filterChain)

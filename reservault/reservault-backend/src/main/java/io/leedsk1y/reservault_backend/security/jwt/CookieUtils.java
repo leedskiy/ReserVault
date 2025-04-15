@@ -8,6 +8,11 @@ import org.slf4j.LoggerFactory;
 public class CookieUtils {
     private static final Logger logger = LoggerFactory.getLogger(CookieUtils.class);
 
+    /**
+     * Sets a secure, HTTP-only JWT cookie in the response.
+     * @param response HTTP servlet response where the cookie will be added.
+     * @param jwtToken The JWT token to include in the cookie.
+     */
     public static void setJwtCookie(HttpServletResponse response, String jwtToken) {
         Cookie cookie = new Cookie("jwt", jwtToken);
         cookie.setHttpOnly(true);
@@ -20,6 +25,10 @@ public class CookieUtils {
         logger.debug("JWT cookie set successfully.");
     }
 
+    /**
+     * Clears the JWT cookie from the client by setting its max age to zero.
+     * @param response HTTP servlet response used to add the expired cookie.
+     */
     public static void clearJwtCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("jwt", null);
         cookie.setHttpOnly(true);

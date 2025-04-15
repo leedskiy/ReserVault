@@ -38,6 +38,11 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
+    /**
+     * Retrieves the JWT token from cookies in the incoming request.
+     * @param request HTTP request potentially containing cookies.
+     * @return The JWT token string if present, otherwise null.
+     */
     public String getJwtFromCookies(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -49,6 +54,11 @@ public class JwtUtils {
         return null;
     }
 
+    /**
+     * Generates a signed JWT token for the specified username.
+     * @param username The username to include in the JWT subject.
+     * @return A signed JWT token string.
+     */
     public String generateTokenFromUsername(String username) {
         return Jwts.builder()
                 .subject(username)
@@ -58,6 +68,11 @@ public class JwtUtils {
                 .compact();
     }
 
+    /**
+     * Extracts the username from a valid JWT token.
+     * @param token The JWT token to parse.
+     * @return The username stored as the subject in the token.
+     */
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parser().verifyWith((SecretKey) key())
                 .build()
@@ -66,14 +81,29 @@ public class JwtUtils {
                 .getSubject();
     }
 
+    /**
+     * Adds a JWT token to the in-memory blacklist, making it invalid for future use.
+     * @param token The JWT token to blacklist.
+     */
     public void blacklistToken(String token) {
         blacklistedTokens.add(token);
     }
 
+    /**
+     * Checks if the given JWT token is blacklisted.
+     * @param token The JWT token to verify.
+     * @return True if the token is blacklisted, false otherwise.
+     */
     public boolean isTokenBlacklisted(String token) {
         return blacklistedTokens.contains(token);
     }
 
+    /**
+     * Validates a JWT token for signature, expiration, and blacklist status.
+     * @param authToken The JWT token to validate.
+     * @param response HTTP response used for cookie cleanup if validation fails.
+     * @return True if the token is valid, false otherwise.
+     */
     public boolean validateJwtToken(String authToken, HttpServletResponse response) {
         if (isTokenBlacklisted(authToken)) {
             logger.error("JWT token is blacklisted");

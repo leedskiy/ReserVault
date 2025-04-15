@@ -37,22 +37,42 @@ public class SecurityConfig {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Exposes the default Spring `AuthenticationManager` bean.
+     * Used to perform authentication operations (e.g. login).
+     * @param builder Spring's AuthenticationConfiguration.
+     * @return Configured AuthenticationManager.
+     * @throws Exception If creation fails.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration builder)
         throws Exception {
         return builder.getAuthenticationManager();
     }
 
+    /**
+     * Creates a BCryptPasswordEncoder bean used for password hashing and verification.
+     * @return A PasswordEncoder instance.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Provides the custom JWT authentication filter bean to validate tokens before standard filters.
+     * @return An instance of AuthTokenFilter.
+     */
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
     }
 
+    /**
+     * Configures a custom UserDetailsService that loads users from the UserRepository by email.
+     * @return A lambda-based implementation of UserDetailsService.
+     * @throws UsernameNotFoundException If the user is not found in the database.
+     */
     @Bean
     UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username)
@@ -62,6 +82,20 @@ public class SecurityConfig {
                 });
     }
 
+    /**
+     * Defines the main security filter chain configuration.
+     * Sets up:
+     * - endpoint access rules
+     * - JWT exception handling
+     * - stateless session policy
+     * - CSRF and CORS config
+     * - OAuth2 login paths
+     * - JWT filter integration
+     *
+     * @param http The HttpSecurity object to customize.
+     * @return Configured SecurityFilterChain.
+     * @throws Exception If configuration fails.
+     */
     @Bean
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
