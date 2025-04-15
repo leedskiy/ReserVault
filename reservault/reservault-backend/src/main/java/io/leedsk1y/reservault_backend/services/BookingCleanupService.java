@@ -33,6 +33,10 @@ public class BookingCleanupService {
         this.paymentRepository = paymentRepository;
     }
 
+    /**
+     * Scheduled task that runs every 10 minutes to clean up expired bookings.
+     * Marks associated pending payments as failed and deletes booked dates and booking records.
+     */
     @Scheduled(fixedRate = 10 * 60 * 1000) // 10min
     public void cleanExpiredBookings() {
         logger.info("Running scheduled task: cleanExpiredBookings");

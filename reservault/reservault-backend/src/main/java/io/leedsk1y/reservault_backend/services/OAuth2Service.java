@@ -35,6 +35,12 @@ public class OAuth2Service {
         this.jwtUtils = jwtUtils;
     }
 
+    /**
+     * Handles the OAuth2 login process by either retrieving an existing user or creating a new one.
+     * Updates the user's profile image if it has changed.
+     * @param auth2AuthenticationToken The authentication token provided by the OAuth2 provider.
+     * @return A JWT token for the authenticated user.
+     */
     public String handleOAuth2Authentication(OAuth2AuthenticationToken auth2AuthenticationToken) {
         logger.info("Handling OAuth2 authentication for user");
 
@@ -54,6 +60,12 @@ public class OAuth2Service {
         return jwtUtils.generateTokenFromUsername(user.getUsername());
     }
 
+    /**
+     * Creates a new user in the system based on the information retrieved from the OAuth2 provider.
+     * Assigns the default ROLE_USER to the new user.
+     * @param oAuth2User The OAuth2User object containing user attributes.
+     * @return The newly created User entity.
+     */
     private User createNewUser(OAuth2User oAuth2User) {
         logger.info("Creating new user via OAuth2");
         Set<Role> roles = new HashSet<>();
@@ -76,6 +88,12 @@ public class OAuth2Service {
         return userRepository.save(user);
     }
 
+    /**
+     * Retrieves the authenticated OAuth2 user based on the current security context.
+     * @param authentication The authentication object containing the OAuth2 user.
+     * @return A detailed response DTO of the authenticated user.
+     * @throws RuntimeException If authentication is not from an OAuth2 token or user is not found.
+     */
     public UserDetailedResponseDTO getAuthenticatedOAuth2User(Authentication authentication) {
         logger.info("Fetching authenticated OAuth2 user from token");
         if (!(authentication instanceof OAuth2AuthenticationToken)) {

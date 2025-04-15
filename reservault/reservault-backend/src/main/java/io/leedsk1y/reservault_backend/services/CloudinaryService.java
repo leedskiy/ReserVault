@@ -22,6 +22,13 @@ public class CloudinaryService {
         this.cloudinary = cloudinary;
     }
 
+    /**
+     * Validates the uploaded file's size and format.
+     * Only PNG and JPG files under 1.5MB are allowed.
+     * @param file The file to validate (MultipartFile or File).
+     * @throws IOException If the file cannot be read or is invalid.
+     * @throws IllegalArgumentException If the file exceeds size limit or has an unsupported format.
+     */
     private void validateFile(Object file) throws IOException {
         logger.debug("Validating file size and format");
         long maxSize = 1_500_000; // 1.5mb
@@ -41,6 +48,13 @@ public class CloudinaryService {
         }
     }
 
+    /**
+     * Uploads an image from a MultipartFile to a specific Cloudinary folder.
+     * @param file The image file to upload.
+     * @param folder The destination folder in Cloudinary.
+     * @return The secure URL of the uploaded image.
+     * @throws IOException If upload or validation fails.
+     */
     public String uploadImage(MultipartFile file, String folder) throws IOException {
         logger.info("Uploading image from MultipartFile to folder: {}", folder);
         validateFile(file);
@@ -48,6 +62,13 @@ public class CloudinaryService {
         return uploadResult.get("secure_url").toString();
     }
 
+    /**
+     * Uploads an image from a File to a specific Cloudinary folder.
+     * @param file The image file to upload.
+     * @param folder The destination folder in Cloudinary.
+     * @return The secure URL of the uploaded image.
+     * @throws IOException If upload or validation fails.
+     */
     public String uploadImage(File file, String folder) throws IOException {
         logger.info("Uploading image from File to folder: {}", folder);
         validateFile(file);
@@ -55,6 +76,12 @@ public class CloudinaryService {
         return uploadResult.get("secure_url").toString();
     }
 
+    /**
+     * Deletes an image from Cloudinary based on its URL and folder.
+     * @param imageUrl The full URL of the image.
+     * @param folder The folder in which the image was uploaded.
+     * @throws RuntimeException If deletion fails.
+     */
     public void deleteImage(String imageUrl, String folder) {
         logger.info("Deleting image from Cloudinary with URL: {} in folder: {}", imageUrl, folder);
         try {
@@ -65,6 +92,13 @@ public class CloudinaryService {
         }
     }
 
+    /**
+     * Extracts the public ID of the image from its URL for deletion purposes.
+     * @param imageUrl The full Cloudinary URL of the image.
+     * @param folder The folder where the image is stored.
+     * @return The public ID used by Cloudinary to identify the image.
+     * @throws RuntimeException If the URL format is invalid.
+     */
     private String extractPublicId(String imageUrl, String folder) {
         try {
             String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);

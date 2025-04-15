@@ -29,12 +29,26 @@ public class UserService {
         this.userDeletionService = userDeletionService;
     }
 
+    /**
+     * Retrieves the authenticated user from the JWT token and returns detailed user info.
+     * @param request HTTP request containing the JWT cookie.
+     * @param response HTTP response for handling token invalidation.
+     * @return UserDetailedResponseDTO containing user details.
+     * @throws ResponseStatusException If the token is invalid or user not found.
+     */
     public UserDetailedResponseDTO getAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
         logger.info("Fetching authenticated user details from token");
         User user = extractUserFromToken(request, response);
         return new UserDetailedResponseDTO(user);
     }
 
+    /**
+     * Updates the name of the authenticated user.
+     * @param newName The new name to set for the user.
+     * @param request HTTP request containing the JWT cookie.
+     * @param response HTTP response for handling token validation or cleanup.
+     * @throws ResponseStatusException If the token is invalid or user not found.
+     */
     public void updateUserName(String newName, HttpServletRequest request, HttpServletResponse response) {
         logger.info("Updating authenticated user's name");
         User user = extractUserFromToken(request, response);
@@ -42,6 +56,13 @@ public class UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Deletes the authenticated user's account.
+     * Handles user or manager-specific deletions, but prevents admin deletion.
+     * @param request HTTP request containing the JWT cookie.
+     * @param response HTTP response used to clear the JWT cookie.
+     * @throws ResponseStatusException If token is invalid, user is not found, or user is an admin.
+     */
     public void deleteAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
         logger.info("Deleting authenticated user");
         User user = extractUserFromToken(request, response);
@@ -59,6 +80,13 @@ public class UserService {
         CookieUtils.clearJwtCookie(response);
     }
 
+    /**
+     * Extracts the user from the JWT token found in the request cookies.
+     * @param request HTTP request with JWT cookie.
+     * @param response HTTP response for clearing the cookie if invalid.
+     * @return The authenticated User entity.
+     * @throws ResponseStatusException If the token is missing, invalid, or the user doesn't exist.
+     */
     private User extractUserFromToken(HttpServletRequest request, HttpServletResponse response) {
         String token = jwtUtils.getJwtFromCookies(request);
 

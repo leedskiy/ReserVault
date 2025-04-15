@@ -17,6 +17,12 @@ import java.net.URI;
 public class ImageProxyService {
     private static final Logger logger = LoggerFactory.getLogger(ImageProxyService.class);
 
+    /**
+     * Fetches an image from a given external URL and returns it as a byte array.
+     * Sets a user-agent header to mimic a browser request.
+     * @param url The URL of the external image.
+     * @return ResponseEntity containing the image data or an error response.
+     */
     public ResponseEntity<byte[]> fetchImage(String url) {
         logger.info("Fetching image from external URL: {}", url);
         try {

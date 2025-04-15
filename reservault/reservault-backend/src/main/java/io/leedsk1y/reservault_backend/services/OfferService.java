@@ -61,6 +61,10 @@ public class OfferService {
         this.hotelManagerRepository = hotelManagerRepository;
     }
 
+    /**
+     * Retrieves all offers in the system and maps them to OfferWithLocationDTOs.
+     * @return List of all offers with location and hotel details.
+     */
     public List<OfferWithLocationDTO> getAllOffers() {
         logger.info("Fetching all offers");
         return offerRepository.findAll().stream()
@@ -68,12 +72,22 @@ public class OfferService {
                 .toList();
     }
 
+    /**
+     * Retrieves a specific offer by its UUID and maps it to an OfferWithLocationDTO.
+     * @param id UUID of the offer.
+     * @return Optional containing the offer DTO if found.
+     */
     public Optional<OfferWithLocationDTO> getOfferById(UUID id) {
         logger.info("Fetching offer by ID: {}", id);
         return offerRepository.findById(id)
                 .map(this::toOfferWithLocationDTO);
     }
 
+    /**
+     * Searches offers based on various filters like location, date range, price, facilities, etc.
+     * Also applies optional sorting.
+     * @return Filtered and sorted list of OfferWithLocationDTOs.
+     */
     public List<OfferWithLocationDTO> searchOffers(String location, Integer rooms, Integer people, String dateFrom, String dateUntil,
                                                    Double minPrice, Double maxPrice, Boolean wifi, Boolean parking, Boolean pool,
                                                    Boolean airConditioning, Boolean breakfast, Integer rating, Integer hotelStars,
@@ -147,6 +161,14 @@ public class OfferService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Checks whether a hotel's location matches the input city or country.
+     * Supports partial and case-insensitive matches.
+     * @param hotel The hotel to compare against.
+     * @param inputCity City name provided by user input (can be null).
+     * @param inputCountry Country name provided by user input (can be null).
+     * @return True if the hotel's location matches the input, false otherwise.
+     */
     private boolean matchesLocation(Hotel hotel, String inputCity, String inputCountry) {
         if (inputCity == null && inputCountry == null) return true;
 
@@ -157,6 +179,13 @@ public class OfferService {
                 || (inputCountry != null && hotelCountry.contains(inputCountry));
     }
 
+    /**
+     * Validates if an offer is available within a given date range.
+     * @param offer The offer to check.
+     * @param dateFrom Start of the requested date range (MM.dd.yyyy).
+     * @param dateUntil End of the requested date range (MM.dd.yyyy).
+     * @return True if the offer is available within the specified range, false if parsing fails or dates conflict.
+     */
     private boolean checkDateRange(Offer offer, String dateFrom, String dateUntil) {
         if (dateFrom != null && dateUntil != null) {
             try {
@@ -175,6 +204,16 @@ public class OfferService {
         return true;
     }
 
+    /**
+     * Checks if an offer includes all facilities requested by the user.
+     * @param offer The offer to evaluate.
+     * @param wifi Whether Wi-Fi is required.
+     * @param parking Whether parking is required.
+     * @param pool Whether a pool is required.
+     * @param airConditioning Whether air conditioning is required.
+     * @param breakfast Whether breakfast is required.
+     * @return True if the offer matches all requested facilities, false otherwise.
+     */
     private boolean matchesFacilities(Offer offer, Boolean wifi, Boolean parking, Boolean pool, Boolean airConditioning, Boolean breakfast) {
         Facilities facilities = offer.getFacilities();
 
@@ -187,6 +226,11 @@ public class OfferService {
         return true;
     }
 
+    /**
+     * Maps an Offer entity to an OfferWithLocationDTO, including hotel metadata.
+     * @param offer The offer to transform.
+     * @return DTO representation of the offer, including hotel name, location, and star rating.
+     */
     private OfferWithLocationDTO toOfferWithLocationDTO(Offer offer) {
         Hotel hotel = hotelRepository.findByIdentifier(offer.getHotelIdentifier()).orElse(null);
 
@@ -211,6 +255,11 @@ public class OfferService {
         );
     }
 
+    /**
+     * Retrieves all booked dates for a given offer.
+     * @param offerId UUID of the offer.
+     * @return List of all dates that are already booked.
+     */
     public List<LocalDate> getBookedDatesForOffer(UUID offerId) {
         logger.info("Fetching booked dates for offer ID: {}", offerId);
         List<BookedDates> ranges = bookedDatesRepository.findByOfferId(offerId);
@@ -231,6 +280,11 @@ public class OfferService {
         return allBookedDates;
     }
 
+    /**
+     * Fetches all offers created by a specific manager and maps them to DTOs.
+     * @param managerId UUID of the manager.
+     * @return List of OfferWithLocationDTOs.
+     */
     public List<OfferWithLocationDTO> getOffersByManager(UUID managerId) {
         logger.info("Fetching offers for manager ID: {}", managerId);
         return offerRepository.findByManagerId(managerId).stream()
@@ -238,6 +292,14 @@ public class OfferService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Creates a new offer for a hotel managed by the given manager.
+     * @param offer The offer entity with details.
+     * @param images Images to be uploaded and associated with the offer.
+     * @param managerId UUID of the manager creating the offer.
+     * @return The saved Offer entity.
+     * @throws IOException If image upload fails.
+     */
     public Offer createOffer(Offer offer, List<MultipartFile> images, UUID managerId) throws IOException {
         logger.info("Creating offer for hotelIdentifier: {}, managerId: {}", offer.getHotelIdentifier(), managerId);
         validateManagerHotelAssociation(offer.getHotelIdentifier(), managerId);
@@ -269,6 +331,16 @@ public class OfferService {
         return offerRepository.save(offer);
     }
 
+    /**
+     * Updates an existing offer's details and optionally adds new images.
+     * Ensures the manager is authorized and date ranges are valid.
+     * @param offerId UUID of the offer to update.
+     * @param updatedOffer Updated offer details.
+     * @param newImages Optional new images to upload.
+     * @param managerId UUID of the manager requesting the update.
+     * @return The updated Offer entity.
+     * @throws IOException If image upload fails.
+     */
     public Offer updateOffer(UUID offerId, Offer updatedOffer, List<MultipartFile> newImages, UUID managerId) throws IOException {
         logger.info("Updating offer ID: {} by manager ID: {}", offerId, managerId);
         Offer existingOffer = offerRepository.findById(offerId)
@@ -330,6 +402,13 @@ public class OfferService {
         return offerRepository.save(existingOffer);
     }
 
+    /**
+     * Deletes an offer and all associated bookings and images.
+     * Checks manager ownership before deletion if a managerId is provided.
+     * @param offerId UUID of the offer to delete.
+     * @param managerId UUID of the manager performing the deletion (can be null for admin).
+     * @return True if successfully deleted.
+     */
     public boolean deleteOffer(UUID offerId, UUID managerId) {
         logger.info("Deleting offer ID: {} by manager ID: {}", offerId, managerId);
         Offer offer = offerRepository.findById(offerId)
@@ -357,6 +436,14 @@ public class OfferService {
         return true;
     }
 
+    /**
+     * Removes a specific image from an offer.
+     * Validates manager authorization and image existence.
+     * @param offerId UUID of the offer.
+     * @param imageUrl URL of the image to remove.
+     * @param managerId UUID of the manager performing the action.
+     * @return True if image was removed successfully.
+     */
     public boolean removeOfferImage(UUID offerId, String imageUrl, UUID managerId) {
         logger.info("Removing image from offer ID: {}, image URL: {}", offerId, imageUrl);
         Offer offer = offerRepository.findById(offerId)
@@ -377,6 +464,12 @@ public class OfferService {
         return true;
     }
 
+    /**
+     * Allows a manager to respond to a specific review on their offer.
+     * @param reviewId UUID of the review to respond to.
+     * @param dto DTO containing the response comment.
+     * @param managerId UUID of the manager writing the response.
+     */
     public void respondToReview(UUID reviewId, ReviewResponseDTO dto, UUID managerId) {
         logger.info("Manager ID: {} responding to review ID: {}", managerId, reviewId);
         Offer offer = offerRepository.findAll().stream()
@@ -401,6 +494,11 @@ public class OfferService {
         offerRepository.save(offer);
     }
 
+    /**
+     * Deletes a manager’s response to a review on one of their offers.
+     * @param reviewId UUID of the review whose response should be deleted.
+     * @param managerId UUID of the manager requesting the deletion.
+     */
     public void deleteReviewResponse(UUID reviewId, UUID managerId) {
         logger.info("Manager ID: {} deleting response to review ID: {}", managerId, reviewId);
         Offer offer = offerRepository.findAll().stream()
@@ -425,11 +523,22 @@ public class OfferService {
         offerRepository.save(offer);
     }
 
+    /**
+     * Retrieves raw Offer entities created by a specific manager.
+     * @param managerId UUID of the manager.
+     * @return List of Offer entities.
+     */
     public List<Offer> getOffersByManagerEntities(UUID managerId) {
         logger.info("Fetching offer entities for manager ID: {}", managerId);
         return offerRepository.findByManagerId(managerId);
     }
 
+    /**
+     * Validates if the manager is associated and approved for a specific hotel.
+     * @param hotelIdentifier Unique identifier of the hotel.
+     * @param managerId UUID of the manager.
+     * @throws IllegalArgumentException If association does not exist or is not approved.
+     */
     private void validateManagerHotelAssociation(String hotelIdentifier, UUID managerId) {
         HotelManager hm = hotelManagerRepository
                 .findByManagerIdAndHotelIdentifier(managerId, hotelIdentifier)

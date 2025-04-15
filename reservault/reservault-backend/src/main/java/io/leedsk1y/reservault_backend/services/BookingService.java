@@ -55,6 +55,12 @@ public class BookingService {
         this.paymentRepository = paymentRepository;
     }
 
+    /**
+     * Creates a new booking for an offer after validating date availability and range.
+     * Also initializes a pending payment and records booked dates.
+     * @param booking The booking entity to be created.
+     * @return The saved booking with payment and booking IDs set.
+     */
     public Booking createBooking(Booking booking) {
         logger.info("Creating booking for offerId: {}", booking.getOfferId());
         User user = getAuthenticatedUser();
@@ -120,6 +126,13 @@ public class BookingService {
         return booking;
     }
 
+    /**
+     * Calculates the total price for a booking based on duration and nightly rate.
+     * @param startDate Booking start date.
+     * @param endDate Booking end date.
+     * @param pricePerNight Nightly rate of the offer.
+     * @return Total booking price as BigDecimal.
+     */
     private BigDecimal calculateTotalPrice(LocalDate startDate, LocalDate endDate, BigDecimal pricePerNight) {
         long days = endDate.toEpochDay() - startDate.toEpochDay() + 1;
         if (days <= 0) {
@@ -128,6 +141,10 @@ public class BookingService {
         return pricePerNight.multiply(BigDecimal.valueOf(days));
     }
 
+    /**
+     * Retrieves all bookings made by the authenticated user.
+     * @return A list of BookingResponseDTOs with booking and offer details.
+     */
     public List<BookingResponseDTO> getUserBookings() {
         logger.info("Fetching bookings for authenticated user");
         User user = getAuthenticatedUser();
@@ -164,6 +181,11 @@ public class BookingService {
         }).toList();
     }
 
+    /**
+     * Retrieves a booking by ID if it belongs to the authenticated user.
+     * @param id UUID of the booking.
+     * @return Optional containing the booking or empty if not found or unauthorized.
+     */
     public Optional<Booking> getBookingById(UUID id) {
         logger.info("Fetching booking by ID: {}", id);
         User user = getAuthenticatedUser();
@@ -171,12 +193,23 @@ public class BookingService {
                 .filter(booking -> booking.getUserId().equals(user.getId()));
     }
 
+    /**
+     * Retrieves the currently authenticated user from the security context.
+     * @return The authenticated User entity.
+     * @throws ResponseStatusException If the user is not found or unauthorized.
+     */
     private User getAuthenticatedUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
     }
 
+    /**
+     * Cancels a pending, unpaid booking if owned by the current user.
+     * Updates the payment status and removes the booking and booked dates.
+     * @param bookingId UUID of the booking to cancel.
+     * @return True if successfully cancelled.
+     */
     public boolean cancelBooking(UUID bookingId) {
         logger.info("Cancelling booking with ID: {}", bookingId);
         Booking booking = getBookingIfOwnedByUser(bookingId);
@@ -202,6 +235,11 @@ public class BookingService {
         return true;
     }
 
+    /**
+     * Simulates a payment for a pending booking and marks it as confirmed.
+     * @param bookingId UUID of the booking to simulate payment for.
+     * @return The updated booking with confirmed status.
+     */
     public Booking simulatePayment(UUID bookingId) {
         logger.info("Simulating payment for booking ID: {}", bookingId);
         Booking booking = checkAndFetchBooking(bookingId);
@@ -219,6 +257,11 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    /**
+     * Retrieves the current payment status of a booking.
+     * @param bookingId UUID of the booking.
+     * @return The payment status of the associated payment record.
+     */
     public EPaymentStatus getPaymentStatus(UUID bookingId) {
         logger.info("Retrieving payment status for booking ID: {}", bookingId);
         Booking booking = checkAndFetchBooking(bookingId);
@@ -226,6 +269,12 @@ public class BookingService {
         return payment.getStatus();
     }
 
+    /**
+     * Retrieves a booking if it belongs to the current user and hasn't expired.
+     * Cancels and removes the booking if it is expired.
+     * @param bookingId UUID of the booking to validate.
+     * @return The validated and fetched Booking.
+     */
     private Booking checkAndFetchBooking(UUID bookingId) {
         Booking booking = getBookingIfOwnedByUser(bookingId);
 
@@ -237,11 +286,21 @@ public class BookingService {
         return booking;
     }
 
+    /**
+     * Retrieves a payment by ID or throws an error if not found.
+     * @param paymentId UUID of the payment.
+     * @return The Payment entity.
+     */
     private Payment getPaymentOrThrow(UUID paymentId) {
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
     }
 
+    /**
+     * Retrieves a booking by ID only if it is owned by the authenticated user.
+     * @param bookingId UUID of the booking.
+     * @return The booking entity if access is allowed.
+     */
     private Booking getBookingIfOwnedByUser(UUID bookingId) {
         User user = getAuthenticatedUser();
         return bookingRepository.findById(bookingId)
@@ -249,6 +308,11 @@ public class BookingService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found or access denied"));
     }
 
+    /**
+     * Deletes a booking and its related payment and booked dates if it exists.
+     * @param bookingId UUID of the booking to delete.
+     * @return True if deletion was successful, false otherwise.
+     */
     public boolean deleteBooking(UUID bookingId) {
         logger.info("Deleting booking with ID: {}", bookingId);
         Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);

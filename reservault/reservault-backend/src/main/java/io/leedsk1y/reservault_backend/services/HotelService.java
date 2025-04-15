@@ -37,11 +37,22 @@ public class HotelService {
         this.hotelManagerRepository = hotelManagerRepository;
     }
 
+    /**
+     * Retrieves all hotels from the repository.
+     * @return A list of all Hotel entities.
+     */
     public List<Hotel> getAllHotels() {
         logger.info("Fetching all hotels");
         return hotelRepository.findAll();
     }
 
+    /**
+     * Creates a new hotel and uploads its associated images to Cloudinary.
+     * @param hotel The hotel entity to create.
+     * @param images A list of images to upload and associate with the hotel.
+     * @return The saved Hotel entity.
+     * @throws IOException If image upload fails.
+     */
     public Hotel createHotel(Hotel hotel, List<MultipartFile> images) throws IOException {
         logger.info("Creating hotel with identifier: {}", hotel.getIdentifier());
         if (hotelRepository.findByIdentifier(hotel.getIdentifier()).isPresent()) {
@@ -62,6 +73,13 @@ public class HotelService {
         return hotelRepository.save(hotel);
     }
 
+    /**
+     * Updates an existing hotel with new details and optionally new images.
+     * @param id UUID of the hotel to update.
+     * @param updatedHotel The updated hotel information.
+     * @param newImages Optional list of new images to add.
+     * @return Optional containing the updated Hotel or empty if not found.
+     */
     public Optional<Hotel> updateHotel(UUID id, Hotel updatedHotel, List<MultipartFile> newImages) {
         logger.info("Updating hotel with ID: {}", id);
         return hotelRepository.findById(id).map(existingHotel -> {
@@ -89,6 +107,11 @@ public class HotelService {
         });
     }
 
+    /**
+     * Deletes a hotel by its ID, including related hotel-manager relations, offers, and images.
+     * @param id UUID of the hotel to delete.
+     * @return True if deletion was successful, false if hotel not found.
+     */
     public boolean deleteHotel(UUID id) {
         logger.info("Deleting hotel with ID: {}", id);
         Optional<Hotel> hotelOptional = hotelRepository.findById(id);
@@ -119,6 +142,12 @@ public class HotelService {
         return true;
     }
 
+    /**
+     * Removes a specific image from a hotel by ID and image URL.
+     * @param hotelId UUID of the hotel.
+     * @param imageUrl URL of the image to remove.
+     * @return True if the image was removed successfully, false otherwise.
+     */
     public boolean removeHotelImage(UUID hotelId, String imageUrl) {
         logger.info("Removing image from hotel ID: {}, Image URL: {}", hotelId, imageUrl);
         Optional<Hotel> hotelOptional = hotelRepository.findById(hotelId);
@@ -137,6 +166,11 @@ public class HotelService {
         return false;
     }
 
+    /**
+     * Retrieves a hotel using its unique identifier.
+     * @param identifier The unique identifier of the hotel.
+     * @return Optional containing the Hotel or empty if not found.
+     */
     public Optional<Hotel> getHotelByIdentifier(String identifier) {
         logger.info("Fetching hotel by identifier: {}", identifier);
         return hotelRepository.findByIdentifier(identifier);

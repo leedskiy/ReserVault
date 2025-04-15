@@ -61,6 +61,11 @@ public class AuthService {
         this.jwtUtils = jwtUtils;
     }
 
+    /**
+     * Registers a new user or manager with the provided registration details.
+     * @param request The registration request containing user info and hotel associations (if manager).
+     * @return A detailed response DTO of the registered user.
+     */
     public UserDetailedResponseDTO registerUser(RegisterRequestDTO request) {
         logger.info("Registering new user with email: {}, isManager: {}", request.getEmail(), request.getIsManager());
         if (userRepository.existsByEmail(request.getEmail().toLowerCase())) {
@@ -102,6 +107,11 @@ public class AuthService {
         return new UserDetailedResponseDTO(user);
     }
 
+    /**
+     * Validates hotel identifiers provided during manager registration.
+     * @param request The registration request from a manager.
+     * @throws RuntimeException If hotel identifiers are missing or invalid.
+     */
     private void validateManagerDetails(RegisterRequestDTO request) {
         // 1. check if manager added hotel identifiers
         if (request.getHotelIdentifiers() == null || request.getHotelIdentifiers().isEmpty()) {
@@ -123,6 +133,11 @@ public class AuthService {
         }
     }
 
+    /**
+     * Assigns the specified hotels to a manager during registration.
+     * @param hotelIdentifiers List of hotel identifiers.
+     * @param managerId UUID of the newly registered manager.
+     */
     private void assignHotelsToManager(List<String> hotelIdentifiers, UUID managerId) {
         for (String hotelIdentifier : hotelIdentifiers) {
             HotelManager hotelManager = new HotelManager(hotelIdentifier, managerId);
@@ -130,6 +145,13 @@ public class AuthService {
         }
     }
 
+    /**
+     * Authenticates a user with email and password, generating a JWT on success.
+     * @param email The user's email.
+     * @param password The user's password.
+     * @return A JWT token for authenticated access.
+     * @throws RuntimeException If authentication fails or user is unverified.
+     */
     public String authenticateUser(String email, String password) {
         logger.info("Authenticating user with email: {}", email);
         try {
@@ -152,6 +174,13 @@ public class AuthService {
         }
     }
 
+    /**
+     * Retrieves the currently authenticated user based on the JWT in the request cookies.
+     * @param request The HTTP request containing JWT.
+     * @param response The HTTP response to clear cookies if needed.
+     * @return A detailed response DTO of the authenticated user.
+     * @throws ResponseStatusException If the token is invalid or user is not found.
+     */
     public UserDetailedResponseDTO getAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
         logger.info("Retrieving authenticated user from request");
         String token = jwtUtils.getJwtFromCookies(request);
@@ -171,6 +200,11 @@ public class AuthService {
         return new UserDetailedResponseDTO(userOptional.get());
     }
 
+    /**
+     * Logs out the user by blacklisting the JWT and clearing the cookie.
+     * @param request The HTTP request containing the JWT.
+     * @param response The HTTP response where the JWT cookie will be cleared.
+     */
     public void logoutUser(HttpServletRequest request, HttpServletResponse response) {
         logger.info("Logging out user from request");
         String token = jwtUtils.getJwtFromCookies(request);
@@ -182,6 +216,13 @@ public class AuthService {
         CookieUtils.clearJwtCookie(response);
     }
 
+    /**
+     * Updates the password of the currently authenticated user.
+     * @param passwordDTO DTO containing the current and new passwords.
+     * @param request The HTTP request containing JWT.
+     * @param response The HTTP response to clear cookies if needed.
+     * @throws RuntimeException If user is OAuth2-based, password is incorrect, or token is invalid.
+     */
     public void updateUserPassword(UpdatePasswordDTO passwordDTO, HttpServletRequest request, HttpServletResponse response) {
         logger.info("Attempting to update password for authenticated user");
         String token = jwtUtils.getJwtFromCookies(request);

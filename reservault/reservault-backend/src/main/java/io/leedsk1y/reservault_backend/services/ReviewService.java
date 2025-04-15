@@ -28,6 +28,12 @@ public class ReviewService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Retrieves all reviews for a specific offer and maps them to detailed DTOs.
+     * @param offerId UUID of the offer.
+     * @return List of ReviewDetailedDTO containing review and user name data.
+     * @throws ResponseStatusException If the offer is not found.
+     */
     public List<ReviewDetailedDTO> getReviewsForOffer(UUID offerId) {
         logger.info("Fetching reviews for offer ID: {}", offerId);
         Offer offer = offerRepository.findById(offerId)
@@ -44,6 +50,14 @@ public class ReviewService {
                 .toList();
     }
 
+    /**
+     * Adds a new review to the specified offer from the currently authenticated user.
+     * Prevents multiple reviews by the same user on the same offer.
+     * @param offerId UUID of the offer being reviewed.
+     * @param dto DTO containing the review data (title, comment, rating).
+     * @return ReviewDetailedDTO of the newly added review.
+     * @throws ResponseStatusException If the user or offer is not found, or if the user already reviewed.
+     */
     public ReviewDetailedDTO addReviewToOffer(UUID offerId, ReviewRequestDTO dto) {
         logger.info("Adding review to offer ID: {} by user email from context", offerId);
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -70,6 +84,13 @@ public class ReviewService {
         return ReviewDetailedDTO.fromReview(review, user.getName());
     }
 
+    /**
+     * Deletes a specific review from an offer if it belongs to the currently authenticated user.
+     * Recalculates the offer’s average rating after deletion.
+     * @param offerId UUID of the offer.
+     * @param reviewId UUID of the review to delete.
+     * @throws ResponseStatusException If the user, offer, or review is not found or user is unauthorized.
+     */
     public void deleteReviewFromOffer(UUID offerId, UUID reviewId) {
         logger.info("Deleting review ID: {} from offer ID: {} by user email from context", reviewId, offerId);
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -94,6 +115,11 @@ public class ReviewService {
         offerRepository.save(offer);
     }
 
+    /**
+     * Calculates the average rating from a list of reviews.
+     * @param reviews List of Review entities.
+     * @return Average rating as a double. Returns 0.0 if no reviews exist.
+     */
     private double calculateAverageRating(List<Review> reviews) {
         logger.debug("Calculating average rating for {} review(s)", reviews.size());
         if (reviews.isEmpty()) {

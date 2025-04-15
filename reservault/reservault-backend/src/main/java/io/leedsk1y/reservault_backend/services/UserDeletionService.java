@@ -38,6 +38,10 @@ public class UserDeletionService {
         this.offerService = offerService;
     }
 
+    /**
+     * Deletes a user and all their associated bookings.
+     * @param userId UUID of the user to delete.
+     */
     public void deleteUser(UUID userId) {
         logger.info("Deleting user with ID: {}", userId);
         List<Booking> bookings = bookingRepository.findByUserId(userId);
@@ -48,6 +52,11 @@ public class UserDeletionService {
         userRepository.deleteById(userId);
     }
 
+    /**
+     * Deletes a manager, their hotel-manager associations, and all offers they created.
+     * Also deletes any related bookings tied to those offers.
+     * @param managerId UUID of the manager to delete.
+     */
     public void deleteManager(UUID managerId) {
         logger.info("Deleting manager with ID: {}", managerId);
         List<HotelManager> hotelManagers = hotelManagerRepository.findByManagerId(managerId);
