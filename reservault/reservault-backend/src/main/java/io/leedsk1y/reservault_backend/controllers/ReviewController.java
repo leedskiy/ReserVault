@@ -27,12 +27,23 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
+    /**
+     * Retrieves all reviews for a specific offer.
+     * @param offerId UUID of the offer to fetch reviews for.
+     * @return ResponseEntity containing a list of ReviewDetailedDTOs.
+     */
     @GetMapping
     public ResponseEntity<List<ReviewDetailedDTO>> getReviews(@PathVariable UUID offerId) {
         logger.info("Fetching reviews for offer ID: {}", offerId);
         return ResponseEntity.ok(reviewService.getReviewsForOffer(offerId));
     }
 
+    /**
+     * Creates a new review for a given offer from the authenticated user.
+     * @param offerId UUID of the offer being reviewed.
+     * @param dto ReviewRequestDTO containing the review content.
+     * @return ResponseEntity containing the created ReviewDetailedDTO.
+     */
     @PostMapping
     public ResponseEntity<ReviewDetailedDTO> createReview(
             @PathVariable UUID offerId,
@@ -41,6 +52,12 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.addReviewToOffer(offerId, dto));
     }
 
+    /**
+     * Deletes a specific review from an offer, only if it belongs to the authenticated user.
+     * @param offerId UUID of the offer.
+     * @param reviewId UUID of the review to delete.
+     * @return ResponseEntity with no content on successful deletion.
+     */
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> deleteReview(
             @PathVariable UUID offerId,

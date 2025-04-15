@@ -29,6 +29,11 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
+    /**
+     * Creates a new booking for the authenticated user.
+     * @param booking The booking request payload.
+     * @return ResponseEntity containing the saved booking or an error message.
+     */
     @PostMapping
     public ResponseEntity<?> createBooking(@RequestBody Booking booking) {
         logger.info("Creating booking for user");
@@ -40,12 +45,21 @@ public class BookingController {
         }
     }
 
+    /**
+     * Retrieves all bookings made by the currently authenticated user.
+     * @return ResponseEntity with a list of BookingResponseDTOs.
+     */
     @GetMapping
     public ResponseEntity<List<BookingResponseDTO>> getUserBookings() {
         logger.info("Fetching bookings for current user");
         return ResponseEntity.ok(bookingService.getUserBookings());
     }
 
+    /**
+     * Retrieves a specific booking by its ID if it belongs to the current user.
+     * @param id UUID of the booking.
+     * @return ResponseEntity with the booking or 404 if not found.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getBookingById(@PathVariable UUID id) {
         logger.info("Fetching booking by ID: {}", id);
@@ -54,6 +68,11 @@ public class BookingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Cancels a pending and unpaid booking by its ID if owned by the user.
+     * @param id UUID of the booking to cancel.
+     * @return ResponseEntity indicating success, not found, or error.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> cancelBooking(@PathVariable UUID id) {
         logger.info("Cancelling booking with ID: {}", id);
@@ -65,6 +84,11 @@ public class BookingController {
         }
     }
 
+    /**
+     * Simulates a successful payment for a pending booking.
+     * @param id UUID of the booking to simulate payment for.
+     * @return ResponseEntity with the updated booking or an error.
+     */
     @PostMapping("/{id}/pay")
     public ResponseEntity<?> simulatePayment(@PathVariable UUID id) {
         logger.info("Simulating payment for booking ID: {}", id);
@@ -76,6 +100,11 @@ public class BookingController {
         }
     }
 
+    /**
+     * Retrieves the payment status for a specific booking.
+     * @param id UUID of the booking.
+     * @return ResponseEntity with the payment status or error if booking expired.
+     */
     @GetMapping("/{id}/payment-status")
     public ResponseEntity<?> getPaymentStatus(@PathVariable UUID id) {
         logger.info("Fetching payment status for booking ID: {}", id);

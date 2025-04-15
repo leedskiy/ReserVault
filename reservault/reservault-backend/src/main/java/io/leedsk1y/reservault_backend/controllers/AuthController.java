@@ -34,6 +34,11 @@ public class AuthController {
         this.authService = authService;
     }
 
+    /**
+     * Registers a new user or manager.
+     * @param request The registration data including user info and hotel assignments.
+     * @return ResponseEntity with registration result and user details or error message.
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequestDTO request) {
         logger.info("Attempting to register user with email: {}", request.getEmail());
@@ -45,6 +50,12 @@ public class AuthController {
         }
     }
 
+    /**
+     * Authenticates a user and sets the JWT in a cookie on successful login.
+     * @param request The login credentials (email and password).
+     * @param response HTTP response used to set the JWT cookie.
+     * @return ResponseEntity indicating login success or failure.
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
         logger.info("Attempting login for email: {}", request.getEmail());
@@ -59,6 +70,12 @@ public class AuthController {
         }
     }
 
+    /**
+     * Retrieves the currently authenticated user's details using the JWT cookie.
+     * @param request HTTP request containing JWT cookie.
+     * @param response HTTP response used to clear cookie if token is invalid.
+     * @return ResponseEntity containing user details or an error message.
+     */
     @GetMapping("/me")
     public ResponseEntity<?> getAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) {
         logger.info("Fetching authenticated user");
@@ -71,6 +88,12 @@ public class AuthController {
         }
     }
 
+    /**
+     * Logs out the user by blacklisting the JWT and clearing the JWT cookie.
+     * @param request HTTP request containing JWT cookie.
+     * @param response HTTP response used to clear the cookie.
+     * @return ResponseEntity indicating successful logout.
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         logger.info("Logging out user");
@@ -78,6 +101,13 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "User logged out successfully", "status", true));
     }
 
+    /**
+     * Updates the password for the authenticated user.
+     * @param passwordDTO Contains current and new password data.
+     * @param request HTTP request containing JWT cookie.
+     * @param response HTTP response used for cookie operations if needed.
+     * @return ResponseEntity indicating success or failure of password update.
+     */
     @PutMapping("/me/password")
     public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordDTO passwordDTO,
                                             HttpServletRequest request, HttpServletResponse response) {

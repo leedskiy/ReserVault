@@ -19,6 +19,11 @@ public class ImageProxyController {
         this.imageService = imageService;
     }
 
+    /**
+     * Proxies an image request from a given external URL and returns the image as a byte array.
+     * @param url The URL of the image to fetch.
+     * @return ResponseEntity containing the image or an error response.
+     */
     @GetMapping("/image")
     public ResponseEntity<byte[]> fetchGoogleImage(@RequestParam String url) {
         logger.info("Proxying image fetch request for URL: {}", url);

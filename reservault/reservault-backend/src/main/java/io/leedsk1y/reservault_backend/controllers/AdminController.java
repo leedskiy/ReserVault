@@ -42,12 +42,22 @@ public class AdminController {
         this.adminService = adminService;
     }
 
+    /**
+     * Retrieves a list of all hotels in the system.
+     * @return A list of Hotel entities.
+     */
     @GetMapping("/hotels")
     public List<Hotel> getAllHotels() {
         logger.info("Fetching all hotels");
         return adminService.getAllHotels();
     }
 
+    /**
+     * Creates a new hotel with the provided details and images.
+     * @param hotelJson JSON string representing the Hotel entity.
+     * @param images List of images associated with the hotel.
+     * @return ResponseEntity containing the created Hotel or an error message.
+     */
     @PostMapping(value = "/hotels", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createHotel(
         @RequestPart("hotel") String hotelJson,
@@ -67,6 +77,13 @@ public class AdminController {
         }
     }
 
+    /**
+     * Updates an existing hotel with the given ID using the provided details and optional images.
+     * @param id UUID of the hotel to be updated.
+     * @param hotelJson JSON string representing the updated Hotel entity.
+     * @param images Optional list of new images for the hotel.
+     * @return ResponseEntity containing the updated Hotel or an error message.
+     */
     @PutMapping(value="/hotels/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateHotel(
         @PathVariable UUID id,
@@ -86,6 +103,11 @@ public class AdminController {
         }
     }
 
+    /**
+     * Deletes a hotel by its UUID.
+     * @param id UUID of the hotel to be deleted.
+     * @return ResponseEntity indicating the result of the deletion.
+     */
     @DeleteMapping("/hotels/{id}")
     public ResponseEntity<String> deleteHotel(@PathVariable UUID id) {
         logger.info("Deleting hotel with ID: {}", id);
@@ -93,6 +115,12 @@ public class AdminController {
         return deleted ? ResponseEntity.ok("Hotel deleted") : ResponseEntity.notFound().build();
     }
 
+    /**
+     * Removes a specific image from a hotel by hotel ID and image URL.
+     * @param hotelId UUID of the hotel.
+     * @param imageUrl URL of the image to be removed.
+     * @return ResponseEntity indicating whether the image was successfully removed.
+     */
     @DeleteMapping("/hotels/{hotelId}/images")
     public ResponseEntity<String> removeHotelImage(
             @PathVariable UUID hotelId,
@@ -104,12 +132,21 @@ public class AdminController {
                 : ResponseEntity.notFound().build();
     }
 
+    /**
+     * Retrieves a detailed list of all users.
+     * @return ResponseEntity containing a list of UserDetailedResponseDTO.
+     */
     @GetMapping("/users")
     public ResponseEntity<List<UserDetailedResponseDTO>> getAllUsers() {
         logger.info("Fetching all users");
         return ResponseEntity.ok(adminService.getAllUsers());
     }
 
+    /**
+     * Fetches a user by their unique identifier.
+     * @param id UUID of the user.
+     * @return ResponseEntity with the user details or not found.
+     */
     @GetMapping("/users/{id}")
     public ResponseEntity<?> getUserById(@PathVariable UUID id) {
         logger.info("Fetching user by ID: {}", id);
@@ -118,6 +155,11 @@ public class AdminController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Deletes a user based on their UUID.
+     * @param id UUID of the user to be deleted.
+     * @return ResponseEntity indicating success or failure.
+     */
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
         logger.info("Deleting user with ID: {}", id);
@@ -125,6 +167,11 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Approves a hotel manager request.
+     * @param managerId UUID of the manager to approve.
+     * @return ResponseEntity indicating the result of the approval process.
+     */
     @PutMapping("/managers/{managerId}/approve")
     public ResponseEntity<?> approveManagerRequest(@PathVariable UUID managerId) {
         logger.info("Approving manager request with ID: {}", managerId);
@@ -134,6 +181,11 @@ public class AdminController {
                 : ResponseEntity.notFound().build();
     }
 
+    /**
+     * Rejects a hotel manager request.
+     * @param managerId UUID of the manager to reject.
+     * @return ResponseEntity indicating the result of the rejection process.
+     */
     @DeleteMapping("/managers/{managerId}/reject")
     public ResponseEntity<?> rejectManagerRequest(@PathVariable UUID managerId) {
         logger.info("Rejecting manager request with ID: {}", managerId);
@@ -143,6 +195,11 @@ public class AdminController {
                 : ResponseEntity.notFound().build();
     }
 
+    /**
+     * Retrieves a list of hotels associated with a given hotel manager.
+     * @param managerId UUID of the manager.
+     * @return ResponseEntity containing a list of HotelManager entities or an error.
+     */
     @GetMapping("/managers/{managerId}/hotels")
     public ResponseEntity<?> getHotelsByManagerList(@PathVariable UUID managerId) {
         logger.info("Fetching hotels for manager ID: {}", managerId);
@@ -154,6 +211,12 @@ public class AdminController {
         }
     }
 
+    /**
+     * Updates the list of hotels managed by a specific hotel manager.
+     * @param managerId UUID of the manager.
+     * @param updatedHotelIdentifiers List of hotel identifiers to assign to the manager.
+     * @return ResponseEntity containing the updated list of HotelManager entities or an error.
+     */
     @PutMapping("/managers/{managerId}/hotels")
     public ResponseEntity<?> updateHotelsByManagerList(
             @PathVariable UUID managerId,
@@ -169,6 +232,10 @@ public class AdminController {
         }
     }
 
+    /**
+     * Retrieves admin dashboard statistics.
+     * @return ResponseEntity containing AdminDashboardStatsDTO.
+     */
     @GetMapping("/statistics")
     public ResponseEntity<AdminDashboardStatsDTO> getDashboardStats() {
         logger.info("Fetching admin dashboard statistics");

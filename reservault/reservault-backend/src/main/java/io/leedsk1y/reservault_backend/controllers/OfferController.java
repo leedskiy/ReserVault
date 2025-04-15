@@ -24,12 +24,21 @@ public class OfferController {
         this.offerService = offerService;
     }
 
+    /**
+     * Retrieves all offers in the system along with associated hotel location and metadata.
+     * @return ResponseEntity containing a list of OfferWithLocationDTOs.
+     */
     @GetMapping
     public ResponseEntity<List<OfferWithLocationDTO>> getAllOffers() {
         logger.info("Fetching all offers");
         return ResponseEntity.ok(offerService.getAllOffers());
     }
 
+    /**
+     * Retrieves an offer by its UUID.
+     * @param id UUID of the offer to fetch.
+     * @return ResponseEntity with the offer data if found, or 404 if not.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getOfferById(@PathVariable UUID id) {
         logger.info("Fetching offer by ID: {}", id);
@@ -38,6 +47,27 @@ public class OfferController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Searches offers based on filters like location, room count, date range, price, facilities, and sorting.
+     * @param location The city or country to search in.
+     * @param rooms Minimum required number of rooms.
+     * @param people Minimum number of people the offer must accommodate.
+     * @param dateFrom Start date of the desired booking range (MM.dd.yyyy).
+     * @param dateUntil End date of the desired booking range (MM.dd.yyyy).
+     * @param minPrice Minimum nightly price filter.
+     * @param maxPrice Maximum nightly price filter.
+     * @param wifi Filter for Wi-Fi facility.
+     * @param parking Filter for parking facility.
+     * @param pool Filter for pool facility.
+     * @param airConditioning Filter for air conditioning.
+     * @param breakfast Filter for breakfast availability.
+     * @param rating Minimum rating filter.
+     * @param hotelStars Minimum hotel star rating.
+     * @param sortBy Attribute to sort results by (e.g. price, rating).
+     * @param sortOrder Sorting order: "asc" or "desc".
+     * @param hotelId Filter offers by a specific hotel identifier.
+     * @return ResponseEntity with filtered and sorted list of offers.
+     */
     @GetMapping("/search")
     public ResponseEntity<List<OfferWithLocationDTO>> searchOffers(
             @RequestParam String location,
@@ -66,6 +96,11 @@ public class OfferController {
         );
     }
 
+    /**
+     * Retrieves all dates that are currently booked for a specific offer.
+     * @param offerId UUID of the offer.
+     * @return ResponseEntity containing a list of LocalDate objects representing booked dates.
+     */
     @GetMapping("/{offerId}/booked-dates")
     public ResponseEntity<?> getBookedDatesForOffer(@PathVariable UUID offerId) {
         logger.info("Fetching booked dates for offer ID: {}", offerId);

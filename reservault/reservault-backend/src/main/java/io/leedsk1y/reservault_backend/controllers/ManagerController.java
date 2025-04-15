@@ -38,12 +38,20 @@ public class ManagerController {
         this.managerService = managerService;
     }
 
+    /**
+     * Retrieves all offers associated with the currently authenticated manager.
+     * @return ResponseEntity containing a list of OfferWithLocationDTOs.
+     */
     @GetMapping("/offers")
     public ResponseEntity<List<OfferWithLocationDTO>> getManagerOffers() {
         logger.info("Fetching manager's offers");
         return ResponseEntity.ok(managerService.getManagerOffers());
     }
 
+    /**
+     * Retrieves a list of hotels assigned to the authenticated manager.
+     * @return ResponseEntity with the manager's HotelManager associations or an error message.
+     */
     @GetMapping("/hotels")
     public ResponseEntity<?> getHotelsByManagerList() {
         logger.info("Fetching hotels assigned to current manager");
@@ -55,6 +63,11 @@ public class ManagerController {
         }
     }
 
+    /**
+     * Updates the list of hotels assigned to the authenticated manager.
+     * @param updatedHotelIdentifiers A list of new hotel identifiers to assign.
+     * @return ResponseEntity with the updated HotelManager list or error details.
+     */
     @PutMapping("/hotels")
     public ResponseEntity<?> updateManagerHotelList(@RequestBody List<String> updatedHotelIdentifiers) {
         logger.info("Updating manager's hotel list with {} identifiers", updatedHotelIdentifiers.size());
@@ -68,6 +81,12 @@ public class ManagerController {
         }
     }
 
+    /**
+     * Creates a new offer for the manager using provided offer data and images.
+     * @param offerJson JSON string representing the Offer object.
+     * @param images List of image files to associate with the offer.
+     * @return ResponseEntity with the created Offer or error message.
+     */
     @PostMapping(value="/offers", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createOffer(
             @RequestPart("offer") String offerJson,
@@ -86,6 +105,13 @@ public class ManagerController {
         }
     }
 
+    /**
+     * Updates an existing offer for the manager using provided data and optional images.
+     * @param id UUID of the offer to update.
+     * @param offerJson JSON string of updated offer data.
+     * @param images Optional list of new images to add.
+     * @return ResponseEntity with the updated Offer or error message.
+     */
     @PutMapping(value = "/offers/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateOffer(
             @PathVariable UUID id,
@@ -105,6 +131,11 @@ public class ManagerController {
         }
     }
 
+    /**
+     * Deletes an offer owned by the manager by its ID.
+     * @param id UUID of the offer to delete.
+     * @return ResponseEntity indicating success or failure.
+     */
     @DeleteMapping(value="/offers/{id}")
     public ResponseEntity<?> deleteOffer(@PathVariable UUID id) {
         logger.info("Deleting offer with ID: {}", id);
@@ -116,6 +147,12 @@ public class ManagerController {
         }
     }
 
+    /**
+     * Removes an image from a specific offer.
+     * @param offerId UUID of the offer.
+     * @param imageUrl URL of the image to remove.
+     * @return ResponseEntity indicating success or 404 if not found.
+     */
     @DeleteMapping("/offers/{offerId}/images")
     public ResponseEntity<String> removeOfferImage(
             @PathVariable UUID offerId,
@@ -127,6 +164,12 @@ public class ManagerController {
                 : ResponseEntity.notFound().build();
     }
 
+    /**
+     * Adds a manager's response to a user review on one of their offers.
+     * @param reviewId UUID of the review to respond to.
+     * @param dto DTO containing the response text.
+     * @return ResponseEntity confirming the response was added.
+     */
     @PostMapping("/reviews/{reviewId}/response")
     public ResponseEntity<?> respondToReview(
             @PathVariable UUID reviewId,
@@ -136,6 +179,11 @@ public class ManagerController {
         return ResponseEntity.ok("Response added successfully");
     }
 
+    /**
+     * Deletes the manager's response to a specific review.
+     * @param reviewId UUID of the review.
+     * @return ResponseEntity confirming deletion.
+     */
     @DeleteMapping("/reviews/{reviewId}/response")
     public ResponseEntity<?> deleteResponseToReview(@PathVariable UUID reviewId) {
         logger.info("Deleting manager response to review ID: {}", reviewId);
@@ -143,6 +191,10 @@ public class ManagerController {
         return ResponseEntity.ok("Response deleted successfully");
     }
 
+    /**
+     * Retrieves dashboard statistics for the currently authenticated manager.
+     * @return ResponseEntity containing ManagerDashboardStatsDTO.
+     */
     @GetMapping("/statistics")
     public ResponseEntity<ManagerDashboardStatsDTO> getManagerStats() {
         logger.info("Fetching dashboard statistics for manager");

@@ -22,6 +22,11 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
+    /**
+     * Retrieves a hotel by its unique identifier.
+     * @param identifier The identifier of the hotel.
+     * @return ResponseEntity containing the Hotel or 404 if not found.
+     */
     @GetMapping("/{identifier}")
     public ResponseEntity<Hotel> getHotelByIdentifier(@PathVariable String identifier) {
         logger.info("Fetching hotel by identifier: {}", identifier);

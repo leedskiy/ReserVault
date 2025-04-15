@@ -27,12 +27,25 @@ public class UserController {
         this.userService = userService;
     }
 
+    /**
+     * Retrieves the currently authenticated user's information.
+     * @param request HTTP request containing the JWT cookie.
+     * @param response HTTP response used for potential cookie handling.
+     * @return ResponseEntity containing UserDetailedResponseDTO of the user.
+     */
     @GetMapping("/me")
     public ResponseEntity<UserDetailedResponseDTO> getUser(HttpServletRequest request, HttpServletResponse response) {
         logger.info("Fetching authenticated user details");
         return ResponseEntity.ok(userService.getAuthenticatedUser(request, response));
     }
 
+    /**
+     * Updates the name of the authenticated user.
+     * @param name The new name to set.
+     * @param request HTTP request with authentication token.
+     * @param response HTTP response used for handling cookies or errors.
+     * @return ResponseEntity with a success message and status.
+     */
     @PutMapping("/me/name")
     public ResponseEntity<Map<String, Object>> updateName(@RequestParam String name,
                                                           HttpServletRequest request,
@@ -42,6 +55,12 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "Name updated successfully", "status", true));
     }
 
+    /**
+     * Deletes the authenticated user unless the user has an admin role.
+     * @param request HTTP request containing JWT for authentication.
+     * @param response HTTP response to handle cookie cleanup.
+     * @return ResponseEntity indicating the success or failure of the deletion.
+     */
     @DeleteMapping("/me")
     public ResponseEntity<Map<String, Object>> deleteUser(HttpServletRequest request, HttpServletResponse response) {
         logger.info("Attempting to delete authenticated user");
